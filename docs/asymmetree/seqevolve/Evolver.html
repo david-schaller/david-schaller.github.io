@@ -1,0 +1,1013 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>asymmetree.seqevolve.Evolver API documentation</title>
+<meta name="description" content="Evolve sequences along a tree using specific models for substitution, indels,
+and rate heterogeneity …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>asymmetree.seqevolve.Evolver</code></h1>
+</header>
+<section id="section-intro">
+<p>Evolve sequences along a tree using specific models for substitution, indels,
+and rate heterogeneity.</p>
+<h2 id="references">References</h2>
+<p>.. [1] Z. Yang.
+Computational molecular evolution.
+Oxford series in ecology and evolution. Oxford University Press, 2006.
+ISBN 978-0-19-856699-1 978-0-19-856702-8.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># -*- coding: utf-8 -*-
+
+&#34;&#34;&#34;Evolve sequences along a tree using specific models for substitution, indels,
+and rate heterogeneity.
+
+References
+----------
+.. [1] Z. Yang.
+   Computational molecular evolution.
+   Oxford series in ecology and evolution. Oxford University Press, 2006.
+   ISBN 978-0-19-856699-1 978-0-19-856702-8.
+&#34;&#34;&#34;
+
+import numpy as np
+
+from asymmetree.seqevolve.EvolvingSequence import EvoSeq, State
+from asymmetree.seqevolve.Alignment import AlignmentBuilder
+from asymmetree.file_io.SeqFileIO import write_alignment
+
+
+__author__ = &#39;David Schaller&#39;
+
+
+class Evolver:
+    
+    def __init__(self, subst_model,
+                 indel_model=None, het_model=None,
+                 jump_chain=False,
+                 **kwargs):
+        &#34;&#34;&#34;Constructor of class &#39;Evolver&#39;.
+        
+        Parameters
+        ----------
+        subst_model : SubstModel
+            Substitution model.
+        indel_model : IndelModel, optional
+            Model for insertions and deletions, default is None.
+        het_model : HetModel, optional
+            Model for substitution rate heterogeneity, default is None.
+        jump_chain : bool, optional
+            If True, draw substitution in a Gillespie process instead of
+            constructing the exchange probability matrix P via matrix
+            diagonalization. The jump chain mode is expected to be faster if
+            the rate heterogeneity is large, and therefore automatically
+            switched on if the het_model has more than 5 classes or is set to
+            sitewise.
+        &#34;&#34;&#34;
+        
+        self.subst_model = subst_model
+        
+        self.indel_model = indel_model
+        self.het_model = het_model
+        
+        if (jump_chain or 
+            (het_model and het_model.sitewise) or
+            (het_model and het_model.classes &gt; 5)):     # determine best cutoff
+            self._jump_chain = True
+        else:
+            self._jump_chain = False
+        
+    
+    def evolve_along_tree(self, tree, start_length=200, start_seq=None):
+        &#34;&#34;&#34;Constructor of class &#39;Evolver&#39;.
+        
+        If &#39;start_seq&#39; is not supplied, then the sequence at the root is
+        constructed randomly using the stationary probabilities of the
+        specified substitution model.
+        
+        Parameters
+        ----------
+        tree : Tree
+            The tree along which sequences are simulated.
+        start_length : int, optional
+            The length of the sequence at the root. The default is 200.
+            This parameter is ignored when &#39;start_seq&#39; is supplied.
+        start_seq : str, optional
+            The start sequence for the root of the tree. The default is None,
+            in which case a sequence is constructed at random.
+        
+        Returns
+        -------
+        dict
+            A dict containing the TreeNode instances in the tree as keys and 
+            the simulated sequences as values (instances of type EvoSeq).
+        &#34;&#34;&#34;
+        
+        self.tree = tree
+        self.site_counter = 0
+        self.sequences = {}
+        
+        if start_seq is None:
+            root_seq = self._random_sequence(start_length)
+        else:
+            root_seq = self._initialize_with_sequence(start_seq)
+            
+        if self.het_model:
+            self.het_model.assign(root_seq)
+        
+        for v in tree.preorder():
+            
+            if v.parent is None:
+                self.sequences[v] = root_seq
+            else:
+                self.sequences[v] = self._evolve(self.sequences[v.parent], v.dist)
+                
+        return self.sequences
+          
+            
+    def _random_positions(self, n):
+        
+        return np.random.choice(len(self.subst_model.alphabet), n,
+                                p=self.subst_model.freqs)
+    
+    
+    def _random_sequence(self, n):
+        
+        seq = EvoSeq()
+        
+        for x in self._random_positions(n):
+            seq.append(x, State.ROOT, self.site_counter)
+            self.site_counter += 1
+        
+        return seq
+    
+    
+    def _initialize_with_sequence(self, sequence):
+        
+        seq = EvoSeq()
+        
+        for x in self.subst_model.to_indices(sequence):
+            seq.append(x, State.ROOT, self.site_counter)
+            self.site_counter += 1
+        
+        return seq
+    
+    
+    def _evolve(self, parent_seq, distance):
+        
+        child_seq = parent_seq.clone()
+        
+        if self.indel_model:
+            self._generate_indels(child_seq, distance)
+            
+            if self.het_model:
+                self.het_model.assign(child_seq)
+        
+        if not self._jump_chain:
+            self._substitute(child_seq, distance)               # apply transition prob. matrix
+        else:
+            self._substitute_jump_chain(child_seq, distance)    # apply jump chain
+        
+        return child_seq
+    
+    
+    def true_alignment(self, include_inner=True, write_to=None,
+                       alignment_format=&#39;phylip&#39;):
+        &#34;&#34;&#34;Construct the &#39;true&#39; alignment of the simulated sequences.
+        
+        Parameters
+        ----------
+        include_inner : bool, optional
+            If True, the alignment also contains the sequences of the inner
+            nodes of the tree. The default is True.
+        write_to : str, optional
+            The path and filename to the file into which the alignment shall
+            be written. The default is None, in which case nothing is written
+            to a file.
+        alignment_format : str
+            Format of the alignment that is written to a file. The default is
+            &#39;phylip&#39;.
+        
+        Returns
+        -------
+        dict
+            A dict containing the TreeNode instances in the tree as keys and 
+            the str sequences as values that include the necessary gaps.
+        &#34;&#34;&#34;
+        
+        alg_builder = AlignmentBuilder(self.tree, self.sequences,
+                                       self.subst_model.alphabet,
+                                       include_inner=include_inner)
+        
+        alignment = alg_builder.build()
+        
+        if write_to:
+            write_alignment(write_to, alignment,
+                            alignment_format=alignment_format)
+        
+        return alignment
+    
+    
+    # --------------------------------------------------------------------------
+    #               Substitution by transition probability matrix
+    # --------------------------------------------------------------------------
+    
+    def _substitute(self, sequence, t):
+        
+        # (cumulative) transition probability matrices
+        P = self._cumulative_P_matrices(sequence, t)
+        
+        r = np.random.random(len(sequence))
+        pos = 0
+        
+        for site in sequence:
+            
+            if site.status == State.INHERITED:
+                # mutate according to matrix of the corresponding class
+                site._value = np.argmax(P[site.rate_class][site._value, :] &gt; r[pos])
+            
+            else:
+                # choose random character
+                site._value = np.argmax(self.subst_model.freqs_cumulative &gt; r[pos])
+            
+            pos += 1
+    
+    
+    def _cumulative_P_matrices(self, sequence, t):
+        
+        P = {}
+        
+        if not self.het_model:
+            P[0] = np.cumsum(self.subst_model.transition_prob_matrix(t),
+                             axis=1)
+
+        else:
+            for site in sequence:
+                
+                c = site.rate_class
+                
+                if c not in P:
+                    
+                    r = site.rate_factor
+                    
+                    if r &gt; 0.0:
+                        P[c] = np.cumsum(self.subst_model.transition_prob_matrix(r * t),
+                                         axis=1)
+                    elif r == 0:
+                        P[c] = np.cumsum(np.identity(len(self.subst_model.alphabet)),
+                                         axis=1)
+        
+        return P
+        
+    
+    # --------------------------------------------------------------------------
+    #                        Substitution by Jump chain
+    # --------------------------------------------------------------------------
+    
+    def _substitute_jump_chain(self, sequence, t):
+        
+        total_rate = self._total_subst_rate(sequence, exclude_inserted=True)
+        
+        # jump chain algorithm for inherited positions
+        current_time = 0.0
+        while current_time &lt; t:
+            
+            current_time += np.random.exponential(1/total_rate) if total_rate &gt; 0.0 else float(&#39;inf&#39;)
+            
+            if current_time &lt; t:
+                
+                site, mutation = self._draw_substitution(sequence, total_rate)
+                
+                total_rate += site.rate_factor * self.subst_model.Q[site._value, site._value]
+                total_rate -= site.rate_factor * self.subst_model.Q[mutation, mutation]
+                site._value = mutation
+        
+        # choose random characters for insertions
+        r = np.random.random(sequence.count_status(State.INSERTION))
+        pos = 0
+        for site in sequence:
+            
+            if site.status == State.INSERTION:
+                site._value = np.argmax(self.subst_model.freqs_cumulative &gt; r[pos])
+                pos += 1
+                
+    
+    def _total_subst_rate(self, sequence, exclude_inserted=True):
+        
+        total = 0.0
+        
+        for site in sequence:
+            
+            if exclude_inserted and site.status == State.INSERTION:
+                continue
+            
+            total -= site.rate_factor * self.subst_model.Q[site._value, site._value]
+            
+        return total
+    
+    
+    def _draw_substitution(self, sequence, total_rate):
+        
+        chosen_site, chosen_mutation = None, None
+        r = np.random.uniform(low=0.0, high=total_rate)
+        
+        current_sum = 0.0
+        for site in sequence:
+            
+            if site.status == State.INSERTION:
+                continue
+            
+            # use negative value on the diagonal of the rate matrix Q
+            site_rate = - site.rate_factor * self.subst_model.Q[site._value, site._value]
+            current_sum += site_rate
+            
+            if current_sum &gt; r:
+                chosen_site = site
+                
+                # rescale the &#34;rest&#34; of r for application on the rate matrix Q
+                r = (r - current_sum + site_rate) / site.rate_factor
+                
+                break
+            
+        current_sum = 0.0
+        for i in range(len(self.subst_model.alphabet)):
+            
+            if i != site._value:            # skip the entry on diagonal
+                current_sum += self.subst_model.Q[site._value, i]
+                
+                if current_sum &gt; r:
+                    chosen_mutation = i
+                    break
+                    
+        return chosen_site, chosen_mutation
+    
+    
+    # --------------------------------------------------------------------------
+    #                               Indels
+    # --------------------------------------------------------------------------
+        
+    def _generate_indels(self, sequence, t):
+        &#34;&#34;&#34;Generates indels by a Gillespie process.&#34;&#34;&#34;
+        
+        current_time = 0.0
+        
+        while current_time &lt; t:
+            
+            ins_rate, del_rate = self.indel_model.get_rates(len(sequence))
+            total_rate = ins_rate + del_rate
+            
+            current_time += np.random.exponential(1/total_rate) if total_rate &gt; 0.0 else float(&#39;inf&#39;)
+            
+            if current_time &lt; t:
+                
+                r = np.random.random()
+                if r &lt; ins_rate / total_rate:
+                    self._insertion(sequence)
+                else:
+                    self._deletion(sequence)
+    
+    
+    def _insertion(self, sequence):
+        
+        d = self.indel_model.draw_length()
+        if d == 0:
+            return
+        
+        pos = np.random.randint(-1, high=len(sequence))
+        
+        # initialize insertion before the first item
+        if pos == -1:
+            current_site = sequence.append_left(None, State.INSERTION,
+                                                self.site_counter)
+            self.site_counter += 1
+            d -= 1
+            
+        # go to the element at position pos
+        else:
+            current_site = sequence.node_at(pos)
+            
+        for _ in range(d):
+            current_site = sequence.insert_right_of(current_site,
+                                                    None, State.INSERTION,
+                                                    self.site_counter)
+            
+            self.site_counter += 1
+    
+    
+    def _deletion(self, sequence):
+        
+        d = self.indel_model.draw_length()
+        if d == 0:
+            return
+        
+        pos = np.random.randint(-d + 1, high=len(sequence))
+        
+        # deletion begins before or at the start of the sequence
+        if pos &lt;= 0:
+            d += pos
+            pos = 0
+            
+        sequence.remove_range(pos, d)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="asymmetree.seqevolve.Evolver.Evolver"><code class="flex name class">
+<span>class <span class="ident">Evolver</span></span>
+<span>(</span><span>subst_model, indel_model=None, het_model=None, jump_chain=False, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Constructor of class 'Evolver'.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>subst_model</code></strong> :&ensp;<code>SubstModel</code></dt>
+<dd>Substitution model.</dd>
+<dt><strong><code>indel_model</code></strong> :&ensp;<code>IndelModel</code>, optional</dt>
+<dd>Model for insertions and deletions, default is None.</dd>
+<dt><strong><code>het_model</code></strong> :&ensp;<code>HetModel</code>, optional</dt>
+<dd>Model for substitution rate heterogeneity, default is None.</dd>
+<dt><strong><code>jump_chain</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, draw substitution in a Gillespie process instead of
+constructing the exchange probability matrix P via matrix
+diagonalization. The jump chain mode is expected to be faster if
+the rate heterogeneity is large, and therefore automatically
+switched on if the het_model has more than 5 classes or is set to
+sitewise.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Evolver:
+    
+    def __init__(self, subst_model,
+                 indel_model=None, het_model=None,
+                 jump_chain=False,
+                 **kwargs):
+        &#34;&#34;&#34;Constructor of class &#39;Evolver&#39;.
+        
+        Parameters
+        ----------
+        subst_model : SubstModel
+            Substitution model.
+        indel_model : IndelModel, optional
+            Model for insertions and deletions, default is None.
+        het_model : HetModel, optional
+            Model for substitution rate heterogeneity, default is None.
+        jump_chain : bool, optional
+            If True, draw substitution in a Gillespie process instead of
+            constructing the exchange probability matrix P via matrix
+            diagonalization. The jump chain mode is expected to be faster if
+            the rate heterogeneity is large, and therefore automatically
+            switched on if the het_model has more than 5 classes or is set to
+            sitewise.
+        &#34;&#34;&#34;
+        
+        self.subst_model = subst_model
+        
+        self.indel_model = indel_model
+        self.het_model = het_model
+        
+        if (jump_chain or 
+            (het_model and het_model.sitewise) or
+            (het_model and het_model.classes &gt; 5)):     # determine best cutoff
+            self._jump_chain = True
+        else:
+            self._jump_chain = False
+        
+    
+    def evolve_along_tree(self, tree, start_length=200, start_seq=None):
+        &#34;&#34;&#34;Constructor of class &#39;Evolver&#39;.
+        
+        If &#39;start_seq&#39; is not supplied, then the sequence at the root is
+        constructed randomly using the stationary probabilities of the
+        specified substitution model.
+        
+        Parameters
+        ----------
+        tree : Tree
+            The tree along which sequences are simulated.
+        start_length : int, optional
+            The length of the sequence at the root. The default is 200.
+            This parameter is ignored when &#39;start_seq&#39; is supplied.
+        start_seq : str, optional
+            The start sequence for the root of the tree. The default is None,
+            in which case a sequence is constructed at random.
+        
+        Returns
+        -------
+        dict
+            A dict containing the TreeNode instances in the tree as keys and 
+            the simulated sequences as values (instances of type EvoSeq).
+        &#34;&#34;&#34;
+        
+        self.tree = tree
+        self.site_counter = 0
+        self.sequences = {}
+        
+        if start_seq is None:
+            root_seq = self._random_sequence(start_length)
+        else:
+            root_seq = self._initialize_with_sequence(start_seq)
+            
+        if self.het_model:
+            self.het_model.assign(root_seq)
+        
+        for v in tree.preorder():
+            
+            if v.parent is None:
+                self.sequences[v] = root_seq
+            else:
+                self.sequences[v] = self._evolve(self.sequences[v.parent], v.dist)
+                
+        return self.sequences
+          
+            
+    def _random_positions(self, n):
+        
+        return np.random.choice(len(self.subst_model.alphabet), n,
+                                p=self.subst_model.freqs)
+    
+    
+    def _random_sequence(self, n):
+        
+        seq = EvoSeq()
+        
+        for x in self._random_positions(n):
+            seq.append(x, State.ROOT, self.site_counter)
+            self.site_counter += 1
+        
+        return seq
+    
+    
+    def _initialize_with_sequence(self, sequence):
+        
+        seq = EvoSeq()
+        
+        for x in self.subst_model.to_indices(sequence):
+            seq.append(x, State.ROOT, self.site_counter)
+            self.site_counter += 1
+        
+        return seq
+    
+    
+    def _evolve(self, parent_seq, distance):
+        
+        child_seq = parent_seq.clone()
+        
+        if self.indel_model:
+            self._generate_indels(child_seq, distance)
+            
+            if self.het_model:
+                self.het_model.assign(child_seq)
+        
+        if not self._jump_chain:
+            self._substitute(child_seq, distance)               # apply transition prob. matrix
+        else:
+            self._substitute_jump_chain(child_seq, distance)    # apply jump chain
+        
+        return child_seq
+    
+    
+    def true_alignment(self, include_inner=True, write_to=None,
+                       alignment_format=&#39;phylip&#39;):
+        &#34;&#34;&#34;Construct the &#39;true&#39; alignment of the simulated sequences.
+        
+        Parameters
+        ----------
+        include_inner : bool, optional
+            If True, the alignment also contains the sequences of the inner
+            nodes of the tree. The default is True.
+        write_to : str, optional
+            The path and filename to the file into which the alignment shall
+            be written. The default is None, in which case nothing is written
+            to a file.
+        alignment_format : str
+            Format of the alignment that is written to a file. The default is
+            &#39;phylip&#39;.
+        
+        Returns
+        -------
+        dict
+            A dict containing the TreeNode instances in the tree as keys and 
+            the str sequences as values that include the necessary gaps.
+        &#34;&#34;&#34;
+        
+        alg_builder = AlignmentBuilder(self.tree, self.sequences,
+                                       self.subst_model.alphabet,
+                                       include_inner=include_inner)
+        
+        alignment = alg_builder.build()
+        
+        if write_to:
+            write_alignment(write_to, alignment,
+                            alignment_format=alignment_format)
+        
+        return alignment
+    
+    
+    # --------------------------------------------------------------------------
+    #               Substitution by transition probability matrix
+    # --------------------------------------------------------------------------
+    
+    def _substitute(self, sequence, t):
+        
+        # (cumulative) transition probability matrices
+        P = self._cumulative_P_matrices(sequence, t)
+        
+        r = np.random.random(len(sequence))
+        pos = 0
+        
+        for site in sequence:
+            
+            if site.status == State.INHERITED:
+                # mutate according to matrix of the corresponding class
+                site._value = np.argmax(P[site.rate_class][site._value, :] &gt; r[pos])
+            
+            else:
+                # choose random character
+                site._value = np.argmax(self.subst_model.freqs_cumulative &gt; r[pos])
+            
+            pos += 1
+    
+    
+    def _cumulative_P_matrices(self, sequence, t):
+        
+        P = {}
+        
+        if not self.het_model:
+            P[0] = np.cumsum(self.subst_model.transition_prob_matrix(t),
+                             axis=1)
+
+        else:
+            for site in sequence:
+                
+                c = site.rate_class
+                
+                if c not in P:
+                    
+                    r = site.rate_factor
+                    
+                    if r &gt; 0.0:
+                        P[c] = np.cumsum(self.subst_model.transition_prob_matrix(r * t),
+                                         axis=1)
+                    elif r == 0:
+                        P[c] = np.cumsum(np.identity(len(self.subst_model.alphabet)),
+                                         axis=1)
+        
+        return P
+        
+    
+    # --------------------------------------------------------------------------
+    #                        Substitution by Jump chain
+    # --------------------------------------------------------------------------
+    
+    def _substitute_jump_chain(self, sequence, t):
+        
+        total_rate = self._total_subst_rate(sequence, exclude_inserted=True)
+        
+        # jump chain algorithm for inherited positions
+        current_time = 0.0
+        while current_time &lt; t:
+            
+            current_time += np.random.exponential(1/total_rate) if total_rate &gt; 0.0 else float(&#39;inf&#39;)
+            
+            if current_time &lt; t:
+                
+                site, mutation = self._draw_substitution(sequence, total_rate)
+                
+                total_rate += site.rate_factor * self.subst_model.Q[site._value, site._value]
+                total_rate -= site.rate_factor * self.subst_model.Q[mutation, mutation]
+                site._value = mutation
+        
+        # choose random characters for insertions
+        r = np.random.random(sequence.count_status(State.INSERTION))
+        pos = 0
+        for site in sequence:
+            
+            if site.status == State.INSERTION:
+                site._value = np.argmax(self.subst_model.freqs_cumulative &gt; r[pos])
+                pos += 1
+                
+    
+    def _total_subst_rate(self, sequence, exclude_inserted=True):
+        
+        total = 0.0
+        
+        for site in sequence:
+            
+            if exclude_inserted and site.status == State.INSERTION:
+                continue
+            
+            total -= site.rate_factor * self.subst_model.Q[site._value, site._value]
+            
+        return total
+    
+    
+    def _draw_substitution(self, sequence, total_rate):
+        
+        chosen_site, chosen_mutation = None, None
+        r = np.random.uniform(low=0.0, high=total_rate)
+        
+        current_sum = 0.0
+        for site in sequence:
+            
+            if site.status == State.INSERTION:
+                continue
+            
+            # use negative value on the diagonal of the rate matrix Q
+            site_rate = - site.rate_factor * self.subst_model.Q[site._value, site._value]
+            current_sum += site_rate
+            
+            if current_sum &gt; r:
+                chosen_site = site
+                
+                # rescale the &#34;rest&#34; of r for application on the rate matrix Q
+                r = (r - current_sum + site_rate) / site.rate_factor
+                
+                break
+            
+        current_sum = 0.0
+        for i in range(len(self.subst_model.alphabet)):
+            
+            if i != site._value:            # skip the entry on diagonal
+                current_sum += self.subst_model.Q[site._value, i]
+                
+                if current_sum &gt; r:
+                    chosen_mutation = i
+                    break
+                    
+        return chosen_site, chosen_mutation
+    
+    
+    # --------------------------------------------------------------------------
+    #                               Indels
+    # --------------------------------------------------------------------------
+        
+    def _generate_indels(self, sequence, t):
+        &#34;&#34;&#34;Generates indels by a Gillespie process.&#34;&#34;&#34;
+        
+        current_time = 0.0
+        
+        while current_time &lt; t:
+            
+            ins_rate, del_rate = self.indel_model.get_rates(len(sequence))
+            total_rate = ins_rate + del_rate
+            
+            current_time += np.random.exponential(1/total_rate) if total_rate &gt; 0.0 else float(&#39;inf&#39;)
+            
+            if current_time &lt; t:
+                
+                r = np.random.random()
+                if r &lt; ins_rate / total_rate:
+                    self._insertion(sequence)
+                else:
+                    self._deletion(sequence)
+    
+    
+    def _insertion(self, sequence):
+        
+        d = self.indel_model.draw_length()
+        if d == 0:
+            return
+        
+        pos = np.random.randint(-1, high=len(sequence))
+        
+        # initialize insertion before the first item
+        if pos == -1:
+            current_site = sequence.append_left(None, State.INSERTION,
+                                                self.site_counter)
+            self.site_counter += 1
+            d -= 1
+            
+        # go to the element at position pos
+        else:
+            current_site = sequence.node_at(pos)
+            
+        for _ in range(d):
+            current_site = sequence.insert_right_of(current_site,
+                                                    None, State.INSERTION,
+                                                    self.site_counter)
+            
+            self.site_counter += 1
+    
+    
+    def _deletion(self, sequence):
+        
+        d = self.indel_model.draw_length()
+        if d == 0:
+            return
+        
+        pos = np.random.randint(-d + 1, high=len(sequence))
+        
+        # deletion begins before or at the start of the sequence
+        if pos &lt;= 0:
+            d += pos
+            pos = 0
+            
+        sequence.remove_range(pos, d)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="asymmetree.seqevolve.Evolver.Evolver.evolve_along_tree"><code class="name flex">
+<span>def <span class="ident">evolve_along_tree</span></span>(<span>self, tree, start_length=200, start_seq=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Constructor of class 'Evolver'.</p>
+<p>If 'start_seq' is not supplied, then the sequence at the root is
+constructed randomly using the stationary probabilities of the
+specified substitution model.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>The tree along which sequences are simulated.</dd>
+<dt><strong><code>start_length</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The length of the sequence at the root. The default is 200.
+This parameter is ignored when 'start_seq' is supplied.</dd>
+<dt><strong><code>start_seq</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>The start sequence for the root of the tree. The default is None,
+in which case a sequence is constructed at random.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>A dict containing the TreeNode instances in the tree as keys and
+the simulated sequences as values (instances of type EvoSeq).</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def evolve_along_tree(self, tree, start_length=200, start_seq=None):
+    &#34;&#34;&#34;Constructor of class &#39;Evolver&#39;.
+    
+    If &#39;start_seq&#39; is not supplied, then the sequence at the root is
+    constructed randomly using the stationary probabilities of the
+    specified substitution model.
+    
+    Parameters
+    ----------
+    tree : Tree
+        The tree along which sequences are simulated.
+    start_length : int, optional
+        The length of the sequence at the root. The default is 200.
+        This parameter is ignored when &#39;start_seq&#39; is supplied.
+    start_seq : str, optional
+        The start sequence for the root of the tree. The default is None,
+        in which case a sequence is constructed at random.
+    
+    Returns
+    -------
+    dict
+        A dict containing the TreeNode instances in the tree as keys and 
+        the simulated sequences as values (instances of type EvoSeq).
+    &#34;&#34;&#34;
+    
+    self.tree = tree
+    self.site_counter = 0
+    self.sequences = {}
+    
+    if start_seq is None:
+        root_seq = self._random_sequence(start_length)
+    else:
+        root_seq = self._initialize_with_sequence(start_seq)
+        
+    if self.het_model:
+        self.het_model.assign(root_seq)
+    
+    for v in tree.preorder():
+        
+        if v.parent is None:
+            self.sequences[v] = root_seq
+        else:
+            self.sequences[v] = self._evolve(self.sequences[v.parent], v.dist)
+            
+    return self.sequences</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.seqevolve.Evolver.Evolver.true_alignment"><code class="name flex">
+<span>def <span class="ident">true_alignment</span></span>(<span>self, include_inner=True, write_to=None, alignment_format='phylip')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Construct the 'true' alignment of the simulated sequences.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>include_inner</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, the alignment also contains the sequences of the inner
+nodes of the tree. The default is True.</dd>
+<dt><strong><code>write_to</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>The path and filename to the file into which the alignment shall
+be written. The default is None, in which case nothing is written
+to a file.</dd>
+<dt><strong><code>alignment_format</code></strong> :&ensp;<code>str</code></dt>
+<dd>Format of the alignment that is written to a file. The default is
+'phylip'.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>A dict containing the TreeNode instances in the tree as keys and
+the str sequences as values that include the necessary gaps.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def true_alignment(self, include_inner=True, write_to=None,
+                   alignment_format=&#39;phylip&#39;):
+    &#34;&#34;&#34;Construct the &#39;true&#39; alignment of the simulated sequences.
+    
+    Parameters
+    ----------
+    include_inner : bool, optional
+        If True, the alignment also contains the sequences of the inner
+        nodes of the tree. The default is True.
+    write_to : str, optional
+        The path and filename to the file into which the alignment shall
+        be written. The default is None, in which case nothing is written
+        to a file.
+    alignment_format : str
+        Format of the alignment that is written to a file. The default is
+        &#39;phylip&#39;.
+    
+    Returns
+    -------
+    dict
+        A dict containing the TreeNode instances in the tree as keys and 
+        the str sequences as values that include the necessary gaps.
+    &#34;&#34;&#34;
+    
+    alg_builder = AlignmentBuilder(self.tree, self.sequences,
+                                   self.subst_model.alphabet,
+                                   include_inner=include_inner)
+    
+    alignment = alg_builder.build()
+    
+    if write_to:
+        write_alignment(write_to, alignment,
+                        alignment_format=alignment_format)
+    
+    return alignment</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="asymmetree.seqevolve" href="index.html">asymmetree.seqevolve</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="asymmetree.seqevolve.Evolver.Evolver" href="#asymmetree.seqevolve.Evolver.Evolver">Evolver</a></code></h4>
+<ul class="">
+<li><code><a title="asymmetree.seqevolve.Evolver.Evolver.evolve_along_tree" href="#asymmetree.seqevolve.Evolver.Evolver.evolve_along_tree">evolve_along_tree</a></code></li>
+<li><code><a title="asymmetree.seqevolve.Evolver.Evolver.true_alignment" href="#asymmetree.seqevolve.Evolver.Evolver.true_alignment">true_alignment</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

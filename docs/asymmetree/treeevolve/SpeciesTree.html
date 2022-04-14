@@ -1,0 +1,1260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>asymmetree.treeevolve.SpeciesTree API documentation</title>
+<meta name="description" content="Species Tree Simulator …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>asymmetree.treeevolve.SpeciesTree</code></h1>
+</header>
+<section id="section-intro">
+<p>Species Tree Simulator.</p>
+<p>Simulate dated species trees.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># -*- coding: utf-8 -*-
+
+&#34;&#34;&#34;
+Species Tree Simulator.
+
+Simulate dated species trees.
+&#34;&#34;&#34;
+
+import random, sys
+import numpy as np
+
+from tralda.datastructures.Tree import Tree, TreeNode
+
+from asymmetree.tools.PhyloTreeTools import (delete_losses_and_contract,
+                                             remove_planted_root)
+
+
+__author__ = &#39;David Schaller&#39;
+
+
+# --------------------------------------------------------------------------
+#                         USER INTERFACE FUNCTION
+# --------------------------------------------------------------------------
+
+def simulate_species_tree(N, 
+                          model=&#39;innovation&#39;,
+                          non_binary_prob=0.0,
+                          planted=True,
+                          remove_extinct=False,
+                          rescale_to_height=None,
+                          **kwargs):
+    &#34;&#34;&#34;Simulates a species tree S with N leaves.
+    
+    Parameters
+    ----------
+    N : int
+        Number of leaves in the resulting tree that correspond to extant
+        species.
+    model : str, optional
+        Simulation model to be applied, the default is &#39;innovation&#39;, see [1].
+        Other available model are &#39;yule&#39; [2], birth-death process (&#39;BDP&#39;, [3]),
+        and episodic birth-death process (&#39;EBDP&#39;, [4]).
+    non_binary_prob : float, optional
+        Probability that an inner edge is contracted; results in non-binary 
+        tree; default is 0.0, in which case the resulting tree is binary.
+    planted : bool, optional
+        Add a planted root that has the canonical root as its single neighbor; 
+        default is True.
+    remove_extinct : bool, optional
+        Remove all branches that lead to extinctions, only relevant for some
+        models; default is False.
+    rescale_to_height : bool, optional
+        Determines the final distance from the root to the (surviving) leaves,
+        default is None, i.e., model-dependent.
+    birth_rate : float, optional
+        The birth rate for models such as &#39;yule&#39; and &#39;BDP&#39;.
+    death_rate : float, optional
+        The death rate for models such as &#39;BDP&#39;.
+    episodes : list, optional
+        The episodes for the model &#39;EBDP&#39;.
+        
+    Raises
+    ------
+    ValueError
+        If unknown parameter values are passed.
+        
+    Returns
+    -------
+    Tree
+        The simulated species tree.
+        
+    References
+    ----------
+    .. [1] S. Keller-Schmidt, K. Klemm.
+       A model of macroevolution as a branching process based on innovations.
+       In: Adv. Complex Syst.,2012, 15, 1250043.
+       doi:10.1142/S0219525912500439.
+    .. [2] G. U. Yule.
+       A mathematical theory of evolution, based on the conclusions of Dr. J. 
+       C.Willis, F. R. S. 
+       In: Phil. Trans. R. Soc. Lond. B, 1924, 213, 21–87.
+       doi:10.1098/rstb.1925.0002.
+    .. [3] D. G. Kendall.
+       On the Generalized &#34;Birth-and-Death&#34; Process.
+       In: Ann. Math. Statist. 1948, 19, 1–15.
+       doi:10.1214/aoms/1177730285.
+    .. [4] T. Stadler.
+       Simulating trees with a fixed number of extant species.
+       In: Syst. Biol. 2011, 60, 676–684.
+       doi:10.1093/sysbio/syr029.
+    &#34;&#34;&#34;
+    
+    # parameter checking
+    if not isinstance(N, int) or N &lt; 0:
+        raise ValueError(&#39;N must be an int &gt;=0&#39;)
+    elif N == 0:
+        return Tree(None)
+    
+    if not isinstance(model, str):
+        raise ValueError(&#34;model must be of type &#39;str&#39;&#34;)
+    
+    if non_binary_prob &lt; 0.0 or non_binary_prob &gt; 1.0:
+        raise ValueError(&#39;contraction prob. must be in [0.0, 1.0]&#39;)
+        
+    if (rescale_to_height is not None and
+        (not isinstance(rescale_to_height, (int, float)) or
+         rescale_to_height &lt; 0.0)):
+        raise ValueError(&#39;height must be a number &gt;=0&#39;)
+    elif rescale_to_height is not None and N == 1 and not planted:
+        raise ValueError(&#39;rescaling is not applicable to unplanted trees &#39;\
+                         &#39;with only one leaf&#39;)
+    
+    # choice of the main simulation algorithm
+    if model.lower() in (&#39;innovation&#39;, &#39;innovations&#39;):
+        tree = _innovation_model(N, planted)
+    elif model.lower() == &#39;yule&#39;:
+        tree = _yule(N, kwargs.get(&#39;birth_rate&#39;))
+    elif model.upper() == &#39;BDP&#39;:
+        tree = _BDP(N, **kwargs)
+    elif model.upper() == &#39;EBDP&#39;:
+        tree = _EBDP(N, **kwargs)
+    else:
+        raise ValueError(&#34;model &#39;{}&#39; is not available&#34;.format(model))
+        
+    # remove extinct branches for models that include losses
+    if remove_extinct and model.upper() in (&#39;BDP&#39;, &#39;EBDP&#39;):
+        delete_losses_and_contract(tree, inplace=True)
+        
+    # remove planted edge for models that are planted by construction
+    if not planted and model.upper() in (&#39;YULE&#39;, &#39;BDP&#39;, &#39;EBDP&#39;):
+        remove_planted_root(tree, inplace=True)
+    
+    # make tree non_binary by random contraction of edges
+    if non_binary_prob &gt; 0.0:
+         edges = _select_edges_for_contraction(tree, non_binary_prob,
+                                               exclude_planted_edge=True)
+         tree.contract(edges)
+    
+    # rescale to specified height
+    if rescale_to_height is not None:
+        _rescale(tree, rescale_to_height, inplace=True)
+        
+    return tree
+
+
+def simulate_species_tree_age(age, model=&#39;yule&#39;,
+                              non_binary_prob=0.0,
+                              **kwargs):
+    &#34;&#34;&#34;Simulates a (planted) species tree S of the specified age.
+    
+    Parameters
+    ----------
+    age : float
+        Simulation time, i.e., the time span from the root of the tree to the
+        leaves that correspond to extant species.
+    model : str, optional
+        Simulation model to be applied, the default is &#39;yule&#39;, see [1].
+        Other available model are birth-death process (&#39;BDP&#39;, [2]), and
+        episodic birth-death process (&#39;EBDP&#39;, [3]).
+    non_binary_prob : float, optional
+        Probability that an inner edge is contracted; results in non-binary 
+        tree; default is 0.0, in which case the resulting tree is binary.
+    birth_rate : float, optional
+        The birth rate for models such as &#39;yule&#39; and &#39;BDP&#39;.
+    death_rate : float, optional
+        The death rate for models such as &#39;BDP&#39;.
+    episodes : list, optional
+        The episodes for the model &#39;EBDP&#39;.
+        
+    Raises
+    ------
+    ValueError
+        If unknown or invalid parameter values are passed.
+        
+    Returns
+    -------
+    Tree
+        The simulated species tree.
+        
+    References
+    ----------
+    .. [1] G. U. Yule.
+       A mathematical theory of evolution, based on the conclusions of Dr. J. 
+       C.Willis, F. R. S. 
+       In: Phil. Trans. R. Soc. Lond. B, 1924, 213, 21–87.
+       doi:10.1098/rstb.1925.0002.
+    .. [2] D. G. Kendall.
+       On the Generalized &#34;Birth-and-Death&#34; Process.
+       In: Ann. Math. Statist. 1948, 19, 1–15.
+       doi:10.1214/aoms/1177730285.
+    .. [3] T. Stadler.
+       Simulating trees with a fixed number of extant species.
+       In: Syst. Biol. 2011, 60, 676–684.
+       doi:10.1093/sysbio/syr029.
+    &#34;&#34;&#34;
+    
+    # parameter checking
+    if not isinstance(age, (float, int)) or age &lt;= 0.0:
+        raise ValueError(&#39;age must be a number &gt;0&#39;)
+    elif isinstance(age, int):
+        age = float(age)
+        
+    if not isinstance(model, str):
+        raise ValueError(&#34;model must be of type &#39;str&#39;&#34;)
+        
+    if non_binary_prob &lt; 0.0 or non_binary_prob &gt; 1.0:
+        raise ValueError(&#34;contraction prob. must be in [0.0, 1.0]&#34;)
+    
+    # main simulation algorithm
+    if model.lower() == &#39;yule&#39;:
+        tree = _yule_age(age, kwargs.get(&#39;birth_rate&#39;))
+    elif model.upper() == &#39;BDP&#39;:
+        tree = _BDP_age(age, **kwargs)
+    elif model.upper() == &#39;EBDP&#39;:
+        tree = _EBDP_age(age, **kwargs)
+    else:
+        raise ValueError(&#34;model &#39;{}&#39; is not available&#34;.format(model))
+        
+    # make tree non_binary by random contraction of edges
+    if non_binary_prob &gt; 0.0:
+         edges = _select_edges_for_contraction(tree, non_binary_prob,
+                                               exclude_planted_edge=True)
+         tree.contract(edges)
+        
+    return tree
+
+
+# --------------------------------------------------------------------------
+#                         AUXILIARY FUNCTIONS 
+# --------------------------------------------------------------------------
+
+
+def _rescale(tree, height, inplace=True):
+    
+    if not inplace:
+        tree = tree.copy()
+    
+    old_height = tree.root.tstamp
+    
+    # not available for trees that only consist of a root
+    if old_height &lt;= 0.0:
+        raise RuntimeError(&#34;cannot rescale tree of &#34;\
+                           &#34;height &#39;{}&#39;&#34;.format(old_height))
+        
+    scaling_factor = height / old_height
+    
+    for v in tree.preorder():
+        v.tstamp *= scaling_factor
+        v.dist   *= scaling_factor
+    
+    return tree
+            
+            
+def _select_edges_for_contraction(tree, p, exclude_planted_edge=True):
+    
+    edges = []
+    
+    for u, v in tree.inner_edges():
+        
+        if exclude_planted_edge and (u is tree.root) and len(u.children) == 1:
+            continue
+        
+        if random.random() &lt; p:
+            edges.append((u,v))
+    
+    return edges
+
+
+def assign_losses(tree, proportion):
+    &#34;&#34;&#34;Randomly assigns a specified proportion of leaves as losses.&#34;&#34;&#34;
+    
+    for leaf in tree.random_leaves(proportion):
+        leaf.event = &#39;L&#39;
+
+
+# --------------------------------------------------------------------------
+#                     SPECIES TREE MODEL FUNCTIONS 
+# --------------------------------------------------------------------------
+
+
+def _innovation_model(N, planted, ultrametric=True):
+    &#34;&#34;&#34;Builds a species tree S with N leaves with the innovation model.
+    
+    Parameters
+    ----------
+    N : int
+        Number of extant species in the resulting tree.
+    planted : bool
+        Add a planted root that has the canonical root as its single neighbor.
+    ultrametric : bool, optional
+        If True, make tree ultrametric and rescale it to height 1.0, else all
+        edges have length 1.0; the default is True.
+    
+    Returns
+    -------
+    Tree
+        The simulated species tree.
+    
+    References
+    ----------
+    .. [1] S. Keller-Schmidt, K. Klemm.
+       A model of macroevolution as a branching process based on innovations.
+       In: Adv. Complex Syst.,2012, 15, 1250043.
+       doi:10.1142/S0219525912500439.
+    &#34;&#34;&#34;
+    
+    tree = Tree(TreeNode(label=0, event=&#39;S&#39;))
+    tree.number_of_species = N
+    node_counter = 1
+    
+    # planted tree (root is an implicit outgroup with outdegree = 1)
+    if planted:
+        root = TreeNode(label=1, event=&#39;S&#39;)
+        tree.root.add_child(root)
+        node_counter += 1
+    else:
+        root = tree.root
+    
+    features = [0]                  # set of available features
+    species = {(0,): root}          # extant species
+    
+    while len(species) &lt; N:
+        
+        loss_candidates = set()     # species for which loss of a feature
+        for s in species.keys():    # can trigger a speciation
+            for i in range(0, len(s)):
+                    if s[:i] + s[i+1:] not in species:
+                        loss_candidates.add(s)
+        
+        if not loss_candidates:     # INNOVATION EVENT
+            s = random.choice(list(species))
+            new_feature = len(features)
+            
+            new_s = s + (new_feature,)
+            
+            child1 = TreeNode(label=node_counter, event=&#39;S&#39;)
+            species[s].add_child(child1)
+            child2 = TreeNode(label=node_counter+1, event=&#39;S&#39;)
+            species[s].add_child(child2)
+            
+            node_counter += 2
+            
+            species[s] = child1
+            species[new_s] = child2
+            features.append(new_feature)
+            
+        else:
+            s = random.choice(list(loss_candidates))
+            
+            if len(s) &gt; 1:
+                feature_index = random.randint(0, len(s)-1)
+            else:
+                feature_index = 0
+            
+            new_s = s[:feature_index] + s[feature_index+1:]
+            
+            if new_s not in species:    # LOSS EVENT
+                
+                child1 = TreeNode(label=node_counter, event=&#39;S&#39;)
+                species[s].add_child(child1)
+                child2 = TreeNode(label=node_counter+1, event=&#39;S&#39;)
+                species[s].add_child(child2)
+
+                node_counter += 2
+                
+                species[s] = child1
+                species[new_s] = child2
+                
+    if ultrametric:         
+        simulate_timing(tree)
+        distance_from_timing(tree)
+    
+    return tree
+
+
+def simulate_timing(tree):
+    &#34;&#34;&#34;Simulates a timing for the tree.
+    
+    It is t(root) = 1 and t(x) = 0 for x in L(S).&#34;&#34;&#34;
+    
+    for v in tree.preorder():
+        if not v.children:
+            v.tstamp = 0.0
+        elif not v.parent:
+            v.tstamp = 1.0
+        else:                               # random walk to a leaf
+            pos = v                         # current position
+            length = 0                      # path length |P|
+            while pos.children:
+                length += 1
+                pos = pos.children[np.random.randint(len(pos.children))]
+            v.tstamp = v.parent.tstamp * (1 - 2 * np.random.uniform() / (length+1))
+            
+
+def distance_from_timing(tree):
+    &#34;&#34;&#34;Adjusts all distances according to the time stamp difference.&#34;&#34;&#34;
+    
+    if tree.root:
+        tree.root.dist = 0.0
+    
+    for u, v in tree.edges():
+        v.dist = abs(u.tstamp - v.tstamp)
+
+
+def _reverse_time_stamps(tree):
+    
+    max_depth = 0.0
+    for v in tree.preorder():
+        max_depth = max(max_depth, v.tstamp)
+            
+    for v in tree.preorder():
+        v.tstamp = abs(v.tstamp - max_depth)
+
+
+def _yule(N, birth_rate):
+    
+    if birth_rate is None:
+        birth_rate = 1.0
+    elif birth_rate &lt;= 0.0:
+        raise ValueError(&#34;birth rate must be &gt;0&#34;)
+    
+    tree = Tree(TreeNode(label=0, event=&#39;S&#39;, dist=0.0, tstamp=0.0))
+    tree.number_of_species = N
+    
+    branches = [(1, tree.root)]
+    forward_time = 0.0
+    node_counter = 1
+    
+    while len(branches) &lt; N:
+        
+        rate = len(branches) * birth_rate
+        forward_time += np.random.exponential(1/rate)
+        
+        i = np.random.randint(len(branches))
+        branch_id, parent = branches[i]
+        spec_node = TreeNode(label=branch_id, event=&#39;S&#39;,
+                             dist=forward_time-parent.tstamp,
+                             tstamp=forward_time)
+        parent.add_child(spec_node)
+        branches[i] = (node_counter, spec_node)
+        branches.append((node_counter+1, spec_node))
+        node_counter += 2
+        
+    # add length for pendant branches (cf. Hartmann et al. 2010)
+    forward_time += np.random.exponential(1/rate)
+    
+    # finalize the branches
+    for branch_id, parent in branches:
+        parent.add_child( TreeNode(label=branch_id, event=&#39;S&#39;,
+                                   dist=forward_time-parent.tstamp,
+                                   tstamp=forward_time) )
+    
+    _reverse_time_stamps(tree)
+    
+    return tree
+
+
+def _yule_age(age, birth_rate):
+    
+    if birth_rate is None:
+        birth_rate = 1.0
+    elif birth_rate &lt;= 0.0:
+        raise ValueError(&#34;birth rate must be &gt;0&#34;)
+    
+    tree = Tree(TreeNode(label=0, event=&#39;S&#39;, dist=0.0, tstamp=0.0))
+    
+    branches = [(1, tree.root)]
+    forward_time = 0.0
+    node_counter = 1
+    
+    while forward_time &lt; age:
+        
+        rate = len(branches) * birth_rate
+        forward_time += np.random.exponential(1/rate)
+        
+        # do not branch if age is already reached
+        if forward_time &gt;= age:
+            break
+        
+        i = np.random.randint(len(branches))
+        branch_id, parent = branches[i]
+        spec_node = TreeNode(label=branch_id, event=&#39;S&#39;,
+                             dist=forward_time-parent.tstamp,
+                             tstamp=forward_time)
+        parent.add_child(spec_node)
+        branches[i] = (node_counter, spec_node)
+        branches.append((node_counter+1, spec_node))
+        node_counter += 2
+    
+    # finalize the branches
+    for branch_id, parent in branches:
+        parent.add_child( TreeNode(label=branch_id, event=&#39;S&#39;,
+                                   dist=age-parent.tstamp,
+                                   tstamp=age) )
+    
+    # reverse such that t(root) = age and t(leaves) = 0.0
+    _reverse_time_stamps(tree)
+    
+    return tree
+
+
+def _BDP(N, **kwargs):
+    
+    # remove potentially supplied &#39;episodes&#39; argument
+    episodes = _EBDP_check_episodes(birth_rate = kwargs.get(&#39;birth_rate&#39;),
+                                    death_rate = kwargs.get(&#39;death_rate&#39;))
+    
+    return _EBDP_backward(N, episodes)
+
+
+def _EBDP(N, **kwargs):
+    
+    episodes = _EBDP_check_episodes(**kwargs)
+    
+    return _EBDP_backward(N, episodes)
+
+
+def _EBDP_check_episodes(**kwargs):
+    
+    birth_rate = kwargs.get(&#39;birth_rate&#39;)
+    death_rate = kwargs.get(&#39;death_rate&#39;)
+    episodes = kwargs.get(&#39;episodes&#39;)
+    
+    # episodes parameter is prefered
+    if episodes is not None:
+        
+        if len(episodes) == 0:
+            raise ValueError(&#34;list of episodes must not be empty&#34;)
+        
+        for i in range(len(episodes)):
+            
+            if len(episodes[i]) != 4:
+                raise ValueError(&#34;all episodes must contain 4 values: birth rate, &#34;\
+                                 &#34;death rate, proportion of survivors, time stamp &#34;\
+                                 &#34;(from recent time as 0)&#34;)
+            
+            birth_rate, death_rate, rho, t = episodes[i]
+            if i == 0 and t != 0.0:
+                raise ValueError(&#34;first episode must be at t=0.0&#34;)
+            elif i &gt; 0 and episodes[i-1][3] &gt;= t:
+                print(episodes[i-1][3], t)
+                raise ValueError(&#34;episodes must be in correct temporal order&#34;)
+            
+            if birth_rate &lt;= 0.0 or birth_rate &lt; death_rate:
+                raise ValueError(&#34;birth rate must be &gt;0 and &gt;=death rate &#34;\
+                                 &#34;in all episodes&#34;)
+                
+            if rho &lt;= 0.0 or rho &gt; 1.0:
+                raise ValueError(&#34;proportion of survivors must be in (0.0, 1.0]&#34;)
+        
+        return episodes
+    
+    elif birth_rate is not None:
+        
+        if birth_rate &lt;= 0.0 or (death_rate and birth_rate &lt; death_rate):
+            raise ValueError(&#34;birth rate must be &gt;0 and &gt;=death rate&#34;)
+            
+        if death_rate and death_rate &lt; 0.0:
+            raise ValueError(&#34;death rate must be &gt;=0&#34;)
+        
+        if death_rate is None:
+            return [(birth_rate, 0.0, 1.0, 0.0)]
+        else:
+            return [(birth_rate, death_rate, 1.0, 0.0)]
+        
+    else:
+        if death_rate:
+            raise ValueError(&#34;birth rate (&gt;0) must be specified if death rate &#34;\
+                             &#34;is supplied&#34;)
+            
+        return [(1.0, 0.0, 1.0, 0.0)]
+
+
+def _EBDP_backward(N, episodes, max_tries=500):
+    &#34;&#34;&#34;Episodic birth–death process (EBDP).
+    
+    References
+    ----------
+    .. [1] T. Stadler.
+       Simulating trees with a fixed number of extant species.
+       In: Syst. Biol. 2011, 60, 676–684.
+       doi:10.1093/sysbio/syr029.
+    &#34;&#34;&#34;
+    
+    birth_inv_sum = sum([1/episodes[i][0] for i in range(len(episodes))])
+    
+    for _ in range(max_tries):
+        
+        tree = None
+        t = 0.0
+        i = 0
+        
+        branches = [TreeNode(label=j, event=&#39;S&#39;, dist=0.0, tstamp=t)
+                    for j in range(N)]
+        id_counter = N
+        
+        while branches:
+            birth_i, death_i, rho_i, t_i = episodes[i]
+            
+            losses_to_add = round(len(branches) / rho_i) - len(branches)
+            for j in range(losses_to_add):
+                branches.append( TreeNode(label=id_counter,
+                                          event=&#39;L&#39;,
+                                          dist=0.0, tstamp=t) )
+            id_counter += losses_to_add
+            
+            while branches:
+                w = np.random.exponential( 1 / ((birth_i + death_i) * len(branches)) )
+                
+                if i+1 &lt; len(episodes) and t + w &gt; episodes[i+1][3]:
+                    t = episodes[i+1][3]
+                    i += 1
+                    break
+                
+                else:
+                    t += w
+                    
+                    if birth_i &gt; np.random.uniform(low=0.0, high=birth_i+death_i):
+                        # speciation event drawn
+                        spec_node = TreeNode(label=id_counter, event=&#39;S&#39;,
+                                             dist=0.0, tstamp=t)
+                        id_counter += 1
+                        if len(branches) &gt; 1:
+                            k, l = np.random.choice(len(branches), 2,
+                                                    replace=False)
+                            if k &gt; l:
+                                k, l = l, k
+                            spec_node.add_child(branches[k])
+                            spec_node.add_child(branches[l])
+                            branches[k] = spec_node
+                            branches.pop(l)
+                        else:
+                            spec_node.add_child(branches[0])
+                            tree = Tree(spec_node)
+                            branches.clear()
+                    else:
+                        # extinction event drawn
+                        branches.append( TreeNode(label=id_counter,
+                                                  event=&#39;L&#39;,
+                                                  dist=0.0, tstamp=t) )
+                        id_counter += 1
+        
+        # return tree with the following probability
+        if np.random.random() &lt; (1 / birth_i) / birth_inv_sum:
+            
+            for v in tree.preorder():
+                if v.parent:
+                    v.dist = v.parent.tstamp - v.tstamp
+            
+            return tree
+        
+    print(&#34;Could not return a tree after {} simulations!&#34;.format(max_tries),
+          file=sys.stderr)
+   
+
+def _BDP_age(age, **kwargs):
+    
+    # remove potentially supplied &#39;episodes&#39; argument
+    episodes = _EBDP_age_check_episodes(birth_rate = kwargs.get(&#39;birth_rate&#39;),
+                                        death_rate = kwargs.get(&#39;death_rate&#39;))
+    
+    return _EBDP_age_forward(age, episodes)
+
+
+def _EBDP_age(age, **kwargs):
+    
+    episodes = _EBDP_age_check_episodes(**kwargs)
+    
+    return _EBDP_age_forward(age, episodes)
+
+
+def _EBDP_age_check_episodes(**kwargs):
+    
+    birth_rate = kwargs.get(&#39;birth_rate&#39;)
+    death_rate = kwargs.get(&#39;death_rate&#39;)
+    episodes = kwargs.get(&#39;episodes&#39;)
+    
+    # episodes parameter is prefered
+    if episodes is not None:
+        
+        if len(episodes) == 0:
+            raise ValueError(&#34;list of episodes must not be empty&#34;)
+        
+        for i in range(len(episodes)):
+            
+            if len(episodes[i]) != 4:
+                raise ValueError(&#34;all episodes must contain 4 values: birth rate, &#34;\
+                                 &#34;death rate, proportion of survivors, time stamp &#34;\
+                                 &#34;(from recent time as 0)&#34;)
+            
+            birth_rate, death_rate, rho, t = episodes[i]
+            if i == 0 and t != 0.0:
+                raise ValueError(&#34;first episode must be at t=0.0&#34;)
+            elif i &gt; 0 and episodes[i-1][3] &gt;= t:
+                print(episodes[i-1][3], t)
+                raise ValueError(&#34;episodes must be in correct temporal order&#34;)
+            
+            if birth_rate &lt; 0.0 or death_rate &lt; 0.0:
+                raise ValueError(&#34;birth and death rate must be &gt;=0 &#34;\
+                                 &#34;in all episodes&#34;)
+                
+            if rho &lt;= 0.0 or rho &gt; 1.0:
+                raise ValueError(&#34;proportion of survivors must be in (0.0, 1.0]&#34;)
+        
+        return episodes
+    
+    elif birth_rate is not None:
+        
+        if birth_rate &lt; 0.0 or (death_rate is not None and death_rate &lt; 0.0):
+            raise ValueError(&#34;birth and death rate must be &gt;=0&#34;)
+        
+        if death_rate is None:
+            # default death rate = 0.0
+            return [(birth_rate, 0.0, 1.0, 0.0)]
+        else:
+            return [(birth_rate, death_rate, 1.0, 0.0)]
+        
+    else:
+        if death_rate:
+            raise ValueError(&#34;birth rate (&gt;=0) must be specified if death rate &#34;\
+                             &#34;is supplied&#34;)
+        
+        # default birth rate = 1.0 and death rate = 0.0
+        return [(1.0, 0.0, 1.0, 0.0)]
+
+   
+def _EBDP_mass_extinction(branches, surviving_rate, t):
+    
+    no_of_losses = round((1-surviving_rate) * len(branches))
+    chosen_losses = sorted(np.random.choice(len(branches), replace=False,
+                                            size=no_of_losses),
+                           reverse=True)
+    for j in chosen_losses:
+        branch_id, parent = branches[j]
+        loss_node = TreeNode(label=branch_id,
+                             event=&#39;L&#39;,
+                             dist=t-parent.tstamp,
+                             tstamp=t)
+        parent.add_child(loss_node)
+        branches.pop(j)
+    
+
+def _EBDP_age_forward(age, episodes):
+    &#34;&#34;&#34;Episodic birth–death process (EBDP), forward algorithm with max. age.&#34;&#34;&#34;
+    
+    tree = Tree(TreeNode(label=0, event=&#39;S&#39;, dist=0.0, tstamp=0.0))
+    
+    branches = [(1, tree.root)]
+    forward_time = 0.0
+    node_counter = 1
+    i = 0               # current episode
+    
+    # may lead to extinction of the single branch at time t=0
+    _EBDP_mass_extinction(branches, episodes[i][2], episodes[i][3])
+    
+    while forward_time &lt; age:
+        birth_rate, death_rate, *_ = episodes[i]
+        
+        rate = len(branches) * (birth_rate + death_rate)
+        waiting_time = np.random.exponential(1/rate) if rate &gt; 0.0 else float(&#39;inf&#39;)
+        
+        if i+1 &lt; len(episodes) and forward_time + waiting_time &gt;= episodes[i+1][3]:
+            _EBDP_mass_extinction(branches, episodes[i+1][2], episodes[i+1][3])
+            forward_time = episodes[i+1][3]
+            i += 1
+        
+        elif forward_time + waiting_time &gt;= age:
+            break
+        
+        else:
+            forward_time += waiting_time
+            
+            j = np.random.randint(len(branches))
+            branch_id, parent = branches[j]
+            
+            if birth_rate &gt; np.random.uniform(low=0.0, high=birth_rate+death_rate):
+                # speciation event drawn
+                spec_node = TreeNode(label=branch_id, event=&#39;S&#39;,
+                                     dist=forward_time-parent.tstamp,
+                                     tstamp=forward_time)
+                parent.add_child(spec_node)
+                branches[j] = (node_counter, spec_node)
+                branches.append((node_counter+1, spec_node))
+                node_counter += 2
+            else:
+                # extinction event drawn
+                loss_node = TreeNode(label=branch_id,
+                                     event=&#39;L&#39;,
+                                     dist=forward_time-parent.tstamp,
+                                     tstamp=forward_time)
+                parent.add_child(loss_node)
+                branches.pop(j)
+                
+    # finalize the (surviving) branches
+    for branch_id, parent in branches:
+        parent.add_child( TreeNode(label=branch_id, event=&#39;S&#39;,
+                                   dist=age-parent.tstamp,
+                                   tstamp=age) )
+    
+    # reverse such that t(root) = age and t(surviving leaves) = 0.0
+    for v in tree.preorder():
+        v.tstamp = age - v.tstamp
+    
+    return tree</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="asymmetree.treeevolve.SpeciesTree.assign_losses"><code class="name flex">
+<span>def <span class="ident">assign_losses</span></span>(<span>tree, proportion)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Randomly assigns a specified proportion of leaves as losses.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assign_losses(tree, proportion):
+    &#34;&#34;&#34;Randomly assigns a specified proportion of leaves as losses.&#34;&#34;&#34;
+    
+    for leaf in tree.random_leaves(proportion):
+        leaf.event = &#39;L&#39;</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.treeevolve.SpeciesTree.distance_from_timing"><code class="name flex">
+<span>def <span class="ident">distance_from_timing</span></span>(<span>tree)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adjusts all distances according to the time stamp difference.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def distance_from_timing(tree):
+    &#34;&#34;&#34;Adjusts all distances according to the time stamp difference.&#34;&#34;&#34;
+    
+    if tree.root:
+        tree.root.dist = 0.0
+    
+    for u, v in tree.edges():
+        v.dist = abs(u.tstamp - v.tstamp)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.treeevolve.SpeciesTree.simulate_species_tree"><code class="name flex">
+<span>def <span class="ident">simulate_species_tree</span></span>(<span>N, model='innovation', non_binary_prob=0.0, planted=True, remove_extinct=False, rescale_to_height=None, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Simulates a species tree S with N leaves.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>N</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of leaves in the resulting tree that correspond to extant
+species.</dd>
+<dt><strong><code>model</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Simulation model to be applied, the default is 'innovation', see [1].
+Other available model are 'yule' [2], birth-death process ('BDP', [3]),
+and episodic birth-death process ('EBDP', [4]).</dd>
+<dt><strong><code>non_binary_prob</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Probability that an inner edge is contracted; results in non-binary
+tree; default is 0.0, in which case the resulting tree is binary.</dd>
+<dt><strong><code>planted</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Add a planted root that has the canonical root as its single neighbor;
+default is True.</dd>
+<dt><strong><code>remove_extinct</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Remove all branches that lead to extinctions, only relevant for some
+models; default is False.</dd>
+<dt><strong><code>rescale_to_height</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Determines the final distance from the root to the (surviving) leaves,
+default is None, i.e., model-dependent.</dd>
+<dt><strong><code>birth_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The birth rate for models such as 'yule' and 'BDP'.</dd>
+<dt><strong><code>death_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The death rate for models such as 'BDP'.</dd>
+<dt><strong><code>episodes</code></strong> :&ensp;<code>list</code>, optional</dt>
+<dd>The episodes for the model 'EBDP'.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If unknown parameter values are passed.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tree</code></dt>
+<dd>The simulated species tree.</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] S. Keller-Schmidt, K. Klemm.
+A model of macroevolution as a branching process based on innovations.
+In: Adv. Complex Syst.,2012, 15, 1250043.
+doi:10.1142/S0219525912500439.
+.. [2] G. U. Yule.
+A mathematical theory of evolution, based on the conclusions of Dr. J.
+C.Willis, F. R. S.
+In: Phil. Trans. R. Soc. Lond. B, 1924, 213, 21–87.
+doi:10.1098/rstb.1925.0002.
+.. [3] D. G. Kendall.
+On the Generalized "Birth-and-Death" Process.
+In: Ann. Math. Statist. 1948, 19, 1–15.
+doi:10.1214/aoms/1177730285.
+.. [4] T. Stadler.
+Simulating trees with a fixed number of extant species.
+In: Syst. Biol. 2011, 60, 676–684.
+doi:10.1093/sysbio/syr029.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def simulate_species_tree(N, 
+                          model=&#39;innovation&#39;,
+                          non_binary_prob=0.0,
+                          planted=True,
+                          remove_extinct=False,
+                          rescale_to_height=None,
+                          **kwargs):
+    &#34;&#34;&#34;Simulates a species tree S with N leaves.
+    
+    Parameters
+    ----------
+    N : int
+        Number of leaves in the resulting tree that correspond to extant
+        species.
+    model : str, optional
+        Simulation model to be applied, the default is &#39;innovation&#39;, see [1].
+        Other available model are &#39;yule&#39; [2], birth-death process (&#39;BDP&#39;, [3]),
+        and episodic birth-death process (&#39;EBDP&#39;, [4]).
+    non_binary_prob : float, optional
+        Probability that an inner edge is contracted; results in non-binary 
+        tree; default is 0.0, in which case the resulting tree is binary.
+    planted : bool, optional
+        Add a planted root that has the canonical root as its single neighbor; 
+        default is True.
+    remove_extinct : bool, optional
+        Remove all branches that lead to extinctions, only relevant for some
+        models; default is False.
+    rescale_to_height : bool, optional
+        Determines the final distance from the root to the (surviving) leaves,
+        default is None, i.e., model-dependent.
+    birth_rate : float, optional
+        The birth rate for models such as &#39;yule&#39; and &#39;BDP&#39;.
+    death_rate : float, optional
+        The death rate for models such as &#39;BDP&#39;.
+    episodes : list, optional
+        The episodes for the model &#39;EBDP&#39;.
+        
+    Raises
+    ------
+    ValueError
+        If unknown parameter values are passed.
+        
+    Returns
+    -------
+    Tree
+        The simulated species tree.
+        
+    References
+    ----------
+    .. [1] S. Keller-Schmidt, K. Klemm.
+       A model of macroevolution as a branching process based on innovations.
+       In: Adv. Complex Syst.,2012, 15, 1250043.
+       doi:10.1142/S0219525912500439.
+    .. [2] G. U. Yule.
+       A mathematical theory of evolution, based on the conclusions of Dr. J. 
+       C.Willis, F. R. S. 
+       In: Phil. Trans. R. Soc. Lond. B, 1924, 213, 21–87.
+       doi:10.1098/rstb.1925.0002.
+    .. [3] D. G. Kendall.
+       On the Generalized &#34;Birth-and-Death&#34; Process.
+       In: Ann. Math. Statist. 1948, 19, 1–15.
+       doi:10.1214/aoms/1177730285.
+    .. [4] T. Stadler.
+       Simulating trees with a fixed number of extant species.
+       In: Syst. Biol. 2011, 60, 676–684.
+       doi:10.1093/sysbio/syr029.
+    &#34;&#34;&#34;
+    
+    # parameter checking
+    if not isinstance(N, int) or N &lt; 0:
+        raise ValueError(&#39;N must be an int &gt;=0&#39;)
+    elif N == 0:
+        return Tree(None)
+    
+    if not isinstance(model, str):
+        raise ValueError(&#34;model must be of type &#39;str&#39;&#34;)
+    
+    if non_binary_prob &lt; 0.0 or non_binary_prob &gt; 1.0:
+        raise ValueError(&#39;contraction prob. must be in [0.0, 1.0]&#39;)
+        
+    if (rescale_to_height is not None and
+        (not isinstance(rescale_to_height, (int, float)) or
+         rescale_to_height &lt; 0.0)):
+        raise ValueError(&#39;height must be a number &gt;=0&#39;)
+    elif rescale_to_height is not None and N == 1 and not planted:
+        raise ValueError(&#39;rescaling is not applicable to unplanted trees &#39;\
+                         &#39;with only one leaf&#39;)
+    
+    # choice of the main simulation algorithm
+    if model.lower() in (&#39;innovation&#39;, &#39;innovations&#39;):
+        tree = _innovation_model(N, planted)
+    elif model.lower() == &#39;yule&#39;:
+        tree = _yule(N, kwargs.get(&#39;birth_rate&#39;))
+    elif model.upper() == &#39;BDP&#39;:
+        tree = _BDP(N, **kwargs)
+    elif model.upper() == &#39;EBDP&#39;:
+        tree = _EBDP(N, **kwargs)
+    else:
+        raise ValueError(&#34;model &#39;{}&#39; is not available&#34;.format(model))
+        
+    # remove extinct branches for models that include losses
+    if remove_extinct and model.upper() in (&#39;BDP&#39;, &#39;EBDP&#39;):
+        delete_losses_and_contract(tree, inplace=True)
+        
+    # remove planted edge for models that are planted by construction
+    if not planted and model.upper() in (&#39;YULE&#39;, &#39;BDP&#39;, &#39;EBDP&#39;):
+        remove_planted_root(tree, inplace=True)
+    
+    # make tree non_binary by random contraction of edges
+    if non_binary_prob &gt; 0.0:
+         edges = _select_edges_for_contraction(tree, non_binary_prob,
+                                               exclude_planted_edge=True)
+         tree.contract(edges)
+    
+    # rescale to specified height
+    if rescale_to_height is not None:
+        _rescale(tree, rescale_to_height, inplace=True)
+        
+    return tree</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.treeevolve.SpeciesTree.simulate_species_tree_age"><code class="name flex">
+<span>def <span class="ident">simulate_species_tree_age</span></span>(<span>age, model='yule', non_binary_prob=0.0, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Simulates a (planted) species tree S of the specified age.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>age</code></strong> :&ensp;<code>float</code></dt>
+<dd>Simulation time, i.e., the time span from the root of the tree to the
+leaves that correspond to extant species.</dd>
+<dt><strong><code>model</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Simulation model to be applied, the default is 'yule', see [1].
+Other available model are birth-death process ('BDP', [2]), and
+episodic birth-death process ('EBDP', [3]).</dd>
+<dt><strong><code>non_binary_prob</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Probability that an inner edge is contracted; results in non-binary
+tree; default is 0.0, in which case the resulting tree is binary.</dd>
+<dt><strong><code>birth_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The birth rate for models such as 'yule' and 'BDP'.</dd>
+<dt><strong><code>death_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The death rate for models such as 'BDP'.</dd>
+<dt><strong><code>episodes</code></strong> :&ensp;<code>list</code>, optional</dt>
+<dd>The episodes for the model 'EBDP'.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If unknown or invalid parameter values are passed.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tree</code></dt>
+<dd>The simulated species tree.</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] G. U. Yule.
+A mathematical theory of evolution, based on the conclusions of Dr. J.
+C.Willis, F. R. S.
+In: Phil. Trans. R. Soc. Lond. B, 1924, 213, 21–87.
+doi:10.1098/rstb.1925.0002.
+.. [2] D. G. Kendall.
+On the Generalized "Birth-and-Death" Process.
+In: Ann. Math. Statist. 1948, 19, 1–15.
+doi:10.1214/aoms/1177730285.
+.. [3] T. Stadler.
+Simulating trees with a fixed number of extant species.
+In: Syst. Biol. 2011, 60, 676–684.
+doi:10.1093/sysbio/syr029.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def simulate_species_tree_age(age, model=&#39;yule&#39;,
+                              non_binary_prob=0.0,
+                              **kwargs):
+    &#34;&#34;&#34;Simulates a (planted) species tree S of the specified age.
+    
+    Parameters
+    ----------
+    age : float
+        Simulation time, i.e., the time span from the root of the tree to the
+        leaves that correspond to extant species.
+    model : str, optional
+        Simulation model to be applied, the default is &#39;yule&#39;, see [1].
+        Other available model are birth-death process (&#39;BDP&#39;, [2]), and
+        episodic birth-death process (&#39;EBDP&#39;, [3]).
+    non_binary_prob : float, optional
+        Probability that an inner edge is contracted; results in non-binary 
+        tree; default is 0.0, in which case the resulting tree is binary.
+    birth_rate : float, optional
+        The birth rate for models such as &#39;yule&#39; and &#39;BDP&#39;.
+    death_rate : float, optional
+        The death rate for models such as &#39;BDP&#39;.
+    episodes : list, optional
+        The episodes for the model &#39;EBDP&#39;.
+        
+    Raises
+    ------
+    ValueError
+        If unknown or invalid parameter values are passed.
+        
+    Returns
+    -------
+    Tree
+        The simulated species tree.
+        
+    References
+    ----------
+    .. [1] G. U. Yule.
+       A mathematical theory of evolution, based on the conclusions of Dr. J. 
+       C.Willis, F. R. S. 
+       In: Phil. Trans. R. Soc. Lond. B, 1924, 213, 21–87.
+       doi:10.1098/rstb.1925.0002.
+    .. [2] D. G. Kendall.
+       On the Generalized &#34;Birth-and-Death&#34; Process.
+       In: Ann. Math. Statist. 1948, 19, 1–15.
+       doi:10.1214/aoms/1177730285.
+    .. [3] T. Stadler.
+       Simulating trees with a fixed number of extant species.
+       In: Syst. Biol. 2011, 60, 676–684.
+       doi:10.1093/sysbio/syr029.
+    &#34;&#34;&#34;
+    
+    # parameter checking
+    if not isinstance(age, (float, int)) or age &lt;= 0.0:
+        raise ValueError(&#39;age must be a number &gt;0&#39;)
+    elif isinstance(age, int):
+        age = float(age)
+        
+    if not isinstance(model, str):
+        raise ValueError(&#34;model must be of type &#39;str&#39;&#34;)
+        
+    if non_binary_prob &lt; 0.0 or non_binary_prob &gt; 1.0:
+        raise ValueError(&#34;contraction prob. must be in [0.0, 1.0]&#34;)
+    
+    # main simulation algorithm
+    if model.lower() == &#39;yule&#39;:
+        tree = _yule_age(age, kwargs.get(&#39;birth_rate&#39;))
+    elif model.upper() == &#39;BDP&#39;:
+        tree = _BDP_age(age, **kwargs)
+    elif model.upper() == &#39;EBDP&#39;:
+        tree = _EBDP_age(age, **kwargs)
+    else:
+        raise ValueError(&#34;model &#39;{}&#39; is not available&#34;.format(model))
+        
+    # make tree non_binary by random contraction of edges
+    if non_binary_prob &gt; 0.0:
+         edges = _select_edges_for_contraction(tree, non_binary_prob,
+                                               exclude_planted_edge=True)
+         tree.contract(edges)
+        
+    return tree</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.treeevolve.SpeciesTree.simulate_timing"><code class="name flex">
+<span>def <span class="ident">simulate_timing</span></span>(<span>tree)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Simulates a timing for the tree.</p>
+<p>It is t(root) = 1 and t(x) = 0 for x in L(S).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def simulate_timing(tree):
+    &#34;&#34;&#34;Simulates a timing for the tree.
+    
+    It is t(root) = 1 and t(x) = 0 for x in L(S).&#34;&#34;&#34;
+    
+    for v in tree.preorder():
+        if not v.children:
+            v.tstamp = 0.0
+        elif not v.parent:
+            v.tstamp = 1.0
+        else:                               # random walk to a leaf
+            pos = v                         # current position
+            length = 0                      # path length |P|
+            while pos.children:
+                length += 1
+                pos = pos.children[np.random.randint(len(pos.children))]
+            v.tstamp = v.parent.tstamp * (1 - 2 * np.random.uniform() / (length+1))</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="asymmetree.treeevolve" href="index.html">asymmetree.treeevolve</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="asymmetree.treeevolve.SpeciesTree.assign_losses" href="#asymmetree.treeevolve.SpeciesTree.assign_losses">assign_losses</a></code></li>
+<li><code><a title="asymmetree.treeevolve.SpeciesTree.distance_from_timing" href="#asymmetree.treeevolve.SpeciesTree.distance_from_timing">distance_from_timing</a></code></li>
+<li><code><a title="asymmetree.treeevolve.SpeciesTree.simulate_species_tree" href="#asymmetree.treeevolve.SpeciesTree.simulate_species_tree">simulate_species_tree</a></code></li>
+<li><code><a title="asymmetree.treeevolve.SpeciesTree.simulate_species_tree_age" href="#asymmetree.treeevolve.SpeciesTree.simulate_species_tree_age">simulate_species_tree_age</a></code></li>
+<li><code><a title="asymmetree.treeevolve.SpeciesTree.simulate_timing" href="#asymmetree.treeevolve.SpeciesTree.simulate_timing">simulate_timing</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

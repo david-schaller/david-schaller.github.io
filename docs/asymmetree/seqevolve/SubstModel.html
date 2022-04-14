@@ -1,0 +1,923 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>asymmetree.seqevolve.SubstModel API documentation</title>
+<meta name="description" content="Substitution models for nucleotide and amino acid evolution …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>asymmetree.seqevolve.SubstModel</code></h1>
+</header>
+<section id="section-intro">
+<p>Substitution models for nucleotide and amino acid evolution.</p>
+<h2 id="references">References</h2>
+<p>.. [1] Z. Yang.
+Computational molecular evolution.
+Oxford series in ecology and evolution. Oxford University Press, 2006.
+ISBN 978-0-19-856699-1 978-0-19-856702-8.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># -*- coding: utf-8 -*-
+
+&#34;&#34;&#34;Substitution models for nucleotide and amino acid evolution.
+
+References
+----------
+.. [1] Z. Yang.
+   Computational molecular evolution.
+   Oxford series in ecology and evolution. Oxford University Press, 2006.
+   ISBN 978-0-19-856699-1 978-0-19-856702-8.
+&#34;&#34;&#34;
+
+import numpy as np
+from scipy import linalg
+
+from asymmetree.seqevolve.EmpiricalModels import empirical_models
+from asymmetree.file_io.SubstModelIO import parse_paml
+
+
+__author__ = &#39;David Schaller&#39;
+
+
+class SubstModel:
+    &#34;&#34;&#34;Substitution model for nucleotide or amino acid evolution.&#34;&#34;&#34;
+    
+    nuc_models = {&#39;JC69&#39;, &#39;K80&#39;, &#39;GTR&#39;, &#39;CUSTOM&#39;}
+    aa_models = {&#39;JC69&#39;, &#39;CUSTOM&#39;}
+    
+    nucleotides = &#39;ACGT&#39;
+    amino_acids = &#39;ARNDCQEGHILKMFPSTWYV&#39;
+    
+    
+    def __init__(self, model_type, model_name,
+                 **kwargs):
+        &#34;&#34;&#34;Constructor.
+        
+        Parameters
+        ----------
+        model_type : str
+            Available options are &#39;n&#39; for nucleotide and &#39;a&#39; for amino acid
+            sequences.
+        model_name : str
+            Availbale are e.g. &#39;JC69&#39; (nuc./a.a.), &#39;K80&#39; (nuc.), &#39;GTR&#39; (nuc.),
+            &#39;WAG&#39; (a.a.), &#39;JTT&#39; (a.a.), &#39;BLOSUM62&#39; (a.a.), &#39;LG&#39; (a.a.), and
+            &#39;DAYHOFF&#39; (a.a.).
+            For the option &#39;CUSTOM&#39;, the keyword parameter &#39;filename&#39; has to
+            be specified with a path to a custom model in paml format.
+        kwargs : optional
+            Some models require additional parameters, e.g. &#39;K80&#39; requires the
+            parameter &#39;kappa&#39; and &#39;GTR&#39; requires &#39;abcdef&#39; and &#39;f&#39;, see
+            documention for details.
+        
+        Raises
+        ------
+        ValueError
+            If an invalid model was specified.
+        &#34;&#34;&#34;
+        
+        self.model_type = model_type.lower()
+        self.model_name = model_name.upper()
+        
+        self._params = kwargs
+        
+        if (self.model_type in (&#39;n&#39;, &#39;nuc&#39;, &#39;nucleotide&#39;) and
+            self.model_name in SubstModel.nuc_models):
+            
+            self.model_type = &#39;n&#39;
+            self.alphabet = SubstModel.nucleotides
+            
+        elif (self.model_type in (&#39;a&#39;, &#39;aa&#39;, &#39;amino&#39;, &#39;aminoacid&#39;, &#39;protein&#39;) and
+              (self.model_name in SubstModel.aa_models or 
+               self.model_name in empirical_models)):
+            
+            self.model_type = &#39;a&#39;
+            self.alphabet = SubstModel.amino_acids
+                
+        else:
+            raise ValueError(&#34;model &#39;{}&#39;, &#39;{}&#39; is not &#34;\
+                             &#34;available&#34;.format(model_type, model_name))
+        
+        self.alphabet_dict = {item: index for index, item in enumerate(self.alphabet)}
+        
+        self._load_exchangeability_and_freqs()
+        self._build_rate_matrix()
+        
+    
+    def _load_exchangeability_and_freqs(self):
+        &#34;&#34;&#34;Load the exchangeability matrix S and the stationary frequencies pi.&#34;&#34;&#34;
+        
+        # a custom model (via a paml file) was specified
+        if self.model_name == &#39;CUSTOM&#39;:
+            
+            if self._params is None or &#39;filename&#39; not in self._params:
+                    raise ValueError(&#34;custom model requires the parameter &#34;\
+                                     &#34;&#39;filename&#39;&#34;)
+            
+            S, freqs = parse_paml(self._params[&#39;filename&#39;],
+                                  model_type=self.model_type)
+            self.S, self.freqs = np.asarray(S), np.asarray(freqs)
+        
+        # non-empirical nucleotide models
+        elif self.model_type == &#39;n&#39;:
+            
+            if self.model_name == &#39;JC69&#39;:
+                self.S, self.freqs = _JC69_nuc()
+                
+            elif self.model_name == &#39;K80&#39;:
+                
+                if self._params is None or &#39;kappa&#39; not in self._params:
+                    raise ValueError(&#34;model &#39;K80&#39; requires the parameter &#39;kappa&#39;&#34;)
+                
+                self.S, self.freqs = _K80_nuc(self._params[&#39;kappa&#39;])
+            
+            elif self.model_name == &#39;GTR&#39;:
+                
+                if self._params is None or &#39;abcdef&#39; not in self._params or &#39;f&#39; not in self._params:
+                    raise ValueError(&#34;model &#39;GTR&#39; requires the parameters &#34;\
+                                     &#34;&#39;abcdef&#39; and &#39;f&#39;&#34;)
+                
+                self.S, self.freqs = _GTR_nuc(self._params[&#39;abcdef&#39;],
+                                              self._params[&#39;f&#39;])
+        
+        # non-empirical and empirical amino acid models
+        elif self.model_type == &#39;a&#39;:
+            
+            if self.model_name == &#39;JC69&#39;:
+                self.S, self.freqs = _JC69_aa()
+                
+            elif self.model_name in empirical_models:
+                self.S, self.freqs = empirical_models[self.model_name]()
+                
+        # make sure stationary frequencies sum to 1
+        self.freqs /= np.sum(self.freqs)
+        
+        # compute cumulative frequencies for evolver
+        self.freqs_cumulative = np.cumsum(self.freqs)
+    
+    
+    def _build_rate_matrix(self):
+        &#34;&#34;&#34;Compute the rate matrix Q.&#34;&#34;&#34;
+    
+        # rate matrix from exchangeability matrix and stationary frequencies
+        Q = self.S @ np.diag(self.freqs)
+        
+        # compute diagonals, rows sum to 0
+        for i in range(Q.shape[0]):
+            Q[i, i] = - (np.sum(Q[i, :]) - Q[i, i])
+            
+        # normalize matrix
+        k = - np.dot(self.freqs, np.diagonal(Q))
+        Q /= k
+        
+        self.Q = Q
+    
+    
+    def eigensystem(self):
+        
+        if not hasattr(self, &#39;eigenvals&#39;):
+            self.eigenvals, self.U, self.U_inv = diagonalize(self.Q, self.freqs)
+        
+        return self.eigenvals, self.U, self.U_inv
+    
+    
+    def transition_prob_matrix(self, t):
+        &#34;&#34;&#34;Calculate the transition probability matrix P(t).
+        
+        P(t) = U x e^(Lambda*t) x U^(-1).
+        
+        Parameters
+        ----------
+        t : float
+            The time / evolutinary distance.
+        
+        Returns
+        -------
+        2-dimensional numpy array
+        &#34;&#34;&#34;
+        
+        # ensure that eigensystem has been computed
+        self.eigensystem()
+        
+        # first multiplication element-wise, since corresponding matrix
+        # only has non-zero entries on the diagonal
+        
+        return (self.U * np.exp(self.eigenvals * t))  @  self.U_inv
+        
+    
+    def to_indices(self, sequence):
+        &#34;&#34;&#34;Convert a sequence into a list of indices the represent the positions
+        of the letters in the alphabet of the model.
+        
+        Parameters
+        ----------
+        sequence : iterable
+            The sequence to be converted.
+        
+        Returns
+        -------
+        list
+            The list of indices.
+        
+        Raises
+        ------
+        ValueError
+            If the sequence contains a letter that is not in the alphabet of
+            the model.
+        &#34;&#34;&#34;
+        
+        try:
+            result = [self.alphabet_dict[letter] for letter in sequence]
+        except KeyError:
+            raise ValueError(&#39;invalid sequence for the specified model&#39;)
+            
+        return result
+    
+    
+    def to_sequence(self, evoseq):
+        &#34;&#34;&#34;Construct the str representation of a sequence.
+        
+        Parameters
+        ----------
+        evoseq : asymmetree.seqevolve.EvolvingSequence.EvoSeq
+            The sequence to be converted.
+        
+        Returns
+        -------
+        str
+            The nucleotide or amino acid sequence depending on the model.
+        &#34;&#34;&#34;
+        
+        return &#39;&#39;.join(self.alphabet[x._value] for x in evoseq)
+    
+
+# --------------------------------------------------------------------------
+#                           Module functions
+# --------------------------------------------------------------------------
+    
+    
+def diagonalize(Q, freqs):
+    &#34;&#34;&#34;Diagonalize a matrix.
+    
+    Parameters
+    ----------
+    Q : 2-dimensional numpy array
+        Rate matrix.
+    freqs : 1-dimensional numpy array
+        stationary frequencies
+    
+    Returns
+    -------
+    1-dimensional numpy array
+        Eigenvalues.
+    2-dimensional numpy array
+        Diagonalized matrix.
+    2-dimensional numpy array
+        Inverse of the diagonalized matrix.
+    &#34;&#34;&#34;
+        
+    # matrix is already symmetric
+    if np.allclose(Q, Q.T):
+        
+        eigenvals, U = linalg.eigh(Q)
+        U_inv = linalg.inv(U)
+    
+    # matrix is not symmetric but model is time-reversible
+    else:
+    
+        Phi = np.diag(np.sqrt(freqs))
+        Phi_inv = linalg.inv(Phi)
+        
+        B = Phi @ Q @ Phi_inv
+        
+        eigenvals, R = linalg.eigh(B)
+
+        U = Phi_inv @ R
+        U_inv = linalg.inv(R) @ Phi
+    
+    return eigenvals, U, U_inv
+    
+    
+# --------------------------------------------------------------------------
+#                           NUCLEOTIDE MODELS
+# --------------------------------------------------------------------------
+
+def _JC69_nuc():
+    
+    S = np.array([[0, 1, 1, 1],
+                  [1, 0, 1, 1],
+                  [1, 1, 0, 1],
+                  [1, 1, 1, 0]])
+    
+    freqs = np.array([0.25, 0.25, 0.25, 0.25])
+    
+    return S, freqs
+
+
+def _K80_nuc(kappa):
+    
+    S = np.array([[0,     1,     kappa, 1    ],
+                  [1,     0,     1,     kappa],
+                  [kappa, 1,     0,     1    ],
+                  [1,     kappa, 1,     0    ]])
+    
+    freqs = np.array([0.25, 0.25, 0.25, 0.25])
+    
+    return S, freqs
+
+
+def _GTR_nuc(abcdef, f):
+    &#34;&#34;&#34;Generalized time-reversible model.
+    
+    Parameterization as in e.g. used in PAML and ALF:
+    a:    C &lt;--&gt; T
+    b:    A &lt;--&gt; T
+    c:    G &lt;--&gt; T
+    d:    A &lt;--&gt; C  
+    e:    C &lt;--&gt; G
+    f:    A &lt;--&gt; G
+    &#34;&#34;&#34;
+    
+    a, b, c, d, e, f = abcdef
+    
+    S = np.array([[0,  d,  f,  b],
+                  [d,  0,  e,  a],
+                  [f,  e,  0,  c],
+                  [b,  a,  c,  0]])
+    
+    freqs = np.asarray(abcdef)
+    freqs /= np.sum(freqs)
+    
+    return S, freqs
+
+
+# --------------------------------------------------------------------------
+#                          AMINO ACID MODELS
+# --------------------------------------------------------------------------
+
+def _JC69_aa():
+    
+    S = np.ones((20, 20))
+    S -= np.identity(20)
+    
+    freqs = np.full((20,), 1/20)
+    
+    return S, freqs</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="asymmetree.seqevolve.SubstModel.diagonalize"><code class="name flex">
+<span>def <span class="ident">diagonalize</span></span>(<span>Q, freqs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Diagonalize a matrix.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>Q</code></strong> :&ensp;<code>2-dimensional numpy array</code></dt>
+<dd>Rate matrix.</dd>
+<dt><strong><code>freqs</code></strong> :&ensp;<code>1-dimensional numpy array</code></dt>
+<dd>stationary frequencies</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>1-dimensional numpy array</code></dt>
+<dd>Eigenvalues.</dd>
+<dt><code>2-dimensional numpy array</code></dt>
+<dd>Diagonalized matrix.</dd>
+<dt><code>2-dimensional numpy array</code></dt>
+<dd>Inverse of the diagonalized matrix.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def diagonalize(Q, freqs):
+    &#34;&#34;&#34;Diagonalize a matrix.
+    
+    Parameters
+    ----------
+    Q : 2-dimensional numpy array
+        Rate matrix.
+    freqs : 1-dimensional numpy array
+        stationary frequencies
+    
+    Returns
+    -------
+    1-dimensional numpy array
+        Eigenvalues.
+    2-dimensional numpy array
+        Diagonalized matrix.
+    2-dimensional numpy array
+        Inverse of the diagonalized matrix.
+    &#34;&#34;&#34;
+        
+    # matrix is already symmetric
+    if np.allclose(Q, Q.T):
+        
+        eigenvals, U = linalg.eigh(Q)
+        U_inv = linalg.inv(U)
+    
+    # matrix is not symmetric but model is time-reversible
+    else:
+    
+        Phi = np.diag(np.sqrt(freqs))
+        Phi_inv = linalg.inv(Phi)
+        
+        B = Phi @ Q @ Phi_inv
+        
+        eigenvals, R = linalg.eigh(B)
+
+        U = Phi_inv @ R
+        U_inv = linalg.inv(R) @ Phi
+    
+    return eigenvals, U, U_inv</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="asymmetree.seqevolve.SubstModel.SubstModel"><code class="flex name class">
+<span>class <span class="ident">SubstModel</span></span>
+<span>(</span><span>model_type, model_name, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Substitution model for nucleotide or amino acid evolution.</p>
+<p>Constructor.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>model_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>Available options are 'n' for nucleotide and 'a' for amino acid
+sequences.</dd>
+<dt><strong><code>model_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Availbale are e.g. 'JC69' (nuc./a.a.), 'K80' (nuc.), 'GTR' (nuc.),
+'WAG' (a.a.), 'JTT' (a.a.), 'BLOSUM62' (a.a.), 'LG' (a.a.), and
+'DAYHOFF' (a.a.).
+For the option 'CUSTOM', the keyword parameter 'filename' has to
+be specified with a path to a custom model in paml format.</dd>
+<dt><strong><code>kwargs</code></strong> :&ensp;<code>optional</code></dt>
+<dd>Some models require additional parameters, e.g. 'K80' requires the
+parameter 'kappa' and 'GTR' requires 'abcdef' and 'f', see
+documention for details.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If an invalid model was specified.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SubstModel:
+    &#34;&#34;&#34;Substitution model for nucleotide or amino acid evolution.&#34;&#34;&#34;
+    
+    nuc_models = {&#39;JC69&#39;, &#39;K80&#39;, &#39;GTR&#39;, &#39;CUSTOM&#39;}
+    aa_models = {&#39;JC69&#39;, &#39;CUSTOM&#39;}
+    
+    nucleotides = &#39;ACGT&#39;
+    amino_acids = &#39;ARNDCQEGHILKMFPSTWYV&#39;
+    
+    
+    def __init__(self, model_type, model_name,
+                 **kwargs):
+        &#34;&#34;&#34;Constructor.
+        
+        Parameters
+        ----------
+        model_type : str
+            Available options are &#39;n&#39; for nucleotide and &#39;a&#39; for amino acid
+            sequences.
+        model_name : str
+            Availbale are e.g. &#39;JC69&#39; (nuc./a.a.), &#39;K80&#39; (nuc.), &#39;GTR&#39; (nuc.),
+            &#39;WAG&#39; (a.a.), &#39;JTT&#39; (a.a.), &#39;BLOSUM62&#39; (a.a.), &#39;LG&#39; (a.a.), and
+            &#39;DAYHOFF&#39; (a.a.).
+            For the option &#39;CUSTOM&#39;, the keyword parameter &#39;filename&#39; has to
+            be specified with a path to a custom model in paml format.
+        kwargs : optional
+            Some models require additional parameters, e.g. &#39;K80&#39; requires the
+            parameter &#39;kappa&#39; and &#39;GTR&#39; requires &#39;abcdef&#39; and &#39;f&#39;, see
+            documention for details.
+        
+        Raises
+        ------
+        ValueError
+            If an invalid model was specified.
+        &#34;&#34;&#34;
+        
+        self.model_type = model_type.lower()
+        self.model_name = model_name.upper()
+        
+        self._params = kwargs
+        
+        if (self.model_type in (&#39;n&#39;, &#39;nuc&#39;, &#39;nucleotide&#39;) and
+            self.model_name in SubstModel.nuc_models):
+            
+            self.model_type = &#39;n&#39;
+            self.alphabet = SubstModel.nucleotides
+            
+        elif (self.model_type in (&#39;a&#39;, &#39;aa&#39;, &#39;amino&#39;, &#39;aminoacid&#39;, &#39;protein&#39;) and
+              (self.model_name in SubstModel.aa_models or 
+               self.model_name in empirical_models)):
+            
+            self.model_type = &#39;a&#39;
+            self.alphabet = SubstModel.amino_acids
+                
+        else:
+            raise ValueError(&#34;model &#39;{}&#39;, &#39;{}&#39; is not &#34;\
+                             &#34;available&#34;.format(model_type, model_name))
+        
+        self.alphabet_dict = {item: index for index, item in enumerate(self.alphabet)}
+        
+        self._load_exchangeability_and_freqs()
+        self._build_rate_matrix()
+        
+    
+    def _load_exchangeability_and_freqs(self):
+        &#34;&#34;&#34;Load the exchangeability matrix S and the stationary frequencies pi.&#34;&#34;&#34;
+        
+        # a custom model (via a paml file) was specified
+        if self.model_name == &#39;CUSTOM&#39;:
+            
+            if self._params is None or &#39;filename&#39; not in self._params:
+                    raise ValueError(&#34;custom model requires the parameter &#34;\
+                                     &#34;&#39;filename&#39;&#34;)
+            
+            S, freqs = parse_paml(self._params[&#39;filename&#39;],
+                                  model_type=self.model_type)
+            self.S, self.freqs = np.asarray(S), np.asarray(freqs)
+        
+        # non-empirical nucleotide models
+        elif self.model_type == &#39;n&#39;:
+            
+            if self.model_name == &#39;JC69&#39;:
+                self.S, self.freqs = _JC69_nuc()
+                
+            elif self.model_name == &#39;K80&#39;:
+                
+                if self._params is None or &#39;kappa&#39; not in self._params:
+                    raise ValueError(&#34;model &#39;K80&#39; requires the parameter &#39;kappa&#39;&#34;)
+                
+                self.S, self.freqs = _K80_nuc(self._params[&#39;kappa&#39;])
+            
+            elif self.model_name == &#39;GTR&#39;:
+                
+                if self._params is None or &#39;abcdef&#39; not in self._params or &#39;f&#39; not in self._params:
+                    raise ValueError(&#34;model &#39;GTR&#39; requires the parameters &#34;\
+                                     &#34;&#39;abcdef&#39; and &#39;f&#39;&#34;)
+                
+                self.S, self.freqs = _GTR_nuc(self._params[&#39;abcdef&#39;],
+                                              self._params[&#39;f&#39;])
+        
+        # non-empirical and empirical amino acid models
+        elif self.model_type == &#39;a&#39;:
+            
+            if self.model_name == &#39;JC69&#39;:
+                self.S, self.freqs = _JC69_aa()
+                
+            elif self.model_name in empirical_models:
+                self.S, self.freqs = empirical_models[self.model_name]()
+                
+        # make sure stationary frequencies sum to 1
+        self.freqs /= np.sum(self.freqs)
+        
+        # compute cumulative frequencies for evolver
+        self.freqs_cumulative = np.cumsum(self.freqs)
+    
+    
+    def _build_rate_matrix(self):
+        &#34;&#34;&#34;Compute the rate matrix Q.&#34;&#34;&#34;
+    
+        # rate matrix from exchangeability matrix and stationary frequencies
+        Q = self.S @ np.diag(self.freqs)
+        
+        # compute diagonals, rows sum to 0
+        for i in range(Q.shape[0]):
+            Q[i, i] = - (np.sum(Q[i, :]) - Q[i, i])
+            
+        # normalize matrix
+        k = - np.dot(self.freqs, np.diagonal(Q))
+        Q /= k
+        
+        self.Q = Q
+    
+    
+    def eigensystem(self):
+        
+        if not hasattr(self, &#39;eigenvals&#39;):
+            self.eigenvals, self.U, self.U_inv = diagonalize(self.Q, self.freqs)
+        
+        return self.eigenvals, self.U, self.U_inv
+    
+    
+    def transition_prob_matrix(self, t):
+        &#34;&#34;&#34;Calculate the transition probability matrix P(t).
+        
+        P(t) = U x e^(Lambda*t) x U^(-1).
+        
+        Parameters
+        ----------
+        t : float
+            The time / evolutinary distance.
+        
+        Returns
+        -------
+        2-dimensional numpy array
+        &#34;&#34;&#34;
+        
+        # ensure that eigensystem has been computed
+        self.eigensystem()
+        
+        # first multiplication element-wise, since corresponding matrix
+        # only has non-zero entries on the diagonal
+        
+        return (self.U * np.exp(self.eigenvals * t))  @  self.U_inv
+        
+    
+    def to_indices(self, sequence):
+        &#34;&#34;&#34;Convert a sequence into a list of indices the represent the positions
+        of the letters in the alphabet of the model.
+        
+        Parameters
+        ----------
+        sequence : iterable
+            The sequence to be converted.
+        
+        Returns
+        -------
+        list
+            The list of indices.
+        
+        Raises
+        ------
+        ValueError
+            If the sequence contains a letter that is not in the alphabet of
+            the model.
+        &#34;&#34;&#34;
+        
+        try:
+            result = [self.alphabet_dict[letter] for letter in sequence]
+        except KeyError:
+            raise ValueError(&#39;invalid sequence for the specified model&#39;)
+            
+        return result
+    
+    
+    def to_sequence(self, evoseq):
+        &#34;&#34;&#34;Construct the str representation of a sequence.
+        
+        Parameters
+        ----------
+        evoseq : asymmetree.seqevolve.EvolvingSequence.EvoSeq
+            The sequence to be converted.
+        
+        Returns
+        -------
+        str
+            The nucleotide or amino acid sequence depending on the model.
+        &#34;&#34;&#34;
+        
+        return &#39;&#39;.join(self.alphabet[x._value] for x in evoseq)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="asymmetree.seqevolve.SubstModel.SubstModel.aa_models"><code class="name">var <span class="ident">aa_models</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="asymmetree.seqevolve.SubstModel.SubstModel.amino_acids"><code class="name">var <span class="ident">amino_acids</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="asymmetree.seqevolve.SubstModel.SubstModel.nuc_models"><code class="name">var <span class="ident">nuc_models</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="asymmetree.seqevolve.SubstModel.SubstModel.nucleotides"><code class="name">var <span class="ident">nucleotides</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="asymmetree.seqevolve.SubstModel.SubstModel.eigensystem"><code class="name flex">
+<span>def <span class="ident">eigensystem</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def eigensystem(self):
+    
+    if not hasattr(self, &#39;eigenvals&#39;):
+        self.eigenvals, self.U, self.U_inv = diagonalize(self.Q, self.freqs)
+    
+    return self.eigenvals, self.U, self.U_inv</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.seqevolve.SubstModel.SubstModel.to_indices"><code class="name flex">
+<span>def <span class="ident">to_indices</span></span>(<span>self, sequence)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert a sequence into a list of indices the represent the positions
+of the letters in the alphabet of the model.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>sequence</code></strong> :&ensp;<code>iterable</code></dt>
+<dd>The sequence to be converted.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>The list of indices.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If the sequence contains a letter that is not in the alphabet of
+the model.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_indices(self, sequence):
+    &#34;&#34;&#34;Convert a sequence into a list of indices the represent the positions
+    of the letters in the alphabet of the model.
+    
+    Parameters
+    ----------
+    sequence : iterable
+        The sequence to be converted.
+    
+    Returns
+    -------
+    list
+        The list of indices.
+    
+    Raises
+    ------
+    ValueError
+        If the sequence contains a letter that is not in the alphabet of
+        the model.
+    &#34;&#34;&#34;
+    
+    try:
+        result = [self.alphabet_dict[letter] for letter in sequence]
+    except KeyError:
+        raise ValueError(&#39;invalid sequence for the specified model&#39;)
+        
+    return result</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.seqevolve.SubstModel.SubstModel.to_sequence"><code class="name flex">
+<span>def <span class="ident">to_sequence</span></span>(<span>self, evoseq)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Construct the str representation of a sequence.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>evoseq</code></strong> :&ensp;<code><a title="asymmetree.seqevolve.EvolvingSequence.EvoSeq" href="EvolvingSequence.html#asymmetree.seqevolve.EvolvingSequence.EvoSeq">EvoSeq</a></code></dt>
+<dd>The sequence to be converted.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The nucleotide or amino acid sequence depending on the model.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_sequence(self, evoseq):
+    &#34;&#34;&#34;Construct the str representation of a sequence.
+    
+    Parameters
+    ----------
+    evoseq : asymmetree.seqevolve.EvolvingSequence.EvoSeq
+        The sequence to be converted.
+    
+    Returns
+    -------
+    str
+        The nucleotide or amino acid sequence depending on the model.
+    &#34;&#34;&#34;
+    
+    return &#39;&#39;.join(self.alphabet[x._value] for x in evoseq)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.seqevolve.SubstModel.SubstModel.transition_prob_matrix"><code class="name flex">
+<span>def <span class="ident">transition_prob_matrix</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculate the transition probability matrix P(t).</p>
+<p>P(t) = U x e^(Lambda*t) x U^(-1).</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>float</code></dt>
+<dd>The time / evolutinary distance.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>2-dimensional numpy array</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def transition_prob_matrix(self, t):
+    &#34;&#34;&#34;Calculate the transition probability matrix P(t).
+    
+    P(t) = U x e^(Lambda*t) x U^(-1).
+    
+    Parameters
+    ----------
+    t : float
+        The time / evolutinary distance.
+    
+    Returns
+    -------
+    2-dimensional numpy array
+    &#34;&#34;&#34;
+    
+    # ensure that eigensystem has been computed
+    self.eigensystem()
+    
+    # first multiplication element-wise, since corresponding matrix
+    # only has non-zero entries on the diagonal
+    
+    return (self.U * np.exp(self.eigenvals * t))  @  self.U_inv</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="asymmetree.seqevolve" href="index.html">asymmetree.seqevolve</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="asymmetree.seqevolve.SubstModel.diagonalize" href="#asymmetree.seqevolve.SubstModel.diagonalize">diagonalize</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="asymmetree.seqevolve.SubstModel.SubstModel" href="#asymmetree.seqevolve.SubstModel.SubstModel">SubstModel</a></code></h4>
+<ul class="">
+<li><code><a title="asymmetree.seqevolve.SubstModel.SubstModel.aa_models" href="#asymmetree.seqevolve.SubstModel.SubstModel.aa_models">aa_models</a></code></li>
+<li><code><a title="asymmetree.seqevolve.SubstModel.SubstModel.amino_acids" href="#asymmetree.seqevolve.SubstModel.SubstModel.amino_acids">amino_acids</a></code></li>
+<li><code><a title="asymmetree.seqevolve.SubstModel.SubstModel.eigensystem" href="#asymmetree.seqevolve.SubstModel.SubstModel.eigensystem">eigensystem</a></code></li>
+<li><code><a title="asymmetree.seqevolve.SubstModel.SubstModel.nuc_models" href="#asymmetree.seqevolve.SubstModel.SubstModel.nuc_models">nuc_models</a></code></li>
+<li><code><a title="asymmetree.seqevolve.SubstModel.SubstModel.nucleotides" href="#asymmetree.seqevolve.SubstModel.SubstModel.nucleotides">nucleotides</a></code></li>
+<li><code><a title="asymmetree.seqevolve.SubstModel.SubstModel.to_indices" href="#asymmetree.seqevolve.SubstModel.SubstModel.to_indices">to_indices</a></code></li>
+<li><code><a title="asymmetree.seqevolve.SubstModel.SubstModel.to_sequence" href="#asymmetree.seqevolve.SubstModel.SubstModel.to_sequence">to_sequence</a></code></li>
+<li><code><a title="asymmetree.seqevolve.SubstModel.SubstModel.transition_prob_matrix" href="#asymmetree.seqevolve.SubstModel.SubstModel.transition_prob_matrix">transition_prob_matrix</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

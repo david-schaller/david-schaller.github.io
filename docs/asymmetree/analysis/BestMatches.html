@@ -1,0 +1,2937 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>asymmetree.analysis.BestMatches API documentation</title>
+<meta name="description" content="Orthology graph, BMG, RBMG …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>asymmetree.analysis.BestMatches</code></h1>
+</header>
+<section id="section-intro">
+<p>Orthology graph, BMG, RBMG.</p>
+<p>This module provides classes concerning colored graphs and colored
+(phylogenetic) trees, including a BMG(Tree)-function, and computation of an
+LRT from a (not necessarily valid) BMG or from an observable gene tree.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># -*- coding: utf-8 -*-
+
+&#34;&#34;&#34;
+Orthology graph, BMG, RBMG.
+
+This module provides classes concerning colored graphs and colored
+(phylogenetic) trees, including a BMG(Tree)-function, and computation of an
+LRT from a (not necessarily valid) BMG or from an observable gene tree.
+&#34;&#34;&#34;
+
+import itertools
+
+import networkx as nx
+
+from tralda.datastructures.Tree import Tree, TreeNode
+
+from tralda.tools.GraphTools import (sort_by_colors,
+                                     is_properly_colored,
+                                     graphs_equal)
+from tralda.supertree import Build
+
+from asymmetree.tools.PhyloTreeTools import (topology_only,
+                                             reconstruct_color_from_graph)
+
+
+__author__ = &#39;David Schaller&#39;
+
+
+# --------------------------------------------------------------------------
+#                 True Orthology Graph (TOG), BMG &amp; RBMG
+#
+#                         (given a known tree)
+# --------------------------------------------------------------------------
+
+def orthology_from_tree(tree):
+    &#34;&#34;&#34;Constructs the true orthology graph from an event-labeled tree.
+    
+    Parameters
+    ----------
+    tree : tree
+        A tree with leaves that have the `label`, and inner vertices that have
+        the `event` attribute set.
+    
+    Returns
+    -------
+    networx.Graph
+        The ortholy graph explained by the tree, i.e., a graph on the set of
+        leaf labels and edges between two of them if and only if their last
+        common ancestor was a speciation event.
+    &#34;&#34;&#34;
+    
+    if not isinstance(tree, Tree):
+        raise TypeError(&#34;not of type &#39;Tree&#39;&#34;)
+    
+    leaves = tree.leaf_dict()
+    TOG = nx.Graph()
+    
+    for v in leaves[tree.root]:
+        TOG.add_node(v.label, color=v.color)
+    
+    for node in tree.preorder():
+        if node.event == &#39;S&#39;:
+            for c1, c2 in itertools.combinations(node.children, 2):
+                for u in leaves[c1]:
+                    for v in leaves[c2]:
+                        TOG.add_edge(u.label, v.label)
+                        
+    return TOG
+
+
+def bmg_from_tree(tree, supply_rbmg=False):
+    &#34;&#34;&#34;Construct a BMG (and optionally RBMG) from a given tree.
+    
+    Parameters
+    ----------
+    tree : tree
+        A tree with leaves that have the `label` and `color` attribute set.
+    supply_rbmg : bool, optional
+        If True, also return the symmetric part of the constructed BMG.
+        The default is False.
+    
+    Returns
+    -------
+    networx.DiGraph or pair of networx.DiGraph and networx.Graph
+        The constructed BMG and optionally its symmetric part.
+    
+    References
+    ----------
+    .. [1] M. Geiß, E. Chávez, M. González Laffitte, A. López Sánchez, B. M. R. 
+       Stadler, D. I. Valdivia, M. Hellmuth, M. Hernández Rosales, and P. F.
+       Stadler.
+       Best match graphs.
+       In: Journal of Mathematical Biology, 78:2015–2057, 2019.
+       doi:10.1007/s00285-019-01332-9.
+    &#34;&#34;&#34;
+    
+    if not isinstance(tree, Tree):
+        raise TypeError(&#34;not of type &#39;Tree&#39;&#34;)
+    
+    leaves = tree.leaf_dict()
+    bmg = nx.DiGraph()
+    colors = set()
+    
+    for v in leaves[tree.root]:
+        colors.add(v.color)
+        bmg.add_node(v.label, color=v.color)
+    
+    for u in leaves[tree.root]:
+        remaining = colors - set([u.color])             # colors to which no best match has yet been found
+        parent = u.parent                               # start with direct parent of each node
+        while remaining and parent:
+            colors_here = set()
+            for v in leaves[parent]:
+                if v.color in remaining:                # best match found
+                    colors_here.add(v.color)
+                    bmg.add_edge(u.label, v.label)      # insert edge (u,v)
+            remaining -= colors_here                    # update remaining colors
+            parent = parent.parent
+    
+    if not supply_rbmg:
+        return bmg
+    else:
+        return bmg, bmg.to_undirected(reciprocal=True)
+    
+    
+def bmg_from_tree_quadratic(tree, supply_rbmg=False):
+    &#34;&#34;&#34;Construct a BMG (and optionally RBMG) from a given tree in O(|L|^2).
+    
+    Implementation of the quadratic algorithm in [1]. Proven to
+    run in O(|L|^2).
+    
+    Parameters
+    ----------
+    tree : tree
+        A tree with leaves that have the `label` and `color` attribute set.
+    supply_rbmg : bool, optional
+        If True, also return the symmetric part of the constructed BMG.
+        The default is False.
+    
+    Returns
+    -------
+    networx.DiGraph or pair of networx.DiGraph and networx.Graph
+        The constructed BMG and optionally its symmetric part.
+    
+    References
+    ----------
+    .. [1] M. Geiß, M. E. González Laffitte, A. López Sánchez, D. I. Valdivia,
+    M. Hellmuth, M. Hernández Rosales, and P. F. Stadler.
+    Best match graphs and reconciliation of gene trees with species trees.
+    In: Journal of Mathematical Biology, 80:1459–1495, 2020.
+    doi: 10.1007/s00285-020-01469-y.
+    &#34;&#34;&#34;
+    
+    if not isinstance(tree, Tree):
+        raise TypeError(&#34;not of type &#39;Tree&#39;&#34;)
+    
+    leaves = tree.leaf_dict()
+    bmg = nx.DiGraph()
+    colors = set()
+    
+    # maps (v, color) --&gt; 0 / 1
+    l = {}
+    
+    for v in leaves[tree.root]:
+        colors.add(v.color)
+        bmg.add_node(v.label, color=v.color)
+        l[v, v.color] = 1
+        
+    for v in tree.postorder():
+        
+        if not v.children:
+            continue
+        
+        for u1, u2 in itertools.combinations(v.children, 2):
+            for x, y in itertools.product(leaves[u1], leaves[u2]):
+                
+                if not l.get((u1, y.color)):
+                    bmg.add_edge(x.label, y.label)
+                if not l.get((u2, x.color)):
+                    bmg.add_edge(y.label, x.label)
+                    
+        for u, r in itertools.product(v.children, colors):
+            if l.get((u, r)):
+                l[v, r] = 1
+    
+    if not supply_rbmg:
+        return bmg
+    else:
+        return bmg, bmg.to_undirected(reciprocal=True)
+    
+def extended_best_hits(leaves, D, epsilon=1e-8, supply_rbmg=False):
+    &#34;&#34;&#34;Compute BMG and RBMG from a distances matrix D.
+    
+    Apporximation of best matches as the genes within a tolerance range from
+    the gene with the smallest distance, see [1].
+    
+    Parameters
+    ----------
+    leaves : list of TreeNode instances with `label` attribute
+    D : 2-dimensional numpy array
+        The distances of the leaves where the order of the rows/columns
+        corresponds to that in the list.
+    epsilon : float, optional
+        relative threshold for the inclusion of suboptimal hits, i.e.,
+        (x,y) in BMG if D(x,y) &lt;= (1+epsilon) * min d(x,y&#39;). The default
+        is 1e-8 (for limited float precision).
+    supply_rbmg : bool, optional
+        If True, also return the symmetric part of the constructed BMG.
+        The default is False.
+    
+    Returns
+    -------
+    networx.DiGraph or pair of networx.DiGraph and networx.Graph
+        The constructed BMG and optionally its symmetric part.
+        
+    References
+    ----------
+    .. [1] P. F. Stadler, M. Geiß, D. Schaller, A. López Sánchez, M. Gonzalez
+    Laffitte, D. I. Valdivia, M. Hellmuth, and M. Hernández Rosales.
+    From pairs of most similar sequences to phylogenetic best matches.
+    In: Algorithms for Molecular Biology, 15:5, 2020.
+    doi: 10.1186/s13015-020-00165-2.
+    &#34;&#34;&#34;
+    
+    bmg = nx.DiGraph()
+    colors = set()
+    relative_threshold = 1 + epsilon
+    
+    for v in leaves:
+        bmg.add_node(v.label, color=v.color)
+        colors.add(v.color)
+    
+    # ---- build BMG ----
+    for u in range(len(leaves)):
+        minima = {color: float(&#39;inf&#39;) for color in colors}
+        for v in range(len(leaves)):
+            if D[u,v] &lt; minima[leaves[v].color]:
+                minima[leaves[v].color] = D[u,v]
+        for v in range(len(leaves)):
+            if (leaves[u].color != leaves[v].color and
+                D[u,v] &lt;= relative_threshold * minima[leaves[v].color]):
+                bmg.add_edge(leaves[u].label, leaves[v].label,
+                             distance = D[u,v])
+    
+    if not supply_rbmg:
+        return bmg
+    else:
+        return bmg, bmg.to_undirected(reciprocal=True)
+
+
+# --------------------------------------------------------------------------
+#                         Least resolved trees
+# --------------------------------------------------------------------------
+
+def informative_triples(graph, color_dict=None):
+    &#34;&#34;&#34;Compute the informative triples of a colored digraph.
+    
+    Parameters
+    ----------
+    graph : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    color_dict : dict, optional
+        A dict containing the colors that appear in the graph as keys and the
+        list of nodes with the respective color as values. The default is False
+        in which case this dict is computed internally.
+    
+    Returns
+    -------
+    list
+        Each item in the list is a tuple (a, b1, b2) of three nodes such that
+        a b1 | b2 is an informative triple in the graph, see [1].
+    
+    References
+    ----------
+    .. [1] M. Geiß, E. Chávez, M. González Laffitte, A. López Sánchez, B. M. R. 
+       Stadler, D. I. Valdivia, M. Hellmuth, M. Hernández Rosales, and P. F.
+       Stadler.
+       Best match graphs.
+       In: Journal of Mathematical Biology, 78:2015–2057, 2019.
+       doi:10.1007/s00285-019-01332-9.
+    &#34;&#34;&#34;
+    
+    if not isinstance(graph, nx.DiGraph):
+        raise TypeError(&#34;must be a NetworkX &#39;Digraph&#39;&#34;)
+    
+    if not color_dict:
+        color_dict = sort_by_colors(graph)
+    
+    R = []
+    
+    for c1, c2 in itertools.permutations(color_dict.keys(), 2):
+        for a in color_dict[c1]:
+            for b1, b2 in itertools.permutations(color_dict[c2], 2):
+                if graph.has_edge(a, b1) and (not graph.has_edge(a, b2)):
+                    R.append( (a, b1, b2) )
+    
+    return R
+
+
+def forbidden_triples(graph, color_dict=None):
+    &#34;&#34;&#34;Compute the forbidden triples of a colored digraph.
+    
+    Parameters
+    ----------
+    graph : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    color_dict : dict, optional
+        A dict containing the colors that appear in the graph as keys and the
+        list of nodes with the respective color as values. The default is False
+        in which case this dict is computed internally.
+    
+    Returns
+    -------
+    list
+        Each item in the list is a tuple (a, b1, b2) of three nodes such that
+        a b1 | b2 is a forbidden triple in the graph, see [1].
+    
+    References
+    ----------
+    .. [1] D. Schaller, P. F. Stadler, and M. Hellmuth.
+       Complexity of modification problems for best match graphs.
+       In: Theoretical Computer Science, 865:63–84, 2021.
+       doi:10.1016/j.tcs.2021.02.037.
+    &#34;&#34;&#34;
+    
+    if not isinstance(graph, nx.DiGraph):
+        raise TypeError(&#34;must be a NetworkX &#39;Digraph&#39;&#34;)
+    
+    if not color_dict:
+        color_dict = sort_by_colors(graph)
+    
+    F = []
+    
+    for c1, c2 in itertools.permutations(color_dict.keys(), 2):
+        for a in color_dict[c1]:
+            for b1, b2 in itertools.combinations(color_dict[c2], 2):
+                if graph.has_edge(a, b1) and graph.has_edge(a, b2):
+                    F.append( (a, b1, b2) )
+                    F.append( (a, b2, b1) )
+    
+    return F
+
+
+def informative_forbidden_triples(graph, color_dict=None):
+    &#34;&#34;&#34;Compute the informative and forbidden triples of a colored digraph.
+    
+    Parameters
+    ----------
+    graph : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    color_dict : dict, optional
+        A dict containing the colors that appear in the graph as keys and the
+        list of nodes with the respective color as values. The default is False
+        in which case this dict is computed internally.
+    
+    Returns
+    -------
+    tuple of two lists
+        Each item in the first (resp. second) list is a tuple (a, b1, b2) of
+        three nodes such that a b1 | b2 is a informative (resp. forbidden)
+        triple in the graph, see [1].
+    
+    References
+    ----------
+    .. [1] D. Schaller, P. F. Stadler, and M. Hellmuth.
+       Complexity of modification problems for best match graphs.
+       In: Theoretical Computer Science, 865:63–84, 2021.
+       doi:10.1016/j.tcs.2021.02.037.
+    &#34;&#34;&#34;
+    
+    if not isinstance(graph, nx.DiGraph):
+        raise TypeError(&#34;must be a NetworkX &#39;Digraph&#39;&#34;)
+    
+    if not color_dict:
+        color_dict = sort_by_colors(graph)
+    
+    R, F = [], []
+    
+    for c1, c2 in itertools.permutations(color_dict.keys(), 2):
+        for a in color_dict[c1]:
+            for b1, b2 in itertools.combinations(color_dict[c2], 2):
+                
+                if graph.has_edge(a, b1) and graph.has_edge(a, b2):
+                    F.append( (a, b1, b2) )
+                    F.append( (a, b2, b1) )
+                elif graph.has_edge(a, b1):
+                    R.append( (a, b1, b2) )
+                elif graph.has_edge(a, b2):
+                    R.append( (a, b2, b1) )
+    
+    return R, F
+
+
+def binary_explainable_triples(graph, color_dict=None):
+    &#34;&#34;&#34;Extended informative triple set for binary-explainable graphs.
+    
+    Parameters
+    ----------
+    graph : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    color_dict : dict, optional
+        A dict containing the colors that appear in the graph as keys and the
+        list of nodes with the respective color as values. The default is False
+        in which case this dict is computed internally.
+    
+    Returns
+    -------
+    tuple of two lists
+        Each item in the  list is a tuple (a, b, c) of three nodes such that
+        ab|c is a triple displayed by every binary tree that explains the graph
+        (if existent), see [1].
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, M. Hellmuth, and P. F. Stadler.
+       Best match graphs with binary trees.
+       In: C. Martín-Vide, M. A. Vega-Rodríguez, and T. Wheeler, editors,
+       Algorithms for Computational Biology, 8th AlCoB, volume 12715 of Lecture
+       Notes in Computer Science, pages 82–93, 2021.
+       doi: 10.1007/978-3-030-74432-8_6.
+    &#34;&#34;&#34;
+    
+    if not isinstance(graph, nx.DiGraph):
+        raise TypeError(&#34;must be a NetworkX &#39;Digraph&#39;&#34;)
+    
+    if not color_dict:
+        color_dict = sort_by_colors(graph)
+    
+    R_binary = []
+    
+    for c1, c2 in itertools.permutations(color_dict.keys(), 2):
+        for a in color_dict[c1]:
+            for b1, b2 in itertools.combinations(color_dict[c2], 2):
+                
+                if graph.has_edge(a, b1) and graph.has_edge(a, b2):
+                    try:
+                        if b2 &lt; b1:
+                            b1, b2 = b2, b1
+                    except NotImplemented: pass
+                    R_binary.append( (b1, b2, a) )
+                elif graph.has_edge(a, b1):
+                    R_binary.append( (a, b1, b2) )
+                elif graph.has_edge(a, b2):
+                    R_binary.append( (a, b2, b1) )
+    
+    return R_binary
+
+
+def _finalize(tree, G):
+    
+    if not tree:
+        return None
+    
+    if isinstance(tree, TreeNode):
+        tree = Tree(tree)
+    
+    # assign colors to the leaves
+    reconstruct_color_from_graph(tree, G)
+    
+    return tree
+
+
+# --------------------------------------------------------------------------
+#                      LRT FROM OBSERVABLE GENE TREE
+# --------------------------------------------------------------------------
+
+def lrt_from_observable_tree(T):
+    &#34;&#34;&#34;Computes the Least Resolved Tree from a tree.
+    
+    The unique Least Resolved Tree from a leaf-colored (observable)
+    gene tree is computed by contraction of all redundant edges.
+    
+    Parameters
+    ----------
+    T : Tree
+        A tree whose nodes have the &#39;color&#39; attribute.
+    
+    Returns
+    -------
+    Tree
+        The unique least resolved tree (w.r.t. best matches), see [1].
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, P. F. Stadler, and M. Hellmuth.
+    Complete characterization of incorrect orthology assignments in best match
+    graphs. 
+    In: Journal of Mathematical Biology, 82:20, 2021.
+    doi: 10.1007/s00285-021-01564-8.
+    &#34;&#34;&#34;
+    
+    lrt = T.copy()
+    if not lrt.root:
+        return lrt
+    
+    # remove planted root if existent
+    if len(lrt.root.children) == 1:
+        new_root = lrt.root.children[0]
+        new_root.detach()
+        lrt.root = new_root
+        new_root.dist = 0.0
+    
+    # assign list of leaves to each node
+    leaves = lrt.leaf_dict()
+    
+    subtree_colors = {}
+    for v in lrt.preorder():
+        subtree_colors[v] = {leaf.color for leaf in leaves[v]}
+        
+    arc_colors = _arc_colors(lrt, leaves, subtree_colors)
+    red_edges = redundant_edges(lrt, subtree_colors, arc_colors)
+    lrt.contract(red_edges)
+    lrt = topology_only(lrt)
+    
+    return lrt
+
+
+def _arc_colors(T, leaves, subtree_colors):
+    &#34;&#34;&#34;Color sets relevant for redundant edge computation.
+    
+    Computes for all inner vertices v the color set of y such that y with (x,y)
+    is an arc in the BMG and lca(x,y) = v.
+    &#34;&#34;&#34;
+    
+    all_colors = subtree_colors[T.root]
+    
+    # color sets for all v
+    arc_colors = {v: set() for v in T.preorder()}
+    
+    for u in leaves[T.root]:
+        
+        # colors to which no best match has yet been found
+        remaining = all_colors - {u.color}
+        
+        # start with direct parent of each node
+        current = u.parent
+        
+        while remaining and current:
+            colors_here = set()
+            for v in leaves[current]:
+                
+                # best match found
+                if v.color in remaining:
+                    colors_here.add(v.color)
+            
+            arc_colors[current].update(colors_here)
+            remaining -= colors_here
+            current = current.parent
+    
+    return arc_colors
+
+
+def redundant_edges(T, subtree_colors, arc_colors):
+    
+    red_edges = []
+    
+    for u, v in T.inner_edges():
+        
+        # colors s in sigma( L(T(u) \ T(v)) )
+        aux_set = set()
+        
+        for v2 in u.children:
+            if v2 is not v:
+                aux_set.update(subtree_colors[v2])
+        
+        if not arc_colors[v].intersection(aux_set):
+            red_edges.append((u, v))
+    
+    return red_edges
+
+
+# --------------------------------------------------------------------------
+#                               LRT FROM BMG
+# --------------------------------------------------------------------------
+
+def is_bmg(G):
+    &#34;&#34;&#34;Determine whether a colored digraph is a BMG.
+    
+    If the graph is a BMG, then its LRT is returned, see [1].
+    
+    Parameters
+    ----------
+    G : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    
+    Returns
+    -------
+    Tree or bool
+        The least-resolved tree if the graph was a BMG, and False otherwise.
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, E. Chávez, M. González Laffitte, A. López
+       Sánchez, B. M. R. Stadler, D. I. Valdivia, M. Hellmuth, M. Hernández
+       Rosales, and P. F. Stadler.
+       Corrigendum to &#39;Best match graphs&#39;.
+       In: Journal of Mathematical Biology, 82:47, 2021. 
+       doi: 10.1007/s00285-021-01601-6.
+    &#34;&#34;&#34;
+    
+    if not isinstance(G, nx.DiGraph):
+            raise TypeError(&#39;not a digraph&#39;)
+    if not is_properly_colored(G):
+        raise RuntimeError(&#39;not a properly colored digraph&#39;)
+    
+    subtrees = []
+    colors = None
+    
+    for wcc in nx.weakly_connected_components(G):
+        
+        sg = G.subgraph(wcc).copy()
+        color_dict = sort_by_colors(sg)
+        
+        # the color sets of all components must be equal
+        if colors is None:
+            colors = set(color_dict)
+        elif colors != set(color_dict):
+            return False
+        
+        L = {v for v in sg.nodes()}
+        R = informative_triples(sg, color_dict=color_dict)
+        build = Build(R, L, mincut=False)
+        subtree = build.build_tree()
+        
+        if not subtree: 
+            return False
+        else:
+            # a digraph is a BMG iff its equal to the BMG of BUILD(R)
+            reconstruct_color_from_graph(subtree, sg)
+            if not graphs_equal(sg, bmg_from_tree(subtree)):
+                return False
+            subtrees.append(subtree)
+    
+    if len(subtrees) == 1:
+        root = subtrees[0].root
+    else:
+        root = TreeNode()
+        for subtree in subtrees:
+            root.add_child(subtree.root)
+    
+    return _finalize(root, G)
+    
+
+def lrt_from_colored_graph(G, mincut=False, weighted_mincut=False):
+    
+    L = {v for v in G.nodes()}
+    R = informative_triples(G)
+    
+    build = Build(R, L, mincut=mincut, weighted_mincut=weighted_mincut)
+    tree = build.build_tree()
+    
+    return _finalize(tree, G)
+
+
+def correct_bmg(bmg_original):
+    &#34;&#34;&#34;Build the LRT (using min cut in BUILD algorithm) and return its BMG.&#34;&#34;&#34;
+    
+    subtrees = []
+    for sg in (bmg_original.subgraph(c)
+               for c in nx.weakly_connected_components(bmg_original)):
+        tree = lrt_from_colored_graph(sg, mincut=True)
+        if tree:
+            subtrees.append(tree)
+            
+    if len(subtrees) == 0:
+        return None
+    elif len(subtrees) == 1:
+        tree = subtrees[0]
+    else:
+        tree = Tree(TreeNode())
+        for subtree in subtrees:
+            tree.root.add_child(subtree.root)
+    
+    return bmg_from_tree(tree)
+
+
+# --------------------------------------------------------------------------
+#                          LRT FROM 2-col. BMG
+#                         (new characterization)
+# --------------------------------------------------------------------------
+            
+class TwoColoredLRT:
+    &#34;&#34;&#34;Construct the least-resolved tree of a 2-colored best match graph.
+    
+    Implementation of the efficient algorithm in [1].
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, M. Hellmuth, and P. F. Stadler.
+       Least resolved trees for two-colored best match graphs.
+       In: Journal of Graph Algorithms and Applications, 25(1):397–416, 2021.
+       doi: 10.7155/jgaa.00564.
+    &#34;&#34;&#34;
+    
+    def __init__(self, digraph):
+        &#34;&#34;&#34;Constructor.
+        
+        Parameters
+        ----------
+        G : networkx.DiGraph
+            A digraph whose nodes have the &#39;color&#39; attribute.
+        &#34;&#34;&#34;
+        
+        if not isinstance(digraph, nx.DiGraph):
+            raise TypeError(&#39;not a digraph&#39;)
+            
+        self.digraph = digraph
+        self.color_dict = sort_by_colors(digraph)
+                
+    
+    def build_tree(self):
+        &#34;&#34;&#34;Construct the least-resolved tree.
+        
+        Returns
+        -------
+        Tree or bool
+            The least-resolved tree if the graph was a 2-colored BMG, and
+            False otherwise.
+        &#34;&#34;&#34;
+        
+        if not is_properly_colored(self.digraph):
+            raise RuntimeError(&#39;not a properly colored digraph&#39;)
+        if len(self.color_dict) &gt; 2:
+            raise RuntimeError(&#39;more than 2 colors&#39;)
+        
+        # star tree if there is only one color
+        if len(self.color_dict) == 1:
+            root = TreeNode()
+            for v in self.digraph.nodes():
+                root.add_child(TreeNode(label=v))
+        # 2 colors
+        else:
+            subtrees = []
+            for wcc in nx.weakly_connected_components(self.digraph):
+                if len(wcc) == 1:
+                    return False
+                
+                subroot = self._build_tree(self.digraph.subgraph(wcc).copy())
+                
+                if not subroot:
+                    return False
+                else:
+                    subtrees.append(subroot)
+            
+            if len(subtrees) == 1:
+                root = subtrees[0]
+            else:
+                root = TreeNode()
+                for subroot in subtrees:
+                    root.add_child(subroot)
+        
+        return _finalize(root, self.digraph)
+    
+        
+    def _build_tree(self, G):
+            
+        color_count = {color: 0 for color in self.color_dict.keys()}
+        for v in G.nodes():
+            color_count[G.nodes[v][&#39;color&#39;]] += 1
+        other_color = {color: G.order() - count
+                       for color, count in color_count.items()}
+        
+        umbrella = {v for v in G.nodes() if 
+                    other_color[G.nodes[v][&#39;color&#39;]] == G.out_degree(v)}
+        S_1 = {v for v in umbrella if umbrella.issuperset(G.predecessors(v))}
+        S_2 = {v for v in S_1 if S_1.issuperset(G.predecessors(v))}
+        
+        if not S_2 or len(S_1) != len(S_2):
+            return False
+            
+        node = TreeNode()
+        for v in S_2:
+            node.add_child(TreeNode(label=v))
+            G.remove_node(v)
+        
+        for wcc in nx.weakly_connected_components(G):
+            
+            if len(wcc) == 1:
+                return False
+            
+            child = self._build_tree(G.subgraph(wcc).copy())
+            
+            if not child:
+                return False
+            else:
+                node.add_child(child)
+                
+        return node
+    
+
+def lrt_from_2bmg(G):
+    &#34;&#34;&#34;Effieciently constructs the LRT for a 2-BMG via the support vertices.
+    
+    Implementation of the efficient algorithm in [1].
+    
+    Parameters
+    ----------
+    G : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    
+    Returns
+    -------
+    Tree or bool
+        The least-resolved tree if the graph was a 2-colored BMG, and
+        False otherwise.
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, M. Hellmuth, and P. F. Stadler.
+       Least resolved trees for two-colored best match graphs.
+       In: Journal of Graph Algorithms and Applications, 25(1):397–416, 2021.
+       doi: 10.7155/jgaa.00564.
+    &#34;&#34;&#34;
+    
+    builder = TwoColoredLRT(G)
+    return builder.build_tree()
+
+
+# --------------------------------------------------------------------------
+#                      Binary-refinable tree (BRT)
+# --------------------------------------------------------------------------
+
+def binary_refinable_tree(G, mincut=False, weighted_mincut=False):
+    &#34;&#34;&#34;Compute the binary-refinable tree (BRT) for a graph.
+    
+    The BRT of a BMG can, if it exists, be refined arbitrarily and such that
+    it still explains the BMG. In particular, all binary explainations are 
+    refinements of the BRT.
+    
+    Parameters
+    ----------
+    G : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    mincut : bool, optional
+        Handle inconsistencies that occur if the supplied graph is not a
+        binary-explainable BMG. The default is True.
+    weighted_mincut : bool, optional
+        If True, apply a weighted mincut heuristic. The deafault is False.
+    
+    Returns
+    -------
+    Tree or bool
+        The unique binary-resovable tree if the graph is a binary-explainable
+        BMG, see [1], or a heuristic tree if it is not but &#39;mincut&#39; is True,
+        or False if neither is the case.
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, M. Hellmuth, and P. F. Stadler.
+       Best match graphs with binary trees.
+       In: C. Martín-Vide, M. A. Vega-Rodríguez, and T. Wheeler, editors,
+       Algorithms for Computational Biology, 8th AlCoB, volume 12715 of Lecture
+       Notes in Computer Science, pages 82–93, 2021.
+       doi: 10.1007/978-3-030-74432-8_6.
+    &#34;&#34;&#34;
+    
+    L = {v for v in G.nodes()}
+    R = binary_explainable_triples(G)
+    
+    build = Build(R, L, mincut=mincut, weighted_mincut=weighted_mincut)
+    brt = build.build_tree()
+    
+    return _finalize(brt, G)
+
+
+# --------------------------------------------------------------------------
+#                           Augmented tree
+# --------------------------------------------------------------------------
+
+def augment_and_label(tree, inplace=False):
+    &#34;&#34;&#34;Augment tree and add event labeling based on color intersections.
+    
+    Parameters
+    ----------
+    tree : Tree
+        A tree whose nodes have the &#39;color&#39; attribute.
+    inplace : bool, optional
+        If True, the supplied tree instance is directly manipulated, otherwise 
+        the tree is copied first. The default is False.
+        
+    Returns
+    -------
+    Tree
+        The unique augmented and duplication/loss-labeled tree as defined in
+        [1].
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, P. F. Stadler, and M. Hellmuth.
+    Complete characterization of incorrect orthology assignments in best match
+    graphs. 
+    In: Journal of Mathematical Biology, 82:20, 2021.
+    doi: 10.1007/s00285-021-01564-8.
+    &#34;&#34;&#34;
+    
+    if not inplace:
+        tree = tree.copy()
+    
+    # precompute since tree will be modified
+    inner_nodes = [u for u in tree.inner_nodes()]
+    leaves = tree.leaf_dict()
+    
+    for u in inner_nodes:
+        
+        # should not appear except if tree is planted, otherwise ignore
+        if len(u.children) == 1:
+            continue
+        
+        C = _color_intersection_components(u, leaves)
+        
+        if len(C) == 1:
+            u.event = &#39;D&#39;
+            
+        else:
+            u.event = &#39;S&#39;
+            
+            for cc in C:
+                if len(cc) &gt; 1:
+                    w = TreeNode(event=&#39;D&#39;)
+                    u.add_child(w)
+                    for v in cc:
+                        u.remove_child(v)
+                        w.add_child(v)
+        
+    return tree
+
+
+def _color_intersection_components(u, leaves):
+    
+    aux_graph = nx.Graph()
+    
+    for v in u.children:
+        aux_graph.add_node(v)
+        
+        for x in leaves[v]:
+            aux_graph.add_edge(v, x.color)
+            
+    result = []
+    
+    for cc in nx.connected_components(aux_graph):
+        
+        # discard the colors in the components
+        result.append( [v for v in cc if isinstance(v, TreeNode)] )
+        
+    return result
+
+
+# --------------------------------------------------------------------------
+#                 Analysis of the structure of (R)BMGs
+# --------------------------------------------------------------------------
+
+def classify_good_ugly(bmg, rbmg, fp):
+    
+    for x, y in fp.edges():
+        fp.edges[x, y][&#39;middle_in_good&#39;] = False
+        fp.edges[x, y][&#39;first_in_ugly&#39;] = False
+        fp.edges[x, y][&#39;first_in_bad&#39;] = False
+        
+    color_dict = sort_by_colors(bmg)
+    
+    for x, y in fp.edges():
+        
+        # middle edges of good quartets
+        for c in color_dict:
+            
+            if c == bmg.nodes[x][&#39;color&#39;] or c == bmg.nodes[y][&#39;color&#39;]:
+                continue
+            
+            for z1, z2 in itertools.permutations(color_dict[c], 2):
+                
+                if (rbmg.has_edge(z1, x) and rbmg.has_edge(z2, y) and
+                    bmg.has_edge(z1, y) and not bmg.has_edge(y, z1) and
+                    bmg.has_edge(z2, x) and not bmg.has_edge(x, z2)):
+                    
+                    fp.edges[x, y][&#39;middle_in_good&#39;] = True
+        
+        # first edges of ugly/bad quartets          
+        for _ in range(2):
+            
+            for x2 in color_dict[bmg.nodes[x][&#39;color&#39;]]:
+                if x == x2:
+                    continue
+                
+                for z in rbmg.neighbors(x2):
+                    
+                    if (bmg.nodes[z][&#39;color&#39;] == bmg.nodes[x][&#39;color&#39;] or
+                        bmg.nodes[z][&#39;color&#39;] == bmg.nodes[y][&#39;color&#39;]):
+                        continue
+                    # first edges of ugly quartets
+                    if (rbmg.has_edge(y, x2) and not rbmg.has_edge(z, y) and
+                        not rbmg.has_edge(z, x)):
+                        fp.edges[x, y][&#39;first_in_ugly&#39;] = True
+                    
+                    # first edges of bad quartets
+                    elif (not rbmg.has_edge(y, x2) and rbmg.has_edge(z, y) and
+                          not bmg.has_edge(x, z)):
+                        fp.edges[x, y][&#39;first_in_bad&#39;] = True
+            
+            # swap for second iteration
+            x, y = y, x
+    
+    return fp   
+
+
+def count_good_ugly(bmg, rbmg, fp):
+    
+    classify_good_ugly(bmg, rbmg, fp)
+    
+    good, ugly, both = 0, 0, 0
+    
+    for x, y in fp.edges():
+        
+        if fp.edges[x, y][&#39;middle_in_good&#39;] and fp.edges[x, y][&#39;first_in_ugly&#39;]:
+            good += 1
+            ugly += 1
+            both += 1
+        elif fp.edges[x, y][&#39;middle_in_good&#39;]:
+            good += 1
+        elif fp.edges[x, y][&#39;first_in_ugly&#39;]:
+            ugly += 1
+    
+    return good, ugly, both
+
+
+def count_good_ugly_bad(bmg, rbmg, fp):
+    
+    classify_good_ugly(bmg, rbmg, fp)
+    
+    gub, gu, gb, ub, g, u, b = 0, 0, 0, 0, 0, 0, 0
+    
+    for x, y in fp.edges():
+        
+        if (fp.edges[x, y][&#39;middle_in_good&#39;] and
+            fp.edges[x, y][&#39;first_in_ugly&#39;] and
+            fp.edges[x, y][&#39;first_in_bad&#39;]):
+            gub += 1
+            gu += 1
+            gb += 1
+            ub += 1
+            g += 1
+            u += 1
+            b += 1
+            
+        elif fp.edges[x, y][&#39;middle_in_good&#39;] and fp.edges[x, y][&#39;first_in_ugly&#39;]:
+            gu += 1
+            g += 1
+            u += 1
+        elif fp.edges[x, y][&#39;middle_in_good&#39;] and fp.edges[x, y][&#39;first_in_bad&#39;]:
+            gb += 1
+            g += 1
+            b += 1
+        elif fp.edges[x, y][&#39;first_in_ugly&#39;] and fp.edges[x, y][&#39;first_in_bad&#39;]:
+            ub += 1
+            u += 1
+            b += 1
+        elif fp.edges[x, y][&#39;middle_in_good&#39;]:
+            g += 1
+        elif fp.edges[x, y][&#39;first_in_ugly&#39;]:
+            u += 1
+        elif fp.edges[x, y][&#39;first_in_bad&#39;]:
+            b += 1
+    
+    return gub, gu, gb, ub, g, u, b
+    
+
+# --------------------------------------------------------------------------
+#                             P4 EDITING
+# --------------------------------------------------------------------------
+    
+def list_path(t, k, path, G, P4_list):
+    for u in G[path[-1]]:
+        G.nodes[u][&#39;vis&#39;] += 1
+    for u in G[path[-1]]:
+        if G.nodes[u][&#39;vis&#39;] == 1:
+            if t &lt; k:
+                list_path(t+1, k, path + [u], G, P4_list)
+            elif path[0] &lt; u:
+                P4_list.append(tuple(path) + (u,))
+    for u in G[path[-1]]:
+        G.nodes[u][&#39;vis&#39;] -= 1
+
+
+def find_all_P4(G):
+    P4_list = []
+    for v in G:
+            G.nodes[v][&#39;vis&#39;] = 0
+    for v in G:
+        G.nodes[v][&#39;vis&#39;] = 1
+        list_path(2, 4, [v], G, P4_list)
+        G.nodes[v][&#39;vis&#39;] = 0
+    return P4_list
+
+
+def is_good_quartet(path, bmg):
+    &#34;&#34;&#34;Determine whether an induced P4 is a good quartet in the bmg.&#34;&#34;&#34;
+    if (bmg.has_edge(path[0], path[2]) and 
+        bmg.has_edge(path[3], path[1]) and
+        bmg.nodes[path[0]][&#39;color&#39;] == bmg.nodes[path[3]][&#39;color&#39;]):
+        return True
+    else:
+        return False
+    
+
+def remove_all_P4(rbmg, bmg, P4_list=None):
+    &#34;&#34;&#34;Find all good quartets and removes the middle edges.&#34;&#34;&#34;
+    GP4 = rbmg.copy()
+    
+    if P4_list is None:
+        P4_list = find_all_P4(GP4)
+
+    for path in P4_list:
+        if is_good_quartet(path, bmg) and GP4.has_edge(path[1], path[2]):
+            GP4.remove_edge(path[1], path[2])
+            print(path[1], &#34;-|-&#34;, path[2])
+    
+    return GP4
+
+# --------------------------------------------------------------------------
+#                            C6 DETECTION
+# --------------------------------------------------------------------------
+
+def validate_C6(G, C6_path):
+    
+    C6 = G.subgraph(C6_path)
+    if C6.size() != 6:
+        print(C6_path)
+        print(&#39;Nodes&#39;, [n for n in C6.nodes()], C6.order())
+        print(&#39;Edges&#39;, [edge for edge in C6.edges()], C6.size())
+        print(&#39;Size not equal to 6!&#39;)
+        return False
+    for n in C6.nodes():
+        if not C6.degree(n) == 2:
+            print(&#34;Degree not equal to 2 for&#34;, n)
+            return False
+        for neighbor in G.neighbors(n):
+            if G.nodes[n][&#39;color&#39;] == G.nodes[neighbor][&#39;color&#39;]:
+                print(&#39;Same color&#39;, n, neighbor)
+                return False
+    return True
+
+
+def find_all_C6(G, P4_list=None):
+    &#34;&#34;&#34;Find induces C6 of the form &lt;x1 y1 z1 x2 y2 z2&gt;.&#34;&#34;&#34;
+    
+    if P4_list is None:
+        P4_list = find_all_P4(G)
+        
+    endpoints = {}
+    for path in P4_list:
+        a, b, c, d = path if path[0] &lt; path[3] else path[::-1]
+        a_col, b_col, c_col, d_col = (G.nodes[a][&#39;color&#39;], G.nodes[b][&#39;color&#39;],
+                                      G.nodes[c][&#39;color&#39;], G.nodes[d][&#39;color&#39;])
+        # avoid multiple recording for the 3 different colors:
+        if a_col == d_col and a_col &lt; b_col and a_col &lt; c_col:
+            if (a, d) not in endpoints:
+                endpoints[(a, d)] = {}
+            if (b_col, c_col) not in endpoints[(a, d)]:
+                endpoints[(a, d)][(b_col, c_col)] = []
+            endpoints[(a, d)][(b_col, c_col)].append(path)
+    
+    C6_list = []
+    for endpoint, colors in endpoints.items():
+        x1, x2 = endpoint
+        for color_pair, paths in colors.items():
+            y_color, z_color = color_pair
+            # avoid multiple recording for the 2 directions:
+            if y_color &lt; z_color and (z_color, y_color) in colors:
+                for path1 in paths:
+                    for path2 in colors[(z_color, y_color)]:
+                        if ((not G.has_edge(path1[1], path2[1])) and
+                            (not G.has_edge(path1[2], path2[2]))):
+                            C6_list.append(path1 + (path2[2], path2[1]))
+                            if not validate_C6(G, C6_list[-1]):
+                                raise RuntimeError(&#39;problem in C6 detection&#39;)
+                            print(C6_list[-1])
+    return C6_list
+
+
+def graph_type(G):
+    
+    P4_list = find_all_P4(G)
+    C6_list = find_all_C6(G, P4_list=P4_list)
+    
+    if C6_list:
+        return &#39;C&#39;, P4_list, C6_list
+    elif P4_list:
+        return &#39;B&#39;, P4_list, C6_list
+    else:
+        return &#39;A&#39;, P4_list, C6_list</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="asymmetree.analysis.BestMatches.augment_and_label"><code class="name flex">
+<span>def <span class="ident">augment_and_label</span></span>(<span>tree, inplace=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Augment tree and add event labeling based on color intersections.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>A tree whose nodes have the 'color' attribute.</dd>
+<dt><strong><code>inplace</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, the supplied tree instance is directly manipulated, otherwise
+the tree is copied first. The default is False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tree</code></dt>
+<dd>The unique augmented and duplication/loss-labeled tree as defined in
+[1].</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] D. Schaller, M. Geiß, P. F. Stadler, and M. Hellmuth.
+Complete characterization of incorrect orthology assignments in best match
+graphs.
+In: Journal of Mathematical Biology, 82:20, 2021.
+doi: 10.1007/s00285-021-01564-8.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def augment_and_label(tree, inplace=False):
+    &#34;&#34;&#34;Augment tree and add event labeling based on color intersections.
+    
+    Parameters
+    ----------
+    tree : Tree
+        A tree whose nodes have the &#39;color&#39; attribute.
+    inplace : bool, optional
+        If True, the supplied tree instance is directly manipulated, otherwise 
+        the tree is copied first. The default is False.
+        
+    Returns
+    -------
+    Tree
+        The unique augmented and duplication/loss-labeled tree as defined in
+        [1].
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, P. F. Stadler, and M. Hellmuth.
+    Complete characterization of incorrect orthology assignments in best match
+    graphs. 
+    In: Journal of Mathematical Biology, 82:20, 2021.
+    doi: 10.1007/s00285-021-01564-8.
+    &#34;&#34;&#34;
+    
+    if not inplace:
+        tree = tree.copy()
+    
+    # precompute since tree will be modified
+    inner_nodes = [u for u in tree.inner_nodes()]
+    leaves = tree.leaf_dict()
+    
+    for u in inner_nodes:
+        
+        # should not appear except if tree is planted, otherwise ignore
+        if len(u.children) == 1:
+            continue
+        
+        C = _color_intersection_components(u, leaves)
+        
+        if len(C) == 1:
+            u.event = &#39;D&#39;
+            
+        else:
+            u.event = &#39;S&#39;
+            
+            for cc in C:
+                if len(cc) &gt; 1:
+                    w = TreeNode(event=&#39;D&#39;)
+                    u.add_child(w)
+                    for v in cc:
+                        u.remove_child(v)
+                        w.add_child(v)
+        
+    return tree</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.binary_explainable_triples"><code class="name flex">
+<span>def <span class="ident">binary_explainable_triples</span></span>(<span>graph, color_dict=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extended informative triple set for binary-explainable graphs.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>graph</code></strong> :&ensp;<code>networkx.DiGraph</code></dt>
+<dd>A digraph whose nodes have the 'color' attribute.</dd>
+<dt><strong><code>color_dict</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>A dict containing the colors that appear in the graph as keys and the
+list of nodes with the respective color as values. The default is False
+in which case this dict is computed internally.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple</code> of <code>two lists</code></dt>
+<dd>Each item in the
+list is a tuple (a, b, c) of three nodes such that
+ab|c is a triple displayed by every binary tree that explains the graph
+(if existent), see [1].</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] D. Schaller, M. Geiß, M. Hellmuth, and P. F. Stadler.
+Best match graphs with binary trees.
+In: C. Martín-Vide, M. A. Vega-Rodríguez, and T. Wheeler, editors,
+Algorithms for Computational Biology, 8th AlCoB, volume 12715 of Lecture
+Notes in Computer Science, pages 82–93, 2021.
+doi: 10.1007/978-3-030-74432-8_6.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def binary_explainable_triples(graph, color_dict=None):
+    &#34;&#34;&#34;Extended informative triple set for binary-explainable graphs.
+    
+    Parameters
+    ----------
+    graph : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    color_dict : dict, optional
+        A dict containing the colors that appear in the graph as keys and the
+        list of nodes with the respective color as values. The default is False
+        in which case this dict is computed internally.
+    
+    Returns
+    -------
+    tuple of two lists
+        Each item in the  list is a tuple (a, b, c) of three nodes such that
+        ab|c is a triple displayed by every binary tree that explains the graph
+        (if existent), see [1].
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, M. Hellmuth, and P. F. Stadler.
+       Best match graphs with binary trees.
+       In: C. Martín-Vide, M. A. Vega-Rodríguez, and T. Wheeler, editors,
+       Algorithms for Computational Biology, 8th AlCoB, volume 12715 of Lecture
+       Notes in Computer Science, pages 82–93, 2021.
+       doi: 10.1007/978-3-030-74432-8_6.
+    &#34;&#34;&#34;
+    
+    if not isinstance(graph, nx.DiGraph):
+        raise TypeError(&#34;must be a NetworkX &#39;Digraph&#39;&#34;)
+    
+    if not color_dict:
+        color_dict = sort_by_colors(graph)
+    
+    R_binary = []
+    
+    for c1, c2 in itertools.permutations(color_dict.keys(), 2):
+        for a in color_dict[c1]:
+            for b1, b2 in itertools.combinations(color_dict[c2], 2):
+                
+                if graph.has_edge(a, b1) and graph.has_edge(a, b2):
+                    try:
+                        if b2 &lt; b1:
+                            b1, b2 = b2, b1
+                    except NotImplemented: pass
+                    R_binary.append( (b1, b2, a) )
+                elif graph.has_edge(a, b1):
+                    R_binary.append( (a, b1, b2) )
+                elif graph.has_edge(a, b2):
+                    R_binary.append( (a, b2, b1) )
+    
+    return R_binary</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.binary_refinable_tree"><code class="name flex">
+<span>def <span class="ident">binary_refinable_tree</span></span>(<span>G, mincut=False, weighted_mincut=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Compute the binary-refinable tree (BRT) for a graph.</p>
+<p>The BRT of a BMG can, if it exists, be refined arbitrarily and such that
+it still explains the BMG. In particular, all binary explainations are
+refinements of the BRT.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>G</code></strong> :&ensp;<code>networkx.DiGraph</code></dt>
+<dd>A digraph whose nodes have the 'color' attribute.</dd>
+<dt><strong><code>mincut</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Handle inconsistencies that occur if the supplied graph is not a
+binary-explainable BMG. The default is True.</dd>
+<dt><strong><code>weighted_mincut</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, apply a weighted mincut heuristic. The deafault is False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tree</code> or <code>bool</code></dt>
+<dd>The unique binary-resovable tree if the graph is a binary-explainable
+BMG, see [1], or a heuristic tree if it is not but 'mincut' is True,
+or False if neither is the case.</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] D. Schaller, M. Geiß, M. Hellmuth, and P. F. Stadler.
+Best match graphs with binary trees.
+In: C. Martín-Vide, M. A. Vega-Rodríguez, and T. Wheeler, editors,
+Algorithms for Computational Biology, 8th AlCoB, volume 12715 of Lecture
+Notes in Computer Science, pages 82–93, 2021.
+doi: 10.1007/978-3-030-74432-8_6.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def binary_refinable_tree(G, mincut=False, weighted_mincut=False):
+    &#34;&#34;&#34;Compute the binary-refinable tree (BRT) for a graph.
+    
+    The BRT of a BMG can, if it exists, be refined arbitrarily and such that
+    it still explains the BMG. In particular, all binary explainations are 
+    refinements of the BRT.
+    
+    Parameters
+    ----------
+    G : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    mincut : bool, optional
+        Handle inconsistencies that occur if the supplied graph is not a
+        binary-explainable BMG. The default is True.
+    weighted_mincut : bool, optional
+        If True, apply a weighted mincut heuristic. The deafault is False.
+    
+    Returns
+    -------
+    Tree or bool
+        The unique binary-resovable tree if the graph is a binary-explainable
+        BMG, see [1], or a heuristic tree if it is not but &#39;mincut&#39; is True,
+        or False if neither is the case.
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, M. Hellmuth, and P. F. Stadler.
+       Best match graphs with binary trees.
+       In: C. Martín-Vide, M. A. Vega-Rodríguez, and T. Wheeler, editors,
+       Algorithms for Computational Biology, 8th AlCoB, volume 12715 of Lecture
+       Notes in Computer Science, pages 82–93, 2021.
+       doi: 10.1007/978-3-030-74432-8_6.
+    &#34;&#34;&#34;
+    
+    L = {v for v in G.nodes()}
+    R = binary_explainable_triples(G)
+    
+    build = Build(R, L, mincut=mincut, weighted_mincut=weighted_mincut)
+    brt = build.build_tree()
+    
+    return _finalize(brt, G)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.bmg_from_tree"><code class="name flex">
+<span>def <span class="ident">bmg_from_tree</span></span>(<span>tree, supply_rbmg=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Construct a BMG (and optionally RBMG) from a given tree.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>tree</code></dt>
+<dd>A tree with leaves that have the <code>label</code> and <code>color</code> attribute set.</dd>
+<dt><strong><code>supply_rbmg</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, also return the symmetric part of the constructed BMG.
+The default is False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>networx.DiGraph</code> or <code>pair</code> of <code>networx.DiGraph and networx.Graph</code></dt>
+<dd>The constructed BMG and optionally its symmetric part.</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] M. Geiß, E. Chávez, M. González Laffitte, A. López Sánchez, B. M. R.
+Stadler, D. I. Valdivia, M. Hellmuth, M. Hernández Rosales, and P. F.
+Stadler.
+Best match graphs.
+In: Journal of Mathematical Biology, 78:2015–2057, 2019.
+doi:10.1007/s00285-019-01332-9.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bmg_from_tree(tree, supply_rbmg=False):
+    &#34;&#34;&#34;Construct a BMG (and optionally RBMG) from a given tree.
+    
+    Parameters
+    ----------
+    tree : tree
+        A tree with leaves that have the `label` and `color` attribute set.
+    supply_rbmg : bool, optional
+        If True, also return the symmetric part of the constructed BMG.
+        The default is False.
+    
+    Returns
+    -------
+    networx.DiGraph or pair of networx.DiGraph and networx.Graph
+        The constructed BMG and optionally its symmetric part.
+    
+    References
+    ----------
+    .. [1] M. Geiß, E. Chávez, M. González Laffitte, A. López Sánchez, B. M. R. 
+       Stadler, D. I. Valdivia, M. Hellmuth, M. Hernández Rosales, and P. F.
+       Stadler.
+       Best match graphs.
+       In: Journal of Mathematical Biology, 78:2015–2057, 2019.
+       doi:10.1007/s00285-019-01332-9.
+    &#34;&#34;&#34;
+    
+    if not isinstance(tree, Tree):
+        raise TypeError(&#34;not of type &#39;Tree&#39;&#34;)
+    
+    leaves = tree.leaf_dict()
+    bmg = nx.DiGraph()
+    colors = set()
+    
+    for v in leaves[tree.root]:
+        colors.add(v.color)
+        bmg.add_node(v.label, color=v.color)
+    
+    for u in leaves[tree.root]:
+        remaining = colors - set([u.color])             # colors to which no best match has yet been found
+        parent = u.parent                               # start with direct parent of each node
+        while remaining and parent:
+            colors_here = set()
+            for v in leaves[parent]:
+                if v.color in remaining:                # best match found
+                    colors_here.add(v.color)
+                    bmg.add_edge(u.label, v.label)      # insert edge (u,v)
+            remaining -= colors_here                    # update remaining colors
+            parent = parent.parent
+    
+    if not supply_rbmg:
+        return bmg
+    else:
+        return bmg, bmg.to_undirected(reciprocal=True)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.bmg_from_tree_quadratic"><code class="name flex">
+<span>def <span class="ident">bmg_from_tree_quadratic</span></span>(<span>tree, supply_rbmg=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Construct a BMG (and optionally RBMG) from a given tree in O(|L|^2).</p>
+<p>Implementation of the quadratic algorithm in [1]. Proven to
+run in O(|L|^2).</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>tree</code></dt>
+<dd>A tree with leaves that have the <code>label</code> and <code>color</code> attribute set.</dd>
+<dt><strong><code>supply_rbmg</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, also return the symmetric part of the constructed BMG.
+The default is False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>networx.DiGraph</code> or <code>pair</code> of <code>networx.DiGraph and networx.Graph</code></dt>
+<dd>The constructed BMG and optionally its symmetric part.</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] M. Geiß, M. E. González Laffitte, A. López Sánchez, D. I. Valdivia,
+M. Hellmuth, M. Hernández Rosales, and P. F. Stadler.
+Best match graphs and reconciliation of gene trees with species trees.
+In: Journal of Mathematical Biology, 80:1459–1495, 2020.
+doi: 10.1007/s00285-020-01469-y.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bmg_from_tree_quadratic(tree, supply_rbmg=False):
+    &#34;&#34;&#34;Construct a BMG (and optionally RBMG) from a given tree in O(|L|^2).
+    
+    Implementation of the quadratic algorithm in [1]. Proven to
+    run in O(|L|^2).
+    
+    Parameters
+    ----------
+    tree : tree
+        A tree with leaves that have the `label` and `color` attribute set.
+    supply_rbmg : bool, optional
+        If True, also return the symmetric part of the constructed BMG.
+        The default is False.
+    
+    Returns
+    -------
+    networx.DiGraph or pair of networx.DiGraph and networx.Graph
+        The constructed BMG and optionally its symmetric part.
+    
+    References
+    ----------
+    .. [1] M. Geiß, M. E. González Laffitte, A. López Sánchez, D. I. Valdivia,
+    M. Hellmuth, M. Hernández Rosales, and P. F. Stadler.
+    Best match graphs and reconciliation of gene trees with species trees.
+    In: Journal of Mathematical Biology, 80:1459–1495, 2020.
+    doi: 10.1007/s00285-020-01469-y.
+    &#34;&#34;&#34;
+    
+    if not isinstance(tree, Tree):
+        raise TypeError(&#34;not of type &#39;Tree&#39;&#34;)
+    
+    leaves = tree.leaf_dict()
+    bmg = nx.DiGraph()
+    colors = set()
+    
+    # maps (v, color) --&gt; 0 / 1
+    l = {}
+    
+    for v in leaves[tree.root]:
+        colors.add(v.color)
+        bmg.add_node(v.label, color=v.color)
+        l[v, v.color] = 1
+        
+    for v in tree.postorder():
+        
+        if not v.children:
+            continue
+        
+        for u1, u2 in itertools.combinations(v.children, 2):
+            for x, y in itertools.product(leaves[u1], leaves[u2]):
+                
+                if not l.get((u1, y.color)):
+                    bmg.add_edge(x.label, y.label)
+                if not l.get((u2, x.color)):
+                    bmg.add_edge(y.label, x.label)
+                    
+        for u, r in itertools.product(v.children, colors):
+            if l.get((u, r)):
+                l[v, r] = 1
+    
+    if not supply_rbmg:
+        return bmg
+    else:
+        return bmg, bmg.to_undirected(reciprocal=True)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.classify_good_ugly"><code class="name flex">
+<span>def <span class="ident">classify_good_ugly</span></span>(<span>bmg, rbmg, fp)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def classify_good_ugly(bmg, rbmg, fp):
+    
+    for x, y in fp.edges():
+        fp.edges[x, y][&#39;middle_in_good&#39;] = False
+        fp.edges[x, y][&#39;first_in_ugly&#39;] = False
+        fp.edges[x, y][&#39;first_in_bad&#39;] = False
+        
+    color_dict = sort_by_colors(bmg)
+    
+    for x, y in fp.edges():
+        
+        # middle edges of good quartets
+        for c in color_dict:
+            
+            if c == bmg.nodes[x][&#39;color&#39;] or c == bmg.nodes[y][&#39;color&#39;]:
+                continue
+            
+            for z1, z2 in itertools.permutations(color_dict[c], 2):
+                
+                if (rbmg.has_edge(z1, x) and rbmg.has_edge(z2, y) and
+                    bmg.has_edge(z1, y) and not bmg.has_edge(y, z1) and
+                    bmg.has_edge(z2, x) and not bmg.has_edge(x, z2)):
+                    
+                    fp.edges[x, y][&#39;middle_in_good&#39;] = True
+        
+        # first edges of ugly/bad quartets          
+        for _ in range(2):
+            
+            for x2 in color_dict[bmg.nodes[x][&#39;color&#39;]]:
+                if x == x2:
+                    continue
+                
+                for z in rbmg.neighbors(x2):
+                    
+                    if (bmg.nodes[z][&#39;color&#39;] == bmg.nodes[x][&#39;color&#39;] or
+                        bmg.nodes[z][&#39;color&#39;] == bmg.nodes[y][&#39;color&#39;]):
+                        continue
+                    # first edges of ugly quartets
+                    if (rbmg.has_edge(y, x2) and not rbmg.has_edge(z, y) and
+                        not rbmg.has_edge(z, x)):
+                        fp.edges[x, y][&#39;first_in_ugly&#39;] = True
+                    
+                    # first edges of bad quartets
+                    elif (not rbmg.has_edge(y, x2) and rbmg.has_edge(z, y) and
+                          not bmg.has_edge(x, z)):
+                        fp.edges[x, y][&#39;first_in_bad&#39;] = True
+            
+            # swap for second iteration
+            x, y = y, x
+    
+    return fp   </code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.correct_bmg"><code class="name flex">
+<span>def <span class="ident">correct_bmg</span></span>(<span>bmg_original)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Build the LRT (using min cut in BUILD algorithm) and return its BMG.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def correct_bmg(bmg_original):
+    &#34;&#34;&#34;Build the LRT (using min cut in BUILD algorithm) and return its BMG.&#34;&#34;&#34;
+    
+    subtrees = []
+    for sg in (bmg_original.subgraph(c)
+               for c in nx.weakly_connected_components(bmg_original)):
+        tree = lrt_from_colored_graph(sg, mincut=True)
+        if tree:
+            subtrees.append(tree)
+            
+    if len(subtrees) == 0:
+        return None
+    elif len(subtrees) == 1:
+        tree = subtrees[0]
+    else:
+        tree = Tree(TreeNode())
+        for subtree in subtrees:
+            tree.root.add_child(subtree.root)
+    
+    return bmg_from_tree(tree)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.count_good_ugly"><code class="name flex">
+<span>def <span class="ident">count_good_ugly</span></span>(<span>bmg, rbmg, fp)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def count_good_ugly(bmg, rbmg, fp):
+    
+    classify_good_ugly(bmg, rbmg, fp)
+    
+    good, ugly, both = 0, 0, 0
+    
+    for x, y in fp.edges():
+        
+        if fp.edges[x, y][&#39;middle_in_good&#39;] and fp.edges[x, y][&#39;first_in_ugly&#39;]:
+            good += 1
+            ugly += 1
+            both += 1
+        elif fp.edges[x, y][&#39;middle_in_good&#39;]:
+            good += 1
+        elif fp.edges[x, y][&#39;first_in_ugly&#39;]:
+            ugly += 1
+    
+    return good, ugly, both</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.count_good_ugly_bad"><code class="name flex">
+<span>def <span class="ident">count_good_ugly_bad</span></span>(<span>bmg, rbmg, fp)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def count_good_ugly_bad(bmg, rbmg, fp):
+    
+    classify_good_ugly(bmg, rbmg, fp)
+    
+    gub, gu, gb, ub, g, u, b = 0, 0, 0, 0, 0, 0, 0
+    
+    for x, y in fp.edges():
+        
+        if (fp.edges[x, y][&#39;middle_in_good&#39;] and
+            fp.edges[x, y][&#39;first_in_ugly&#39;] and
+            fp.edges[x, y][&#39;first_in_bad&#39;]):
+            gub += 1
+            gu += 1
+            gb += 1
+            ub += 1
+            g += 1
+            u += 1
+            b += 1
+            
+        elif fp.edges[x, y][&#39;middle_in_good&#39;] and fp.edges[x, y][&#39;first_in_ugly&#39;]:
+            gu += 1
+            g += 1
+            u += 1
+        elif fp.edges[x, y][&#39;middle_in_good&#39;] and fp.edges[x, y][&#39;first_in_bad&#39;]:
+            gb += 1
+            g += 1
+            b += 1
+        elif fp.edges[x, y][&#39;first_in_ugly&#39;] and fp.edges[x, y][&#39;first_in_bad&#39;]:
+            ub += 1
+            u += 1
+            b += 1
+        elif fp.edges[x, y][&#39;middle_in_good&#39;]:
+            g += 1
+        elif fp.edges[x, y][&#39;first_in_ugly&#39;]:
+            u += 1
+        elif fp.edges[x, y][&#39;first_in_bad&#39;]:
+            b += 1
+    
+    return gub, gu, gb, ub, g, u, b</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.extended_best_hits"><code class="name flex">
+<span>def <span class="ident">extended_best_hits</span></span>(<span>leaves, D, epsilon=1e-08, supply_rbmg=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Compute BMG and RBMG from a distances matrix D.</p>
+<p>Apporximation of best matches as the genes within a tolerance range from
+the gene with the smallest distance, see [1].</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>leaves</code></strong> :&ensp;<code>list</code> of <code>TreeNode instances with </code>label<code> attribute</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>D</code></strong> :&ensp;<code>2-dimensional numpy array</code></dt>
+<dd>The distances of the leaves where the order of the rows/columns
+corresponds to that in the list.</dd>
+<dt><strong><code>epsilon</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>relative threshold for the inclusion of suboptimal hits, i.e.,
+(x,y) in BMG if D(x,y) &lt;= (1+epsilon) * min d(x,y'). The default
+is 1e-8 (for limited float precision).</dd>
+<dt><strong><code>supply_rbmg</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, also return the symmetric part of the constructed BMG.
+The default is False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>networx.DiGraph</code> or <code>pair</code> of <code>networx.DiGraph and networx.Graph</code></dt>
+<dd>The constructed BMG and optionally its symmetric part.</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] P. F. Stadler, M. Geiß, D. Schaller, A. López Sánchez, M. Gonzalez
+Laffitte, D. I. Valdivia, M. Hellmuth, and M. Hernández Rosales.
+From pairs of most similar sequences to phylogenetic best matches.
+In: Algorithms for Molecular Biology, 15:5, 2020.
+doi: 10.1186/s13015-020-00165-2.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def extended_best_hits(leaves, D, epsilon=1e-8, supply_rbmg=False):
+    &#34;&#34;&#34;Compute BMG and RBMG from a distances matrix D.
+    
+    Apporximation of best matches as the genes within a tolerance range from
+    the gene with the smallest distance, see [1].
+    
+    Parameters
+    ----------
+    leaves : list of TreeNode instances with `label` attribute
+    D : 2-dimensional numpy array
+        The distances of the leaves where the order of the rows/columns
+        corresponds to that in the list.
+    epsilon : float, optional
+        relative threshold for the inclusion of suboptimal hits, i.e.,
+        (x,y) in BMG if D(x,y) &lt;= (1+epsilon) * min d(x,y&#39;). The default
+        is 1e-8 (for limited float precision).
+    supply_rbmg : bool, optional
+        If True, also return the symmetric part of the constructed BMG.
+        The default is False.
+    
+    Returns
+    -------
+    networx.DiGraph or pair of networx.DiGraph and networx.Graph
+        The constructed BMG and optionally its symmetric part.
+        
+    References
+    ----------
+    .. [1] P. F. Stadler, M. Geiß, D. Schaller, A. López Sánchez, M. Gonzalez
+    Laffitte, D. I. Valdivia, M. Hellmuth, and M. Hernández Rosales.
+    From pairs of most similar sequences to phylogenetic best matches.
+    In: Algorithms for Molecular Biology, 15:5, 2020.
+    doi: 10.1186/s13015-020-00165-2.
+    &#34;&#34;&#34;
+    
+    bmg = nx.DiGraph()
+    colors = set()
+    relative_threshold = 1 + epsilon
+    
+    for v in leaves:
+        bmg.add_node(v.label, color=v.color)
+        colors.add(v.color)
+    
+    # ---- build BMG ----
+    for u in range(len(leaves)):
+        minima = {color: float(&#39;inf&#39;) for color in colors}
+        for v in range(len(leaves)):
+            if D[u,v] &lt; minima[leaves[v].color]:
+                minima[leaves[v].color] = D[u,v]
+        for v in range(len(leaves)):
+            if (leaves[u].color != leaves[v].color and
+                D[u,v] &lt;= relative_threshold * minima[leaves[v].color]):
+                bmg.add_edge(leaves[u].label, leaves[v].label,
+                             distance = D[u,v])
+    
+    if not supply_rbmg:
+        return bmg
+    else:
+        return bmg, bmg.to_undirected(reciprocal=True)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.find_all_C6"><code class="name flex">
+<span>def <span class="ident">find_all_C6</span></span>(<span>G, P4_list=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Find induces C6 of the form <x1 y1 z1 x2 y2 z2>.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_all_C6(G, P4_list=None):
+    &#34;&#34;&#34;Find induces C6 of the form &lt;x1 y1 z1 x2 y2 z2&gt;.&#34;&#34;&#34;
+    
+    if P4_list is None:
+        P4_list = find_all_P4(G)
+        
+    endpoints = {}
+    for path in P4_list:
+        a, b, c, d = path if path[0] &lt; path[3] else path[::-1]
+        a_col, b_col, c_col, d_col = (G.nodes[a][&#39;color&#39;], G.nodes[b][&#39;color&#39;],
+                                      G.nodes[c][&#39;color&#39;], G.nodes[d][&#39;color&#39;])
+        # avoid multiple recording for the 3 different colors:
+        if a_col == d_col and a_col &lt; b_col and a_col &lt; c_col:
+            if (a, d) not in endpoints:
+                endpoints[(a, d)] = {}
+            if (b_col, c_col) not in endpoints[(a, d)]:
+                endpoints[(a, d)][(b_col, c_col)] = []
+            endpoints[(a, d)][(b_col, c_col)].append(path)
+    
+    C6_list = []
+    for endpoint, colors in endpoints.items():
+        x1, x2 = endpoint
+        for color_pair, paths in colors.items():
+            y_color, z_color = color_pair
+            # avoid multiple recording for the 2 directions:
+            if y_color &lt; z_color and (z_color, y_color) in colors:
+                for path1 in paths:
+                    for path2 in colors[(z_color, y_color)]:
+                        if ((not G.has_edge(path1[1], path2[1])) and
+                            (not G.has_edge(path1[2], path2[2]))):
+                            C6_list.append(path1 + (path2[2], path2[1]))
+                            if not validate_C6(G, C6_list[-1]):
+                                raise RuntimeError(&#39;problem in C6 detection&#39;)
+                            print(C6_list[-1])
+    return C6_list</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.find_all_P4"><code class="name flex">
+<span>def <span class="ident">find_all_P4</span></span>(<span>G)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_all_P4(G):
+    P4_list = []
+    for v in G:
+            G.nodes[v][&#39;vis&#39;] = 0
+    for v in G:
+        G.nodes[v][&#39;vis&#39;] = 1
+        list_path(2, 4, [v], G, P4_list)
+        G.nodes[v][&#39;vis&#39;] = 0
+    return P4_list</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.forbidden_triples"><code class="name flex">
+<span>def <span class="ident">forbidden_triples</span></span>(<span>graph, color_dict=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Compute the forbidden triples of a colored digraph.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>graph</code></strong> :&ensp;<code>networkx.DiGraph</code></dt>
+<dd>A digraph whose nodes have the 'color' attribute.</dd>
+<dt><strong><code>color_dict</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>A dict containing the colors that appear in the graph as keys and the
+list of nodes with the respective color as values. The default is False
+in which case this dict is computed internally.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>Each item in the list is a tuple (a, b1, b2) of three nodes such that
+a b1 | b2 is a forbidden triple in the graph, see [1].</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] D. Schaller, P. F. Stadler, and M. Hellmuth.
+Complexity of modification problems for best match graphs.
+In: Theoretical Computer Science, 865:63–84, 2021.
+doi:10.1016/j.tcs.2021.02.037.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forbidden_triples(graph, color_dict=None):
+    &#34;&#34;&#34;Compute the forbidden triples of a colored digraph.
+    
+    Parameters
+    ----------
+    graph : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    color_dict : dict, optional
+        A dict containing the colors that appear in the graph as keys and the
+        list of nodes with the respective color as values. The default is False
+        in which case this dict is computed internally.
+    
+    Returns
+    -------
+    list
+        Each item in the list is a tuple (a, b1, b2) of three nodes such that
+        a b1 | b2 is a forbidden triple in the graph, see [1].
+    
+    References
+    ----------
+    .. [1] D. Schaller, P. F. Stadler, and M. Hellmuth.
+       Complexity of modification problems for best match graphs.
+       In: Theoretical Computer Science, 865:63–84, 2021.
+       doi:10.1016/j.tcs.2021.02.037.
+    &#34;&#34;&#34;
+    
+    if not isinstance(graph, nx.DiGraph):
+        raise TypeError(&#34;must be a NetworkX &#39;Digraph&#39;&#34;)
+    
+    if not color_dict:
+        color_dict = sort_by_colors(graph)
+    
+    F = []
+    
+    for c1, c2 in itertools.permutations(color_dict.keys(), 2):
+        for a in color_dict[c1]:
+            for b1, b2 in itertools.combinations(color_dict[c2], 2):
+                if graph.has_edge(a, b1) and graph.has_edge(a, b2):
+                    F.append( (a, b1, b2) )
+                    F.append( (a, b2, b1) )
+    
+    return F</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.graph_type"><code class="name flex">
+<span>def <span class="ident">graph_type</span></span>(<span>G)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def graph_type(G):
+    
+    P4_list = find_all_P4(G)
+    C6_list = find_all_C6(G, P4_list=P4_list)
+    
+    if C6_list:
+        return &#39;C&#39;, P4_list, C6_list
+    elif P4_list:
+        return &#39;B&#39;, P4_list, C6_list
+    else:
+        return &#39;A&#39;, P4_list, C6_list</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.informative_forbidden_triples"><code class="name flex">
+<span>def <span class="ident">informative_forbidden_triples</span></span>(<span>graph, color_dict=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Compute the informative and forbidden triples of a colored digraph.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>graph</code></strong> :&ensp;<code>networkx.DiGraph</code></dt>
+<dd>A digraph whose nodes have the 'color' attribute.</dd>
+<dt><strong><code>color_dict</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>A dict containing the colors that appear in the graph as keys and the
+list of nodes with the respective color as values. The default is False
+in which case this dict is computed internally.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple</code> of <code>two lists</code></dt>
+<dd>Each item in the first (resp. second) list is a tuple (a, b1, b2) of
+three nodes such that a b1 | b2 is a informative (resp. forbidden)
+triple in the graph, see [1].</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] D. Schaller, P. F. Stadler, and M. Hellmuth.
+Complexity of modification problems for best match graphs.
+In: Theoretical Computer Science, 865:63–84, 2021.
+doi:10.1016/j.tcs.2021.02.037.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def informative_forbidden_triples(graph, color_dict=None):
+    &#34;&#34;&#34;Compute the informative and forbidden triples of a colored digraph.
+    
+    Parameters
+    ----------
+    graph : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    color_dict : dict, optional
+        A dict containing the colors that appear in the graph as keys and the
+        list of nodes with the respective color as values. The default is False
+        in which case this dict is computed internally.
+    
+    Returns
+    -------
+    tuple of two lists
+        Each item in the first (resp. second) list is a tuple (a, b1, b2) of
+        three nodes such that a b1 | b2 is a informative (resp. forbidden)
+        triple in the graph, see [1].
+    
+    References
+    ----------
+    .. [1] D. Schaller, P. F. Stadler, and M. Hellmuth.
+       Complexity of modification problems for best match graphs.
+       In: Theoretical Computer Science, 865:63–84, 2021.
+       doi:10.1016/j.tcs.2021.02.037.
+    &#34;&#34;&#34;
+    
+    if not isinstance(graph, nx.DiGraph):
+        raise TypeError(&#34;must be a NetworkX &#39;Digraph&#39;&#34;)
+    
+    if not color_dict:
+        color_dict = sort_by_colors(graph)
+    
+    R, F = [], []
+    
+    for c1, c2 in itertools.permutations(color_dict.keys(), 2):
+        for a in color_dict[c1]:
+            for b1, b2 in itertools.combinations(color_dict[c2], 2):
+                
+                if graph.has_edge(a, b1) and graph.has_edge(a, b2):
+                    F.append( (a, b1, b2) )
+                    F.append( (a, b2, b1) )
+                elif graph.has_edge(a, b1):
+                    R.append( (a, b1, b2) )
+                elif graph.has_edge(a, b2):
+                    R.append( (a, b2, b1) )
+    
+    return R, F</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.informative_triples"><code class="name flex">
+<span>def <span class="ident">informative_triples</span></span>(<span>graph, color_dict=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Compute the informative triples of a colored digraph.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>graph</code></strong> :&ensp;<code>networkx.DiGraph</code></dt>
+<dd>A digraph whose nodes have the 'color' attribute.</dd>
+<dt><strong><code>color_dict</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>A dict containing the colors that appear in the graph as keys and the
+list of nodes with the respective color as values. The default is False
+in which case this dict is computed internally.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>Each item in the list is a tuple (a, b1, b2) of three nodes such that
+a b1 | b2 is an informative triple in the graph, see [1].</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] M. Geiß, E. Chávez, M. González Laffitte, A. López Sánchez, B. M. R.
+Stadler, D. I. Valdivia, M. Hellmuth, M. Hernández Rosales, and P. F.
+Stadler.
+Best match graphs.
+In: Journal of Mathematical Biology, 78:2015–2057, 2019.
+doi:10.1007/s00285-019-01332-9.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def informative_triples(graph, color_dict=None):
+    &#34;&#34;&#34;Compute the informative triples of a colored digraph.
+    
+    Parameters
+    ----------
+    graph : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    color_dict : dict, optional
+        A dict containing the colors that appear in the graph as keys and the
+        list of nodes with the respective color as values. The default is False
+        in which case this dict is computed internally.
+    
+    Returns
+    -------
+    list
+        Each item in the list is a tuple (a, b1, b2) of three nodes such that
+        a b1 | b2 is an informative triple in the graph, see [1].
+    
+    References
+    ----------
+    .. [1] M. Geiß, E. Chávez, M. González Laffitte, A. López Sánchez, B. M. R. 
+       Stadler, D. I. Valdivia, M. Hellmuth, M. Hernández Rosales, and P. F.
+       Stadler.
+       Best match graphs.
+       In: Journal of Mathematical Biology, 78:2015–2057, 2019.
+       doi:10.1007/s00285-019-01332-9.
+    &#34;&#34;&#34;
+    
+    if not isinstance(graph, nx.DiGraph):
+        raise TypeError(&#34;must be a NetworkX &#39;Digraph&#39;&#34;)
+    
+    if not color_dict:
+        color_dict = sort_by_colors(graph)
+    
+    R = []
+    
+    for c1, c2 in itertools.permutations(color_dict.keys(), 2):
+        for a in color_dict[c1]:
+            for b1, b2 in itertools.permutations(color_dict[c2], 2):
+                if graph.has_edge(a, b1) and (not graph.has_edge(a, b2)):
+                    R.append( (a, b1, b2) )
+    
+    return R</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.is_bmg"><code class="name flex">
+<span>def <span class="ident">is_bmg</span></span>(<span>G)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Determine whether a colored digraph is a BMG.</p>
+<p>If the graph is a BMG, then its LRT is returned, see [1].</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>G</code></strong> :&ensp;<code>networkx.DiGraph</code></dt>
+<dd>A digraph whose nodes have the 'color' attribute.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tree</code> or <code>bool</code></dt>
+<dd>The least-resolved tree if the graph was a BMG, and False otherwise.</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] D. Schaller, M. Geiß, E. Chávez, M. González Laffitte, A. López
+Sánchez, B. M. R. Stadler, D. I. Valdivia, M. Hellmuth, M. Hernández
+Rosales, and P. F. Stadler.
+Corrigendum to 'Best match graphs'.
+In: Journal of Mathematical Biology, 82:47, 2021.
+doi: 10.1007/s00285-021-01601-6.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_bmg(G):
+    &#34;&#34;&#34;Determine whether a colored digraph is a BMG.
+    
+    If the graph is a BMG, then its LRT is returned, see [1].
+    
+    Parameters
+    ----------
+    G : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    
+    Returns
+    -------
+    Tree or bool
+        The least-resolved tree if the graph was a BMG, and False otherwise.
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, E. Chávez, M. González Laffitte, A. López
+       Sánchez, B. M. R. Stadler, D. I. Valdivia, M. Hellmuth, M. Hernández
+       Rosales, and P. F. Stadler.
+       Corrigendum to &#39;Best match graphs&#39;.
+       In: Journal of Mathematical Biology, 82:47, 2021. 
+       doi: 10.1007/s00285-021-01601-6.
+    &#34;&#34;&#34;
+    
+    if not isinstance(G, nx.DiGraph):
+            raise TypeError(&#39;not a digraph&#39;)
+    if not is_properly_colored(G):
+        raise RuntimeError(&#39;not a properly colored digraph&#39;)
+    
+    subtrees = []
+    colors = None
+    
+    for wcc in nx.weakly_connected_components(G):
+        
+        sg = G.subgraph(wcc).copy()
+        color_dict = sort_by_colors(sg)
+        
+        # the color sets of all components must be equal
+        if colors is None:
+            colors = set(color_dict)
+        elif colors != set(color_dict):
+            return False
+        
+        L = {v for v in sg.nodes()}
+        R = informative_triples(sg, color_dict=color_dict)
+        build = Build(R, L, mincut=False)
+        subtree = build.build_tree()
+        
+        if not subtree: 
+            return False
+        else:
+            # a digraph is a BMG iff its equal to the BMG of BUILD(R)
+            reconstruct_color_from_graph(subtree, sg)
+            if not graphs_equal(sg, bmg_from_tree(subtree)):
+                return False
+            subtrees.append(subtree)
+    
+    if len(subtrees) == 1:
+        root = subtrees[0].root
+    else:
+        root = TreeNode()
+        for subtree in subtrees:
+            root.add_child(subtree.root)
+    
+    return _finalize(root, G)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.is_good_quartet"><code class="name flex">
+<span>def <span class="ident">is_good_quartet</span></span>(<span>path, bmg)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Determine whether an induced P4 is a good quartet in the bmg.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_good_quartet(path, bmg):
+    &#34;&#34;&#34;Determine whether an induced P4 is a good quartet in the bmg.&#34;&#34;&#34;
+    if (bmg.has_edge(path[0], path[2]) and 
+        bmg.has_edge(path[3], path[1]) and
+        bmg.nodes[path[0]][&#39;color&#39;] == bmg.nodes[path[3]][&#39;color&#39;]):
+        return True
+    else:
+        return False</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.list_path"><code class="name flex">
+<span>def <span class="ident">list_path</span></span>(<span>t, k, path, G, P4_list)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def list_path(t, k, path, G, P4_list):
+    for u in G[path[-1]]:
+        G.nodes[u][&#39;vis&#39;] += 1
+    for u in G[path[-1]]:
+        if G.nodes[u][&#39;vis&#39;] == 1:
+            if t &lt; k:
+                list_path(t+1, k, path + [u], G, P4_list)
+            elif path[0] &lt; u:
+                P4_list.append(tuple(path) + (u,))
+    for u in G[path[-1]]:
+        G.nodes[u][&#39;vis&#39;] -= 1</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.lrt_from_2bmg"><code class="name flex">
+<span>def <span class="ident">lrt_from_2bmg</span></span>(<span>G)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Effieciently constructs the LRT for a 2-BMG via the support vertices.</p>
+<p>Implementation of the efficient algorithm in [1].</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>G</code></strong> :&ensp;<code>networkx.DiGraph</code></dt>
+<dd>A digraph whose nodes have the 'color' attribute.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tree</code> or <code>bool</code></dt>
+<dd>The least-resolved tree if the graph was a 2-colored BMG, and
+False otherwise.</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] D. Schaller, M. Geiß, M. Hellmuth, and P. F. Stadler.
+Least resolved trees for two-colored best match graphs.
+In: Journal of Graph Algorithms and Applications, 25(1):397–416, 2021.
+doi: 10.7155/jgaa.00564.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def lrt_from_2bmg(G):
+    &#34;&#34;&#34;Effieciently constructs the LRT for a 2-BMG via the support vertices.
+    
+    Implementation of the efficient algorithm in [1].
+    
+    Parameters
+    ----------
+    G : networkx.DiGraph
+        A digraph whose nodes have the &#39;color&#39; attribute.
+    
+    Returns
+    -------
+    Tree or bool
+        The least-resolved tree if the graph was a 2-colored BMG, and
+        False otherwise.
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, M. Hellmuth, and P. F. Stadler.
+       Least resolved trees for two-colored best match graphs.
+       In: Journal of Graph Algorithms and Applications, 25(1):397–416, 2021.
+       doi: 10.7155/jgaa.00564.
+    &#34;&#34;&#34;
+    
+    builder = TwoColoredLRT(G)
+    return builder.build_tree()</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.lrt_from_colored_graph"><code class="name flex">
+<span>def <span class="ident">lrt_from_colored_graph</span></span>(<span>G, mincut=False, weighted_mincut=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def lrt_from_colored_graph(G, mincut=False, weighted_mincut=False):
+    
+    L = {v for v in G.nodes()}
+    R = informative_triples(G)
+    
+    build = Build(R, L, mincut=mincut, weighted_mincut=weighted_mincut)
+    tree = build.build_tree()
+    
+    return _finalize(tree, G)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.lrt_from_observable_tree"><code class="name flex">
+<span>def <span class="ident">lrt_from_observable_tree</span></span>(<span>T)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Computes the Least Resolved Tree from a tree.</p>
+<p>The unique Least Resolved Tree from a leaf-colored (observable)
+gene tree is computed by contraction of all redundant edges.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>T</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>A tree whose nodes have the 'color' attribute.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tree</code></dt>
+<dd>The unique least resolved tree (w.r.t. best matches), see [1].</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] D. Schaller, M. Geiß, P. F. Stadler, and M. Hellmuth.
+Complete characterization of incorrect orthology assignments in best match
+graphs.
+In: Journal of Mathematical Biology, 82:20, 2021.
+doi: 10.1007/s00285-021-01564-8.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def lrt_from_observable_tree(T):
+    &#34;&#34;&#34;Computes the Least Resolved Tree from a tree.
+    
+    The unique Least Resolved Tree from a leaf-colored (observable)
+    gene tree is computed by contraction of all redundant edges.
+    
+    Parameters
+    ----------
+    T : Tree
+        A tree whose nodes have the &#39;color&#39; attribute.
+    
+    Returns
+    -------
+    Tree
+        The unique least resolved tree (w.r.t. best matches), see [1].
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, P. F. Stadler, and M. Hellmuth.
+    Complete characterization of incorrect orthology assignments in best match
+    graphs. 
+    In: Journal of Mathematical Biology, 82:20, 2021.
+    doi: 10.1007/s00285-021-01564-8.
+    &#34;&#34;&#34;
+    
+    lrt = T.copy()
+    if not lrt.root:
+        return lrt
+    
+    # remove planted root if existent
+    if len(lrt.root.children) == 1:
+        new_root = lrt.root.children[0]
+        new_root.detach()
+        lrt.root = new_root
+        new_root.dist = 0.0
+    
+    # assign list of leaves to each node
+    leaves = lrt.leaf_dict()
+    
+    subtree_colors = {}
+    for v in lrt.preorder():
+        subtree_colors[v] = {leaf.color for leaf in leaves[v]}
+        
+    arc_colors = _arc_colors(lrt, leaves, subtree_colors)
+    red_edges = redundant_edges(lrt, subtree_colors, arc_colors)
+    lrt.contract(red_edges)
+    lrt = topology_only(lrt)
+    
+    return lrt</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.orthology_from_tree"><code class="name flex">
+<span>def <span class="ident">orthology_from_tree</span></span>(<span>tree)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Constructs the true orthology graph from an event-labeled tree.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>tree</code></dt>
+<dd>A tree with leaves that have the <code>label</code>, and inner vertices that have
+the <code>event</code> attribute set.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>networx.Graph</code></dt>
+<dd>The ortholy graph explained by the tree, i.e., a graph on the set of
+leaf labels and edges between two of them if and only if their last
+common ancestor was a speciation event.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def orthology_from_tree(tree):
+    &#34;&#34;&#34;Constructs the true orthology graph from an event-labeled tree.
+    
+    Parameters
+    ----------
+    tree : tree
+        A tree with leaves that have the `label`, and inner vertices that have
+        the `event` attribute set.
+    
+    Returns
+    -------
+    networx.Graph
+        The ortholy graph explained by the tree, i.e., a graph on the set of
+        leaf labels and edges between two of them if and only if their last
+        common ancestor was a speciation event.
+    &#34;&#34;&#34;
+    
+    if not isinstance(tree, Tree):
+        raise TypeError(&#34;not of type &#39;Tree&#39;&#34;)
+    
+    leaves = tree.leaf_dict()
+    TOG = nx.Graph()
+    
+    for v in leaves[tree.root]:
+        TOG.add_node(v.label, color=v.color)
+    
+    for node in tree.preorder():
+        if node.event == &#39;S&#39;:
+            for c1, c2 in itertools.combinations(node.children, 2):
+                for u in leaves[c1]:
+                    for v in leaves[c2]:
+                        TOG.add_edge(u.label, v.label)
+                        
+    return TOG</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.redundant_edges"><code class="name flex">
+<span>def <span class="ident">redundant_edges</span></span>(<span>T, subtree_colors, arc_colors)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def redundant_edges(T, subtree_colors, arc_colors):
+    
+    red_edges = []
+    
+    for u, v in T.inner_edges():
+        
+        # colors s in sigma( L(T(u) \ T(v)) )
+        aux_set = set()
+        
+        for v2 in u.children:
+            if v2 is not v:
+                aux_set.update(subtree_colors[v2])
+        
+        if not arc_colors[v].intersection(aux_set):
+            red_edges.append((u, v))
+    
+    return red_edges</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.remove_all_P4"><code class="name flex">
+<span>def <span class="ident">remove_all_P4</span></span>(<span>rbmg, bmg, P4_list=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Find all good quartets and removes the middle edges.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_all_P4(rbmg, bmg, P4_list=None):
+    &#34;&#34;&#34;Find all good quartets and removes the middle edges.&#34;&#34;&#34;
+    GP4 = rbmg.copy()
+    
+    if P4_list is None:
+        P4_list = find_all_P4(GP4)
+
+    for path in P4_list:
+        if is_good_quartet(path, bmg) and GP4.has_edge(path[1], path[2]):
+            GP4.remove_edge(path[1], path[2])
+            print(path[1], &#34;-|-&#34;, path[2])
+    
+    return GP4</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.analysis.BestMatches.validate_C6"><code class="name flex">
+<span>def <span class="ident">validate_C6</span></span>(<span>G, C6_path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate_C6(G, C6_path):
+    
+    C6 = G.subgraph(C6_path)
+    if C6.size() != 6:
+        print(C6_path)
+        print(&#39;Nodes&#39;, [n for n in C6.nodes()], C6.order())
+        print(&#39;Edges&#39;, [edge for edge in C6.edges()], C6.size())
+        print(&#39;Size not equal to 6!&#39;)
+        return False
+    for n in C6.nodes():
+        if not C6.degree(n) == 2:
+            print(&#34;Degree not equal to 2 for&#34;, n)
+            return False
+        for neighbor in G.neighbors(n):
+            if G.nodes[n][&#39;color&#39;] == G.nodes[neighbor][&#39;color&#39;]:
+                print(&#39;Same color&#39;, n, neighbor)
+                return False
+    return True</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="asymmetree.analysis.BestMatches.TwoColoredLRT"><code class="flex name class">
+<span>class <span class="ident">TwoColoredLRT</span></span>
+<span>(</span><span>digraph)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Construct the least-resolved tree of a 2-colored best match graph.</p>
+<p>Implementation of the efficient algorithm in [1].</p>
+<h2 id="references">References</h2>
+<p>.. [1] D. Schaller, M. Geiß, M. Hellmuth, and P. F. Stadler.
+Least resolved trees for two-colored best match graphs.
+In: Journal of Graph Algorithms and Applications, 25(1):397–416, 2021.
+doi: 10.7155/jgaa.00564.</p>
+<p>Constructor.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>G</code></strong> :&ensp;<code>networkx.DiGraph</code></dt>
+<dd>A digraph whose nodes have the 'color' attribute.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TwoColoredLRT:
+    &#34;&#34;&#34;Construct the least-resolved tree of a 2-colored best match graph.
+    
+    Implementation of the efficient algorithm in [1].
+    
+    References
+    ----------
+    .. [1] D. Schaller, M. Geiß, M. Hellmuth, and P. F. Stadler.
+       Least resolved trees for two-colored best match graphs.
+       In: Journal of Graph Algorithms and Applications, 25(1):397–416, 2021.
+       doi: 10.7155/jgaa.00564.
+    &#34;&#34;&#34;
+    
+    def __init__(self, digraph):
+        &#34;&#34;&#34;Constructor.
+        
+        Parameters
+        ----------
+        G : networkx.DiGraph
+            A digraph whose nodes have the &#39;color&#39; attribute.
+        &#34;&#34;&#34;
+        
+        if not isinstance(digraph, nx.DiGraph):
+            raise TypeError(&#39;not a digraph&#39;)
+            
+        self.digraph = digraph
+        self.color_dict = sort_by_colors(digraph)
+                
+    
+    def build_tree(self):
+        &#34;&#34;&#34;Construct the least-resolved tree.
+        
+        Returns
+        -------
+        Tree or bool
+            The least-resolved tree if the graph was a 2-colored BMG, and
+            False otherwise.
+        &#34;&#34;&#34;
+        
+        if not is_properly_colored(self.digraph):
+            raise RuntimeError(&#39;not a properly colored digraph&#39;)
+        if len(self.color_dict) &gt; 2:
+            raise RuntimeError(&#39;more than 2 colors&#39;)
+        
+        # star tree if there is only one color
+        if len(self.color_dict) == 1:
+            root = TreeNode()
+            for v in self.digraph.nodes():
+                root.add_child(TreeNode(label=v))
+        # 2 colors
+        else:
+            subtrees = []
+            for wcc in nx.weakly_connected_components(self.digraph):
+                if len(wcc) == 1:
+                    return False
+                
+                subroot = self._build_tree(self.digraph.subgraph(wcc).copy())
+                
+                if not subroot:
+                    return False
+                else:
+                    subtrees.append(subroot)
+            
+            if len(subtrees) == 1:
+                root = subtrees[0]
+            else:
+                root = TreeNode()
+                for subroot in subtrees:
+                    root.add_child(subroot)
+        
+        return _finalize(root, self.digraph)
+    
+        
+    def _build_tree(self, G):
+            
+        color_count = {color: 0 for color in self.color_dict.keys()}
+        for v in G.nodes():
+            color_count[G.nodes[v][&#39;color&#39;]] += 1
+        other_color = {color: G.order() - count
+                       for color, count in color_count.items()}
+        
+        umbrella = {v for v in G.nodes() if 
+                    other_color[G.nodes[v][&#39;color&#39;]] == G.out_degree(v)}
+        S_1 = {v for v in umbrella if umbrella.issuperset(G.predecessors(v))}
+        S_2 = {v for v in S_1 if S_1.issuperset(G.predecessors(v))}
+        
+        if not S_2 or len(S_1) != len(S_2):
+            return False
+            
+        node = TreeNode()
+        for v in S_2:
+            node.add_child(TreeNode(label=v))
+            G.remove_node(v)
+        
+        for wcc in nx.weakly_connected_components(G):
+            
+            if len(wcc) == 1:
+                return False
+            
+            child = self._build_tree(G.subgraph(wcc).copy())
+            
+            if not child:
+                return False
+            else:
+                node.add_child(child)
+                
+        return node</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="asymmetree.analysis.BestMatches.TwoColoredLRT.build_tree"><code class="name flex">
+<span>def <span class="ident">build_tree</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Construct the least-resolved tree.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tree</code> or <code>bool</code></dt>
+<dd>The least-resolved tree if the graph was a 2-colored BMG, and
+False otherwise.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_tree(self):
+    &#34;&#34;&#34;Construct the least-resolved tree.
+    
+    Returns
+    -------
+    Tree or bool
+        The least-resolved tree if the graph was a 2-colored BMG, and
+        False otherwise.
+    &#34;&#34;&#34;
+    
+    if not is_properly_colored(self.digraph):
+        raise RuntimeError(&#39;not a properly colored digraph&#39;)
+    if len(self.color_dict) &gt; 2:
+        raise RuntimeError(&#39;more than 2 colors&#39;)
+    
+    # star tree if there is only one color
+    if len(self.color_dict) == 1:
+        root = TreeNode()
+        for v in self.digraph.nodes():
+            root.add_child(TreeNode(label=v))
+    # 2 colors
+    else:
+        subtrees = []
+        for wcc in nx.weakly_connected_components(self.digraph):
+            if len(wcc) == 1:
+                return False
+            
+            subroot = self._build_tree(self.digraph.subgraph(wcc).copy())
+            
+            if not subroot:
+                return False
+            else:
+                subtrees.append(subroot)
+        
+        if len(subtrees) == 1:
+            root = subtrees[0]
+        else:
+            root = TreeNode()
+            for subroot in subtrees:
+                root.add_child(subroot)
+    
+    return _finalize(root, self.digraph)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="asymmetree.analysis" href="index.html">asymmetree.analysis</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="asymmetree.analysis.BestMatches.augment_and_label" href="#asymmetree.analysis.BestMatches.augment_and_label">augment_and_label</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.binary_explainable_triples" href="#asymmetree.analysis.BestMatches.binary_explainable_triples">binary_explainable_triples</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.binary_refinable_tree" href="#asymmetree.analysis.BestMatches.binary_refinable_tree">binary_refinable_tree</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.bmg_from_tree" href="#asymmetree.analysis.BestMatches.bmg_from_tree">bmg_from_tree</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.bmg_from_tree_quadratic" href="#asymmetree.analysis.BestMatches.bmg_from_tree_quadratic">bmg_from_tree_quadratic</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.classify_good_ugly" href="#asymmetree.analysis.BestMatches.classify_good_ugly">classify_good_ugly</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.correct_bmg" href="#asymmetree.analysis.BestMatches.correct_bmg">correct_bmg</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.count_good_ugly" href="#asymmetree.analysis.BestMatches.count_good_ugly">count_good_ugly</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.count_good_ugly_bad" href="#asymmetree.analysis.BestMatches.count_good_ugly_bad">count_good_ugly_bad</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.extended_best_hits" href="#asymmetree.analysis.BestMatches.extended_best_hits">extended_best_hits</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.find_all_C6" href="#asymmetree.analysis.BestMatches.find_all_C6">find_all_C6</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.find_all_P4" href="#asymmetree.analysis.BestMatches.find_all_P4">find_all_P4</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.forbidden_triples" href="#asymmetree.analysis.BestMatches.forbidden_triples">forbidden_triples</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.graph_type" href="#asymmetree.analysis.BestMatches.graph_type">graph_type</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.informative_forbidden_triples" href="#asymmetree.analysis.BestMatches.informative_forbidden_triples">informative_forbidden_triples</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.informative_triples" href="#asymmetree.analysis.BestMatches.informative_triples">informative_triples</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.is_bmg" href="#asymmetree.analysis.BestMatches.is_bmg">is_bmg</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.is_good_quartet" href="#asymmetree.analysis.BestMatches.is_good_quartet">is_good_quartet</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.list_path" href="#asymmetree.analysis.BestMatches.list_path">list_path</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.lrt_from_2bmg" href="#asymmetree.analysis.BestMatches.lrt_from_2bmg">lrt_from_2bmg</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.lrt_from_colored_graph" href="#asymmetree.analysis.BestMatches.lrt_from_colored_graph">lrt_from_colored_graph</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.lrt_from_observable_tree" href="#asymmetree.analysis.BestMatches.lrt_from_observable_tree">lrt_from_observable_tree</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.orthology_from_tree" href="#asymmetree.analysis.BestMatches.orthology_from_tree">orthology_from_tree</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.redundant_edges" href="#asymmetree.analysis.BestMatches.redundant_edges">redundant_edges</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.remove_all_P4" href="#asymmetree.analysis.BestMatches.remove_all_P4">remove_all_P4</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.validate_C6" href="#asymmetree.analysis.BestMatches.validate_C6">validate_C6</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="asymmetree.analysis.BestMatches.TwoColoredLRT" href="#asymmetree.analysis.BestMatches.TwoColoredLRT">TwoColoredLRT</a></code></h4>
+<ul class="">
+<li><code><a title="asymmetree.analysis.BestMatches.TwoColoredLRT.build_tree" href="#asymmetree.analysis.BestMatches.TwoColoredLRT.build_tree">build_tree</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

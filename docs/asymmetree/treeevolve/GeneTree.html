@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>asymmetree.treeevolve.GeneTree API documentation</title>
-<meta name="description" content="Gene Tree Simulator …" />
+<meta name="description" content="Simulation of dated gene trees." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,8 +22,7 @@
 <h1 class="title">Module <code>asymmetree.treeevolve.GeneTree</code></h1>
 </header>
 <section id="section-intro">
-<p>Gene Tree Simulator.</p>
-<p>Simulate dated gene trees.</p>
+<p>Simulation of dated gene trees.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -31,14 +30,13 @@
 <pre><code class="python"># -*- coding: utf-8 -*-
 
 &#34;&#34;&#34;
-Gene Tree Simulator.
-
-Simulate dated gene trees.
+Simulation of dated gene trees.
 &#34;&#34;&#34;
 
 import random, warnings
 from collections import deque
 from dataclasses import dataclass
+from warnings import warn
 
 import numpy as np
 
@@ -685,16 +683,39 @@ class GeneTreeSimulator:
         
 
 # --------------------------------------------------------------------------
-#                 CONSTRUCTION OF THE OBSERVABLE TREE
+#                           PRUNE LOSS BRANCHES
 # --------------------------------------------------------------------------
+
+def prune_losses(tree):
+    &#34;&#34;&#34;Prune all loss branches.
+    
+    Returns a copy of the tree with all branches that lead to losses only
+    removed and superfluous vertices suppressed. Additionally, if the root of
+    the tree has only a single child, then this &#39;planted edge&#39; is also removed.    
+    
+    Parameters
+    ----------
+    tree : Tree
+        The tree to be pruned.
+    
+    Returns
+    -------
+    Tree
+        A pruned version of the tree.
+    &#34;&#34;&#34;
+    
+    pruned_tree = delete_losses_and_contract(tree, inplace=False)
+    
+    remove_planted_root(pruned_tree, inplace=True)
+    
+    return pruned_tree
+
 
 def observable_tree(tree):
     
-    obs_tree = delete_losses_and_contract(tree, inplace=False)
-    
-    remove_planted_root(obs_tree, inplace=True)
-    
-    return obs_tree</code></pre>
+    warn(&#39;This method is deprecated. Use prune_losses() instead.&#39;,
+         DeprecationWarning, stacklevel=2)
+    return prune_losses(tree)</code></pre>
 </details>
 </section>
 <section>
@@ -715,11 +736,57 @@ def observable_tree(tree):
 </summary>
 <pre><code class="python">def observable_tree(tree):
     
-    obs_tree = delete_losses_and_contract(tree, inplace=False)
+    warn(&#39;This method is deprecated. Use prune_losses() instead.&#39;,
+         DeprecationWarning, stacklevel=2)
+    return prune_losses(tree)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.treeevolve.GeneTree.prune_losses"><code class="name flex">
+<span>def <span class="ident">prune_losses</span></span>(<span>tree)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Prune all loss branches.</p>
+<p>Returns a copy of the tree with all branches that lead to losses only
+removed and superfluous vertices suppressed. Additionally, if the root of
+the tree has only a single child, then this 'planted edge' is also removed.
+</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>The tree to be pruned.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tree</code></dt>
+<dd>A pruned version of the tree.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def prune_losses(tree):
+    &#34;&#34;&#34;Prune all loss branches.
     
-    remove_planted_root(obs_tree, inplace=True)
+    Returns a copy of the tree with all branches that lead to losses only
+    removed and superfluous vertices suppressed. Additionally, if the root of
+    the tree has only a single child, then this &#39;planted edge&#39; is also removed.    
     
-    return obs_tree</code></pre>
+    Parameters
+    ----------
+    tree : Tree
+        The tree to be pruned.
+    
+    Returns
+    -------
+    Tree
+        A pruned version of the tree.
+    &#34;&#34;&#34;
+    
+    pruned_tree = delete_losses_and_contract(tree, inplace=False)
+    
+    remove_planted_root(pruned_tree, inplace=True)
+    
+    return pruned_tree</code></pre>
 </details>
 </dd>
 <dt id="asymmetree.treeevolve.GeneTree.simulate_dated_gene_tree"><code class="name flex">
@@ -1600,6 +1667,7 @@ doi:10.1093/bioinformatics/btz081.</p></div>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="asymmetree.treeevolve.GeneTree.observable_tree" href="#asymmetree.treeevolve.GeneTree.observable_tree">observable_tree</a></code></li>
+<li><code><a title="asymmetree.treeevolve.GeneTree.prune_losses" href="#asymmetree.treeevolve.GeneTree.prune_losses">prune_losses</a></code></li>
 <li><code><a title="asymmetree.treeevolve.GeneTree.simulate_dated_gene_tree" href="#asymmetree.treeevolve.GeneTree.simulate_dated_gene_tree">simulate_dated_gene_tree</a></code></li>
 </ul>
 </li>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>asymmetree.genome API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Genome simulation …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,11 +22,26 @@
 <h1 class="title">Module <code>asymmetree.genome</code></h1>
 </header>
 <section id="section-intro">
+<p>Genome simulation.</p>
+<p>The module asymmetree.genome.GenomeSimulation provides functions that combine
+the simulation of phylogenetic trees and sequences. In particular, the class
+GenomeSimulator combines multiple steps described in the previous sections in
+order to conveniently simulate whole genomes/proteomes. The (optional) output
+directory contains serialized trees, fasta files, and the true alignments.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
+
+&#34;&#34;&#34;Genome simulation.
+
+The module asymmetree.genome.GenomeSimulation provides functions that combine
+the simulation of phylogenetic trees and sequences. In particular, the class
+GenomeSimulator combines multiple steps described in the previous sections in
+order to conveniently simulate whole genomes/proteomes. The (optional) output
+directory contains serialized trees, fasta files, and the true alignments.
+&#34;&#34;&#34;
 
 from asymmetree.genome.GenomeSimulation import GenomeSimulator</code></pre>
 </details>

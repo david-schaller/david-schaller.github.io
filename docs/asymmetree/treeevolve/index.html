@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>asymmetree.treeevolve API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Simulation of species and gene trees …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,13 +22,49 @@
 <h1 class="title">Module <code>asymmetree.treeevolve</code></h1>
 </header>
 <section id="section-intro">
+<p>Simulation of species and gene trees.</p>
+<p>The subpackage asymmetree.treeevolve contains modules for the simulation and
+manipulation of species trees and gene trees. In terms of divergence time,
+these trees define an ultrametric on the set of their (extant) leaves. Gene
+trees, furthermore, can be manipulated with a realistic rate heterogeneity
+among their branches resulting in general additive distances (but no longer
+ultrametric).</p>
+<p>A typical simulation consists of the following steps:</p>
+<p>(1) dated species tree (models e.g. 'innovation', 'Yule', and '(episodic)
+birth-death process')</p>
+<p>(2) dated gene tree(s) (birth-death process with speciations as additional
+branching events)</p>
+<p>(3) assignment of asymmetric evolution rates to paralogous genes</p>
+<p>(4) pruned gene tree(s) (removal of all branches that lead to losses only)</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
 
-from asymmetree.treeevolve.GeneTree import simulate_dated_gene_tree, GeneTreeSimulator, observable_tree
+&#34;&#34;&#34;Simulation of species and gene trees.
+
+The subpackage asymmetree.treeevolve contains modules for the simulation and
+manipulation of species trees and gene trees. In terms of divergence time,
+these trees define an ultrametric on the set of their (extant) leaves. Gene
+trees, furthermore, can be manipulated with a realistic rate heterogeneity
+among their branches resulting in general additive distances (but no longer
+ultrametric).
+
+A typical simulation consists of the following steps:
+    
+(1) dated species tree (models e.g. &#39;innovation&#39;, &#39;Yule&#39;, and &#39;(episodic)
+    birth-death process&#39;)
+    
+(2) dated gene tree(s) (birth-death process with speciations as additional
+    branching events)
+
+(3) assignment of asymmetric evolution rates to paralogous genes
+
+(4) pruned gene tree(s) (removal of all branches that lead to losses only)
+&#34;&#34;&#34;
+
+from asymmetree.treeevolve.GeneTree import simulate_dated_gene_tree, GeneTreeSimulator, prune_losses
 from asymmetree.treeevolve.SpeciesTree import simulate_species_tree, simulate_species_tree_age
 from asymmetree.treeevolve.EvolutionRates import assign_rates, autocorrelation_factors, simulate_gene_trees
 from asymmetree.treeevolve.NoisyMatrix import noisy_matrix, convex_linear_comb, wrong_topology_matrix</code></pre>
@@ -39,19 +75,19 @@ from asymmetree.treeevolve.NoisyMatrix import noisy_matrix, convex_linear_comb, 
 <dl>
 <dt><code class="name"><a title="asymmetree.treeevolve.EvolutionRates" href="EvolutionRates.html">asymmetree.treeevolve.EvolutionRates</a></code></dt>
 <dd>
-<div class="desc"><p>Assign asymmetric evolution rates to the branches of a gene tree …</p></div>
+<div class="desc"><p>Evolution rate heterogeneity …</p></div>
 </dd>
 <dt><code class="name"><a title="asymmetree.treeevolve.GeneTree" href="GeneTree.html">asymmetree.treeevolve.GeneTree</a></code></dt>
 <dd>
-<div class="desc"><p>Gene Tree Simulator …</p></div>
+<div class="desc"><p>Simulation of dated gene trees.</p></div>
 </dd>
 <dt><code class="name"><a title="asymmetree.treeevolve.NoisyMatrix" href="NoisyMatrix.html">asymmetree.treeevolve.NoisyMatrix</a></code></dt>
 <dd>
-<div class="desc"><p>Noisy Matrix …</p></div>
+<div class="desc"><p>Simulation of noisy distance matrices …</p></div>
 </dd>
 <dt><code class="name"><a title="asymmetree.treeevolve.SpeciesTree" href="SpeciesTree.html">asymmetree.treeevolve.SpeciesTree</a></code></dt>
 <dd>
-<div class="desc"><p>Species Tree Simulator …</p></div>
+<div class="desc"><p>Simulation of dated species trees.</p></div>
 </dd>
 </dl>
 </section>

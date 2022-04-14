@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>asymmetree.treeevolve.NoisyMatrix API documentation</title>
-<meta name="description" content="Noisy Matrix …" />
+<meta name="description" content="Simulation of noisy distance matrices …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,8 +22,11 @@
 <h1 class="title">Module <code>asymmetree.treeevolve.NoisyMatrix</code></h1>
 </header>
 <section id="section-intro">
-<p>Noisy Matrix.</p>
-<p>Introduce noise into a distance matrix.</p>
+<p>Simulation of noisy distance matrices.</p>
+<p>Distances derived from (real-life) gene or protein sequences are burdened with
+noise. Such data can either be modeled by simulating sequences, or by
+disturbing the distances specified by a given tree directly. This module
+implements functions for the latter alternative.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -31,9 +34,12 @@
 <pre><code class="python"># -*- coding: utf-8 -*-
 
 &#34;&#34;&#34;
-Noisy Matrix.
+Simulation of noisy distance matrices.
 
-Introduce noise into a distance matrix.
+Distances derived from (real-life) gene or protein sequences are burdened with
+noise. Such data can either be modeled by simulating sequences, or by
+disturbing the distances specified by a given tree directly. This module
+implements functions for the latter alternative.
 &#34;&#34;&#34;
 
 import random
@@ -279,11 +285,11 @@ def convex_linear_comb(D1, D2, alpha=0.05, first_only=False):
             return D1_alpha
 
 
-def wrong_topology_matrix(OGT):
+def wrong_topology_matrix(PGT):
     &#34;&#34;&#34;Return a wrong topology matrix by rearranging the edges of a binary tree.&#34;&#34;&#34;
     
-    distances = [v.dist for v in OGT.preorder()][1:]    # do not include root,
-    if len(distances) % 2 != 0:                         # observable gene tree (OGT)
+    distances = [v.dist for v in PGT.preorder()][1:]    # do not include root,
+    if len(distances) % 2 != 0:                         # pruned gene tree (PGT)
         print(&#34;List of distances is not even!&#34;)         # is binary and not planted,
         return                                          # hence |E| should be even
     random.shuffle(distances)
@@ -544,7 +550,7 @@ doi: 10.1109/ALLERTON.2017.8262793.</p></div>
 </details>
 </dd>
 <dt id="asymmetree.treeevolve.NoisyMatrix.wrong_topology_matrix"><code class="name flex">
-<span>def <span class="ident">wrong_topology_matrix</span></span>(<span>OGT)</span>
+<span>def <span class="ident">wrong_topology_matrix</span></span>(<span>PGT)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return a wrong topology matrix by rearranging the edges of a binary tree.</p></div>
@@ -552,11 +558,11 @@ doi: 10.1109/ALLERTON.2017.8262793.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def wrong_topology_matrix(OGT):
+<pre><code class="python">def wrong_topology_matrix(PGT):
     &#34;&#34;&#34;Return a wrong topology matrix by rearranging the edges of a binary tree.&#34;&#34;&#34;
     
-    distances = [v.dist for v in OGT.preorder()][1:]    # do not include root,
-    if len(distances) % 2 != 0:                         # observable gene tree (OGT)
+    distances = [v.dist for v in PGT.preorder()][1:]    # do not include root,
+    if len(distances) % 2 != 0:                         # pruned gene tree (PGT)
         print(&#34;List of distances is not even!&#34;)         # is binary and not planted,
         return                                          # hence |E| should be even
     random.shuffle(distances)

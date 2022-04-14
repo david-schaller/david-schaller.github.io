@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>asymmetree.seqevolve API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Evolving sequences along trees …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,11 +22,62 @@
 <h1 class="title">Module <code>asymmetree.seqevolve</code></h1>
 </header>
 <section id="section-intro">
+<p>Evolving sequences along trees.</p>
+<p>The subpackage asymmetree.seqevolve contains modules for the simulation of
+nucleotide or amino acid sequences along a phylogenetic tree using
+time-continuous Markov chains, as usually applied for this purpose (for
+textbooks, see e.g. [1], [2], and [3]).</p>
+<p>These models typically take a substitution-rate matrix and the equilibrium
+frequencies of the states (i.e. the nucleotides or amino acids as input).
+Moreover, insertions and deletions (indels) and heterogeneity among the sites
+can be simulated.</p>
+<h2 id="references">References</h2>
+<p>.. [1] J. Felsenstein.
+Inferring Phylogenies. Sinauer Associates, Sunderland, Mass, 2004.
+ISBN 978-0-87893-177-4.
+.. [2] Z. Yang.
+Computational molecular evolution.
+Oxford series in ecology and evolution. Oxford University Press, 2006.
+ISBN 978-0-19-856699-1 978-0-19-856702-8.
+.. [3] Z. Yang.
+Molecular Evolution: A Statistical Approach.
+Oxford University Press, Oxford, United Kingdom; New York, NY, United
+States of America,
+rst edition edition, 2014.
+ISBN 978-0-19-960261-2 978-0-19-960260-5.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
+
+&#34;&#34;&#34;Evolving sequences along trees.
+
+The subpackage asymmetree.seqevolve contains modules for the simulation of
+nucleotide or amino acid sequences along a phylogenetic tree using
+time-continuous Markov chains, as usually applied for this purpose (for
+textbooks, see e.g. [1], [2], and [3]).
+
+These models typically take a substitution-rate matrix and the equilibrium
+frequencies of the states (i.e. the nucleotides or amino acids as input).
+Moreover, insertions and deletions (indels) and heterogeneity among the sites 
+can be simulated.
+
+References
+----------
+.. [1] J. Felsenstein.
+   Inferring Phylogenies. Sinauer Associates, Sunderland, Mass, 2004.
+   ISBN 978-0-87893-177-4.
+.. [2] Z. Yang.
+   Computational molecular evolution.
+   Oxford series in ecology and evolution. Oxford University Press, 2006.
+   ISBN 978-0-19-856699-1 978-0-19-856702-8.
+.. [3] Z. Yang.
+   Molecular Evolution: A Statistical Approach.
+   Oxford University Press, Oxford, United Kingdom; New York, NY, United
+   States of America,  rst edition edition, 2014.
+   ISBN 978-0-19-960261-2 978-0-19-960260-5.
+&#34;&#34;&#34;
 
 from asymmetree.seqevolve.Evolver import Evolver
 from asymmetree.seqevolve.SubstModel import SubstModel
@@ -41,7 +92,7 @@ from asymmetree.seqevolve.EvolvingSequence import EvoSeq</code></pre>
 <dl>
 <dt><code class="name"><a title="asymmetree.seqevolve.Alignment" href="Alignment.html">asymmetree.seqevolve.Alignment</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Constructing the true alignment of simulated sequences.</p></div>
 </dd>
 <dt><code class="name"><a title="asymmetree.seqevolve.EmpiricalModels" href="EmpiricalModels.html">asymmetree.seqevolve.EmpiricalModels</a></code></dt>
 <dd>
@@ -54,7 +105,7 @@ and rate heterogeneity …</p></div>
 </dd>
 <dt><code class="name"><a title="asymmetree.seqevolve.EvolvingSequence" href="EvolvingSequence.html">asymmetree.seqevolve.EvolvingSequence</a></code></dt>
 <dd>
-<div class="desc"><p>Evolving sequence …</p></div>
+<div class="desc"><p>Data structure for evolving sequences.</p></div>
 </dd>
 <dt><code class="name"><a title="asymmetree.seqevolve.HetModel" href="HetModel.html">asymmetree.seqevolve.HetModel</a></code></dt>
 <dd>
@@ -80,7 +131,9 @@ and rate heterogeneity …</p></div>
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#references">References</a></li>
+</ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>

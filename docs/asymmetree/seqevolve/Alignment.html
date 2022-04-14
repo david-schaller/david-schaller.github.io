@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>asymmetree.seqevolve.Alignment API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Constructing the true alignment of simulated sequences." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,11 +22,14 @@
 <h1 class="title">Module <code>asymmetree.seqevolve.Alignment</code></h1>
 </header>
 <section id="section-intro">
+<p>Constructing the true alignment of simulated sequences.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
+
+&#34;&#34;&#34;Constructing the true alignment of simulated sequences.&#34;&#34;&#34;
 
 import numpy as np
 import networkx as nx
@@ -39,8 +42,7 @@ class AlignmentBuilder:
     &#34;&#34;&#34;Construction of the true alignment of simulated sequences.&#34;&#34;&#34;
     
     def __init__(self, tree, sequence_dict, alphabet, include_inner=True):
-        &#34;&#34;&#34;Constructor of class &#39;AlignmentBuilder&#39;.
-        
+        &#34;&#34;&#34;
         Parameters
         ----------
         tree : Tree
@@ -153,7 +155,6 @@ class AlignmentBuilder:
 </code></dt>
 <dd>
 <div class="desc"><p>Construction of the true alignment of simulated sequences.</p>
-<p>Constructor of class 'AlignmentBuilder'.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
@@ -175,8 +176,7 @@ nodes of the tree. The default is True.</dd>
     &#34;&#34;&#34;Construction of the true alignment of simulated sequences.&#34;&#34;&#34;
     
     def __init__(self, tree, sequence_dict, alphabet, include_inner=True):
-        &#34;&#34;&#34;Constructor of class &#39;AlignmentBuilder&#39;.
-        
+        &#34;&#34;&#34;
         Parameters
         ----------
         tree : Tree

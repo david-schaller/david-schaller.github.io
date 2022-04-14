@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>asymmetree.analysis API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Extraction and analysis of orthology, xenology, best matches, ..." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,17 +22,21 @@
 <h1 class="title">Module <code>asymmetree.analysis</code></h1>
 </header>
 <section id="section-intro">
+<p>Extraction and analysis of orthology, xenology, best matches, &hellip;</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
 
+&#34;&#34;&#34;Extraction and analysis of orthology, xenology, best matches, ...
+&#34;&#34;&#34;
+
 from asymmetree.analysis.BestMatches import (orthology_from_tree,
                                              bmg_from_tree,
                                              extended_best_hits,
                                              is_bmg,
-                                             lrt_from_observable_tree,
+                                             lrt_from_tree,
                                              lrt_from_colored_graph,
                                              binary_refinable_tree,
                                              augment_and_label,)
@@ -56,7 +60,7 @@ from asymmetree.analysis.HGT import (true_transfer_edges,
 </dd>
 <dt><code class="name"><a title="asymmetree.analysis.HGT" href="HGT.html">asymmetree.analysis.HGT</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>HGT, xenology and Fitch graphs …</p></div>
 </dd>
 </dl>
 </section>

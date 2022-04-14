@@ -25,7 +25,14 @@
 <p>Orthology graph, BMG, RBMG.</p>
 <p>This module provides classes concerning colored graphs and colored
 (phylogenetic) trees, including a BMG(Tree)-function, and computation of an
-LRT from a (not necessarily valid) BMG or from an observable gene tree.</p>
+LRT from a (not necessarily valid) BMG or from a (pruned) gene tree.</p>
+<p>Phylogenetic best matches of a gene x of species X are defined as those genes
+y of another species Y that share the lowest common ancestor with x in the gene
+tree among all genes in that species. In contrast, two genes are orthologs if
+their last common ancestor was a speciation event. Orthology and reciprocal
+best matches are closely related. The module asymmetree.analysis. BestMatches
+contains methods for extracting BMGs from trees, least resolved trees of BMG,
+and orthology graphs from trees.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -37,7 +44,15 @@ Orthology graph, BMG, RBMG.
 
 This module provides classes concerning colored graphs and colored
 (phylogenetic) trees, including a BMG(Tree)-function, and computation of an
-LRT from a (not necessarily valid) BMG or from an observable gene tree.
+LRT from a (not necessarily valid) BMG or from a (pruned) gene tree.
+
+Phylogenetic best matches of a gene x of species X are defined as those genes
+y of another species Y that share the lowest common ancestor with x in the gene
+tree among all genes in that species. In contrast, two genes are orthologs if
+their last common ancestor was a speciation event. Orthology and reciprocal
+best matches are closely related. The module asymmetree.analysis. BestMatches
+contains methods for extracting BMGs from trees, least resolved trees of BMG,
+and orthology graphs from trees.
 &#34;&#34;&#34;
 
 import itertools
@@ -496,16 +511,16 @@ def _finalize(tree, G):
 #                      LRT FROM OBSERVABLE GENE TREE
 # --------------------------------------------------------------------------
 
-def lrt_from_observable_tree(T):
+def lrt_from_tree(T):
     &#34;&#34;&#34;Computes the Least Resolved Tree from a tree.
     
-    The unique Least Resolved Tree from a leaf-colored (observable)
+    The unique Least Resolved Tree from a leaf-colored (pruned)
     gene tree is computed by contraction of all redundant edges.
     
     Parameters
     ----------
     T : Tree
-        A tree whose nodes have the &#39;color&#39; attribute.
+        A tree whose leaf nodes have the &#39;color&#39; attribute.
     
     Returns
     -------
@@ -725,8 +740,7 @@ class TwoColoredLRT:
     &#34;&#34;&#34;
     
     def __init__(self, digraph):
-        &#34;&#34;&#34;Constructor.
-        
+        &#34;&#34;&#34;
         Parameters
         ----------
         G : networkx.DiGraph
@@ -2458,17 +2472,17 @@ doi: 10.7155/jgaa.00564.</p></div>
     return _finalize(tree, G)</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.analysis.BestMatches.lrt_from_observable_tree"><code class="name flex">
-<span>def <span class="ident">lrt_from_observable_tree</span></span>(<span>T)</span>
+<dt id="asymmetree.analysis.BestMatches.lrt_from_tree"><code class="name flex">
+<span>def <span class="ident">lrt_from_tree</span></span>(<span>T)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Computes the Least Resolved Tree from a tree.</p>
-<p>The unique Least Resolved Tree from a leaf-colored (observable)
+<p>The unique Least Resolved Tree from a leaf-colored (pruned)
 gene tree is computed by contraction of all redundant edges.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>T</code></strong> :&ensp;<code>Tree</code></dt>
-<dd>A tree whose nodes have the 'color' attribute.</dd>
+<dd>A tree whose leaf nodes have the 'color' attribute.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -2485,16 +2499,16 @@ doi: 10.1007/s00285-021-01564-8.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def lrt_from_observable_tree(T):
+<pre><code class="python">def lrt_from_tree(T):
     &#34;&#34;&#34;Computes the Least Resolved Tree from a tree.
     
-    The unique Least Resolved Tree from a leaf-colored (observable)
+    The unique Least Resolved Tree from a leaf-colored (pruned)
     gene tree is computed by contraction of all redundant edges.
     
     Parameters
     ----------
     T : Tree
-        A tree whose nodes have the &#39;color&#39; attribute.
+        A tree whose leaf nodes have the &#39;color&#39; attribute.
     
     Returns
     -------
@@ -2692,7 +2706,6 @@ common ancestor was a speciation event.</dd>
 Least resolved trees for two-colored best match graphs.
 In: Journal of Graph Algorithms and Applications, 25(1):397–416, 2021.
 doi: 10.7155/jgaa.00564.</p>
-<p>Constructor.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>G</code></strong> :&ensp;<code>networkx.DiGraph</code></dt>
@@ -2716,8 +2729,7 @@ doi: 10.7155/jgaa.00564.</p>
     &#34;&#34;&#34;
     
     def __init__(self, digraph):
-        &#34;&#34;&#34;Constructor.
-        
+        &#34;&#34;&#34;
         Parameters
         ----------
         G : networkx.DiGraph
@@ -2910,7 +2922,7 @@ False otherwise.</dd>
 <li><code><a title="asymmetree.analysis.BestMatches.list_path" href="#asymmetree.analysis.BestMatches.list_path">list_path</a></code></li>
 <li><code><a title="asymmetree.analysis.BestMatches.lrt_from_2bmg" href="#asymmetree.analysis.BestMatches.lrt_from_2bmg">lrt_from_2bmg</a></code></li>
 <li><code><a title="asymmetree.analysis.BestMatches.lrt_from_colored_graph" href="#asymmetree.analysis.BestMatches.lrt_from_colored_graph">lrt_from_colored_graph</a></code></li>
-<li><code><a title="asymmetree.analysis.BestMatches.lrt_from_observable_tree" href="#asymmetree.analysis.BestMatches.lrt_from_observable_tree">lrt_from_observable_tree</a></code></li>
+<li><code><a title="asymmetree.analysis.BestMatches.lrt_from_tree" href="#asymmetree.analysis.BestMatches.lrt_from_tree">lrt_from_tree</a></code></li>
 <li><code><a title="asymmetree.analysis.BestMatches.orthology_from_tree" href="#asymmetree.analysis.BestMatches.orthology_from_tree">orthology_from_tree</a></code></li>
 <li><code><a title="asymmetree.analysis.BestMatches.redundant_edges" href="#asymmetree.analysis.BestMatches.redundant_edges">redundant_edges</a></code></li>
 <li><code><a title="asymmetree.analysis.BestMatches.remove_all_P4" href="#asymmetree.analysis.BestMatches.remove_all_P4">remove_all_P4</a></code></li>

@@ -54,7 +54,7 @@ __author__ = &#39;David Schaller&#39;
 
 default_attributes = {&#39;label&#39;: &#39;&#39;,
                       &#39;event&#39;: None,
-                      &#39;color&#39;: None,
+                      &#39;reconc&#39;: None,
                       &#39;dist&#39;: 1.0,
                       &#39;tstamp&#39;: None,
                       &#39;transferred&#39;: 0}
@@ -66,14 +66,14 @@ def node_to_str(node):
     Returns
     -------
     str
-        String representation of the node including color (if defined)
+        String representation of the node including reconc (if defined)
         and dist.
     &#34;&#34;&#34;
     
-    if isinstance(node.color, (tuple, list)):
-        return &#39;{}&lt;{}-{}&gt;:{}&#39;.format(node.label, *node.color, node.dist)
-    elif node.color:
-        return &#39;{}&lt;{}&gt;:{}&#39;.format(node.label, node.color, node.dist)
+    if isinstance(node.reconc, (tuple, list)):
+        return &#39;{}&lt;{}-{}&gt;:{}&#39;.format(node.label, *node.reconc, node.dist)
+    elif node.reconc:
+        return &#39;{}&lt;{}&gt;:{}&#39;.format(node.label, node.reconc, node.dist)
     else:
         return &#39;{}:{}&#39;.format(node.label, node.dist)
 
@@ -125,6 +125,21 @@ def sorted_edges(tree):
                   key=lambda e: (e[0].tstamp, e[1].tstamp),
                   reverse=True)
 
+def distance_from_timing(tree):
+    &#34;&#34;&#34;Adjusts all distances according to the time stamp difference.
+    
+    Parameters
+    ----------
+    tree : Tree
+        A phylogenetic tree with nodes that have a `tstamp` attribute.
+    &#34;&#34;&#34;
+    
+    if tree.root:
+        tree.root.dist = 0.0
+    
+    for u, v in tree.edges():
+        v.dist = abs(u.tstamp - v.tstamp)
+
 
 def delete_and_reconnect(tree, node,
                          add_distances=True,
@@ -155,7 +170,7 @@ def delete_and_reconnect(tree, node,
         return False
     
     for child in node.children:
-        if add_distances and hasattr(child, &#39;dist&#39;):
+        if add_distances and hasattr(node, &#39;dist&#39;) and hasattr(child, &#39;dist&#39;):
             child.dist += node.dist
         if (keep_transferred and 
             hasattr(node, &#39;transferred&#39;) and 
@@ -190,43 +205,43 @@ def add_planted_root(tree):
     return tree.root
 
 
-def color_sorted_leaves(tree, return_list=False):
-    &#34;&#34;&#34;Sort leaves by their color.
+def reconc_sorted_leaves(tree, return_list=False):
+    &#34;&#34;&#34;Sort leaves by their reconciliation attribute.
     
     Parameters
     ----------
     tree : Tree
-        A tree with nodes that have a `color` attribute.
+        A tree with nodes that have a `reconc` attribute.
     return_list : bool, optional
         If True, also return a list of leaves such that leaves of the same
-        color appear as a coherent sequence (the default is False).
+        reconciliation appear as a coherent sequence (the default is False).
     
     Returns
     -------
     dict
-        A dictionary with colors as keys and a list of corresponding nodes
-        as values.
+        A dictionary with reconciliations as keys and a list of corresponding
+        nodes as values.
     list, optional
-        List of leaves such that leaves of the same color appear as a
+        List of leaves such that leaves of the same reconciliation appear as a
         coherent sequence.
     &#34;&#34;&#34;
     
-    color_dict = {}
+    reconc_dict = {}
     
     for leaf in tree.leaves():
-        if leaf.color not in color_dict:
-            color_dict[leaf.color] = []
-        color_dict[leaf.color].append(leaf)
+        if leaf.reconc not in reconc_dict:
+            reconc_dict[leaf.reconc] = []
+        reconc_dict[leaf.reconc].append(leaf)
     
     if not return_list:
-        return color_dict
+        return reconc_dict
     else:
         leaves = []
-        for color, leaf_list in color_dict.items():
+        for reconc, leaf_list in reconc_dict.items():
             for leaf in leaf_list:
                 leaves.append(leaf)
         
-        return color_dict, leaves
+        return reconc_dict, leaves
     
     
 def distance_matrix(tree, leaf_order=None):
@@ -315,8 +330,8 @@ def distances_from_root(tree):
 
 
 def topology_only(tree, inplace=True):
-    &#34;&#34;&#34;Reset colors, distances, time stamps, transfer status and inner
-    labels.
+    &#34;&#34;&#34;Reset reconciliations, distances, time stamps, transfer status, and
+    inner labels.
     
     Parameters
     ----------
@@ -340,7 +355,7 @@ def topology_only(tree, inplace=True):
     for v in T.preorder():
         if v.children:
             v.label = &#39;&#39;
-            v.color = None
+            v.reconc = None
         v.dist = 1.0
         v.tstamp = None
         v.transferred = 0
@@ -384,50 +399,51 @@ def count_node_types(tree):
     return counts
 
 
-def random_colored_tree(N, colors, binary=False, force_all_colors=False):
+def random_colored_tree(n, colors, binary=False, force_all_colors=False):
      &#34;&#34;&#34;Create a random colored tree.
      
-     The number of leaves and the color labels are specified in the
-     parameters `N` and `colors`, respectively. Each non-leaf node in the 
+     The number of leaves and the reconciliation labels are specified in the
+     parameters n and colors, respectively. Each non-leaf node in the 
      resulting tree will have at least children (property of phylogenetic
      trees).
      
      Parameters
      ----------
-     N : int
+     n : int
          The desired number of leaves.
      colors : int or list
-         The list of colors, or the desired number of colors in which case
-         the colors {1, ..., colors} are used.
+         The list of recociliations, or the desired number in which case the
+         reconciliations {1, ..., colors} are used.
      binary : bool, optional
          If True, forces the tree to be binary (the default is False).
      force_all_colors : bool
          If True, the resulting tree is guaranteed to have at least one leaf
-         of each color (the default is False).
+         of each reconciliation (the default is False).
      
      Returns
      -------
      Tree
-         A random tree with `N` leaves and random leaf coloring.
+         A random tree with n leaves to which the `reconc` attribute is
+         assigned at random.
      
      Raises
      ------
      TypeError
-         If `N` is not an integer &gt; 0.
+         If n is not an integer &gt; 0.
      ValueError
-         If the number of colors is greater than `N` and `force_all_colors`
+         If the number of colors is greater than n and `force_all_colors`
          is true.
      &#34;&#34;&#34;
      
-     tree = Tree.random_tree(N, binary=binary)
+     tree = Tree.random_tree(n, binary=binary)
          
      if isinstance(colors, int):
          colors = [i+1 for i in range(colors)]
      elif not isinstance(colors, collections.abc.Iterable):
          raise TypeError(&#34;&#39;colors&#39; must be of type &#39;int&#39; or iterable&#34;)
          
-     if len(colors) &gt; N and force_all_colors:
-         raise ValueError(&#39;cannot force all colors since #colors &gt; N&#39;)
+     if len(colors) &gt; n and force_all_colors:
+         raise ValueError(&#39;cannot force all colors since #colors &gt; n&#39;)
      
      leaves = [l for l in tree.leaves()]
      
@@ -436,14 +452,14 @@ def random_colored_tree(N, colors, binary=False, force_all_colors=False):
          permutation = np.random.permutation(len(leaves))
          for i in range(len(leaves)):
              if i &lt; len(colors):
-                 leaves[permutation[i]].color = colors[i]
+                 leaves[permutation[i]].reconc = colors[i]
              else:
                  # color the remaining leaves randomly
-                 leaves[permutation[i]].color = random.choice(colors)
+                 leaves[permutation[i]].reconc = random.choice(colors)
      else:
          # assign colors completely randomly
          for leaf in leaves:
-             leaf.color = random.choice(colors)
+             leaf.reconc = random.choice(colors)
              
      return tree
  
@@ -509,23 +525,28 @@ def assign_missing_labels(tree):
             labels.add(current_label)
 
 
-def reconstruct_color_from_graph(tree, G):
-    &#34;&#34;&#34;Reconstruct the colors from a NetworkX Graph.
+def reconstruct_reconc_from_graph(tree, G):
+    &#34;&#34;&#34;Reconstruct the reconciliations from a NetworkX Graph.
     
     Parameters
     ----------
     tree : Tree
     G : networkx.Graph
-        The graph from which labels and colors shall be reconstructed.
+        The graph from which labels and reconciliations shall be reconstructed.
     &#34;&#34;&#34;
     
     for v in tree.preorder():
         if hasattr(v, &#39;label&#39;) and v.label in G:
-            if &#39;color&#39; in G.nodes[v.label]:
-                if isinstance(G.nodes[v.label][&#39;color&#39;], list):
-                    v.color = tuple(G.nodes[v.label][&#39;color&#39;])
+            if &#39;reconc&#39; in G.nodes[v.label]:
+                if isinstance(G.nodes[v.label][&#39;reconc&#39;], list):
+                    v.reconc = tuple(G.nodes[v.label][&#39;reconc&#39;])
                 else:
-                    v.color = G.nodes[v.label][&#39;color&#39;]
+                    v.reconc = G.nodes[v.label][&#39;reconc&#39;]
+            elif &#39;color&#39; in G.nodes[v.label]:
+                if isinstance(G.nodes[v.label][&#39;color&#39;], list):
+                    v.reconc = tuple(G.nodes[v.label][&#39;color&#39;])
+                else:
+                    v.reconc = G.nodes[v.label][&#39;color&#39;]
             
             
 def reconstruct_timestamps(tree):
@@ -637,8 +658,8 @@ def remove_planted_root(tree, inplace=True):
 #                          TREE  &lt;---&gt;  NEWICK
 # --------------------------------------------------------------------------
         
-def to_newick(tree, label=True, color=True, distance=True,
-                    label_inner=True, color_inner=False):
+def to_newick(tree, label=True, reconc=True, distance=True,
+                    label_inner=True, reconc_inner=False):
     &#34;&#34;&#34;Return a Newick representation of the tree.
     
     This function overrides the function of the parent class.
@@ -648,8 +669,8 @@ def to_newick(tree, label=True, color=True, distance=True,
     label : bool, optional
         If True, the Newick str contains the labels of the nodes (the
         default is True).
-    color : bool, optional
-        If True, the Newick str contains the colors of the nodes in
+    reconc : bool, optional
+        If True, the Newick str contains the reconciliations of the nodes in
         &lt;[...]&gt; brackets (the default is True).
     distance : bool, optional
         If True, the Newick str contains the distances of the nodes in
@@ -657,9 +678,9 @@ def to_newick(tree, label=True, color=True, distance=True,
     label_inner : bool, optional
         If True, the Newick str also contains the labels of the inner 
         nodes (the default is True).
-    color_inner : bool, optional
-        If True, the Newick str contains the colors of the inner nodes (the
-        default is False).
+    reconc_inner : bool, optional
+        If True, the Newick str contains the reconciliations of the inner nodes
+        (the default is False).
     
     Returns
     -------
@@ -673,10 +694,10 @@ def to_newick(tree, label=True, color=True, distance=True,
             token = &#39;&#39;
             if label and hasattr(node, &#39;label&#39;):
                 token += str(node.label)
-            if color and hasattr(node, &#39;color&#39;) and node.color:
-                token += &#39;&lt;{}-{}&gt;&#39;.format(*node.color) \
-                    if isinstance(node.color, (tuple, list)) \
-                    else &#39;&lt;{}&gt;&#39;.format(node.color)
+            if reconc and hasattr(node, &#39;reconc&#39;) and node.reconc:
+                token += &#39;&lt;{}-{}&gt;&#39;.format(*node.reconc) \
+                    if isinstance(node.reconc, (tuple, list)) \
+                    else &#39;&lt;{}&gt;&#39;.format(node.reconc)
             if distance and hasattr(node, &#39;dist&#39;):
                 token += &#34;:{}&#34;.format(node.dist)
             return token
@@ -687,10 +708,10 @@ def to_newick(tree, label=True, color=True, distance=True,
             token = &#39;&#39;
             if label and hasattr(node, &#39;label&#39;) and label_inner:
                 token += str(node.label)
-            if color_inner and hasattr(node, &#39;color&#39;) and node.color:
-                token += &#39;&lt;{}-{}&gt;&#39;.format(*node.color) \
-                    if isinstance(node.color, (tuple, list)) \
-                    else &#39;&lt;{}&gt;&#39;.format(node.color)
+            if reconc_inner and hasattr(node, &#39;reconc&#39;) and node.reconc:
+                token += &#39;&lt;{}-{}&gt;&#39;.format(*node.reconc) \
+                    if isinstance(node.reconc, (tuple, list)) \
+                    else &#39;&lt;{}&gt;&#39;.format(node.reconc)
             if distance and hasattr(node, &#39;dist&#39;):
                 token += &#39;:{}&#39;.format(node.dist)
             return &#39;({}){}&#39;.format(s[:-1], token)
@@ -726,14 +747,14 @@ def parse_newick(newick):
     -----
     Do not use this function for serialization and reloading Tree
     objects. Use the `serialize()` function instead.
-    Labels and colors that are integer numbers are converted to int.
-    The colors (if present in &lt;...&gt; in the string) are parsed as strings
-    and need to be converted to integers afterwards if necessary.
+    Labels and reconciliations that are integer numbers are converted to int.
+    The reconciliations (if present in &lt;...&gt; in the string) are parsed as
+    strings and need to be converted to integers afterwards if necessary.
     &#34;&#34;&#34;
     
-    # label&lt;color&gt;:distance
+    # label&lt;reconc&gt;:distance
     label_col_dist_regex = re.compile(r&#34;&#39;?([a-zA-Z0-9_]*)&#39;?&lt;(.*)&gt;:(-?[0-9]*\.?[0-9]*[Ee]?-?[0-9]+)&#34;)
-    # label&lt;color&gt;
+    # label&lt;reconc&gt;
     label_col_regex = re.compile(r&#34;&#39;?([a-zA-Z0-9_]*)&#39;?&lt;(.*)&gt;&#34;)
     # label:distance
     label_dist_regex = re.compile(r&#34;&#39;?([a-zA-Z0-9_]*)&#39;?:(-?[0-9]*\.?[0-9]*[Ee]?-?[0-9]+)&#34;)
@@ -758,30 +779,30 @@ def parse_newick(newick):
                 parse_subtree(node, child[1:end])               # recursive call &#39;parse_subtree&#39;
             child = child[end+1:].strip()
             label_col_dist = label_col_dist_regex.match(child)
-            if label_col_dist:                                  # CASE 1: label&lt;color&gt;:distance
+            if label_col_dist:                                  # CASE 1: label&lt;reconc&gt;:distance
                 node.label = to_int(label_col_dist.group(1))
-                node.color = to_int(label_col_dist.group(2))
+                node.reconc = to_int(label_col_dist.group(2))
                 node.dist = float(label_col_dist.group(3))
             else:
                 label_col = label_col_regex.match(child)
                 label_dist = label_dist_regex.match(child)
-                if label_col:                                   # CASE 2: label&lt;color&gt;
+                if label_col:                                   # CASE 2: label&lt;reconc&gt;
                     node.label = to_int(label_col.group(1))
-                    node.color = to_int(label_col.group(2))
+                    node.reconc = to_int(label_col.group(2))
                     node.dist = 1.0
                 elif label_dist:                                # CASE 3: label:distance
                     node.label = to_int(label_dist.group(1))
-                    node.color = None
+                    node.reconc = None
                     node.dist = float(label_dist.group(2))
                 else:                                           # CASE 4: label
                     node.label = to_int(child)
-                    node.color = None
+                    node.reconc = None
                     node.dist = 1.0
-            # color is a tuple
-            if node.color and isinstance(node.color, str) and node.color.find(&#39;-&#39;) != -1:
-                split_color = node.color.split(&#39;-&#39;)
-                node.color = (to_int(split_color[0]),
-                              to_int(split_color[1]))
+            # reconc is a tuple
+            if node.reconc and isinstance(node.reconc, str) and node.reconc.find(&#39;-&#39;) != -1:
+                split_reconc = node.reconc.split(&#39;-&#39;)
+                node.reconc = (to_int(split_reconc[0]),
+                              to_int(split_reconc[1]))
                     
     def split_children(child_string):
         &#34;&#34;&#34;Splits a given string by all &#39;,&#39; that are not enclosed by parentheses.&#34;&#34;&#34;
@@ -921,71 +942,6 @@ to the tree.</p>
             labels.add(current_label)</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.tools.PhyloTreeTools.color_sorted_leaves"><code class="name flex">
-<span>def <span class="ident">color_sorted_leaves</span></span>(<span>tree, return_list=False)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Sort leaves by their color.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
-<dd>A tree with nodes that have a <code>color</code> attribute.</dd>
-<dt><strong><code>return_list</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>If True, also return a list of leaves such that leaves of the same
-color appear as a coherent sequence (the default is False).</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>dict</code></dt>
-<dd>A dictionary with colors as keys and a list of corresponding nodes
-as values.</dd>
-<dt><code>list</code>, optional</dt>
-<dd>List of leaves such that leaves of the same color appear as a
-coherent sequence.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def color_sorted_leaves(tree, return_list=False):
-    &#34;&#34;&#34;Sort leaves by their color.
-    
-    Parameters
-    ----------
-    tree : Tree
-        A tree with nodes that have a `color` attribute.
-    return_list : bool, optional
-        If True, also return a list of leaves such that leaves of the same
-        color appear as a coherent sequence (the default is False).
-    
-    Returns
-    -------
-    dict
-        A dictionary with colors as keys and a list of corresponding nodes
-        as values.
-    list, optional
-        List of leaves such that leaves of the same color appear as a
-        coherent sequence.
-    &#34;&#34;&#34;
-    
-    color_dict = {}
-    
-    for leaf in tree.leaves():
-        if leaf.color not in color_dict:
-            color_dict[leaf.color] = []
-        color_dict[leaf.color].append(leaf)
-    
-    if not return_list:
-        return color_dict
-    else:
-        leaves = []
-        for color, leaf_list in color_dict.items():
-            for leaf in leaf_list:
-                leaves.append(leaf)
-        
-        return color_dict, leaves</code></pre>
-</details>
-</dd>
 <dt id="asymmetree.tools.PhyloTreeTools.count_node_types"><code class="name flex">
 <span>def <span class="ident">count_node_types</span></span>(<span>tree)</span>
 </code></dt>
@@ -1100,7 +1056,7 @@ node could not be deleted, i.e., it has no parent.</dd>
         return False
     
     for child in node.children:
-        if add_distances and hasattr(child, &#39;dist&#39;):
+        if add_distances and hasattr(node, &#39;dist&#39;) and hasattr(child, &#39;dist&#39;):
             child.dist += node.dist
         if (keep_transferred and 
             hasattr(node, &#39;transferred&#39;) and 
@@ -1184,6 +1140,36 @@ depending on the <code>inplace</code> parameter).</dd>
                                            keep_transferred=True)
     
     return tree</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.tools.PhyloTreeTools.distance_from_timing"><code class="name flex">
+<span>def <span class="ident">distance_from_timing</span></span>(<span>tree)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adjusts all distances according to the time stamp difference.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>A phylogenetic tree with nodes that have a <code>tstamp</code> attribute.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def distance_from_timing(tree):
+    &#34;&#34;&#34;Adjusts all distances according to the time stamp difference.
+    
+    Parameters
+    ----------
+    tree : Tree
+        A phylogenetic tree with nodes that have a `tstamp` attribute.
+    &#34;&#34;&#34;
+    
+    if tree.root:
+        tree.root.dist = 0.0
+    
+    for u, v in tree.edges():
+        v.dist = abs(u.tstamp - v.tstamp)</code></pre>
 </details>
 </dd>
 <dt id="asymmetree.tools.PhyloTreeTools.distance_matrix"><code class="name flex">
@@ -1329,7 +1315,7 @@ sibling order).</dd>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>str</code></dt>
-<dd>String representation of the node including color (if defined)
+<dd>String representation of the node including reconc (if defined)
 and dist.</dd>
 </dl></div>
 <details class="source">
@@ -1342,14 +1328,14 @@ and dist.</dd>
     Returns
     -------
     str
-        String representation of the node including color (if defined)
+        String representation of the node including reconc (if defined)
         and dist.
     &#34;&#34;&#34;
     
-    if isinstance(node.color, (tuple, list)):
-        return &#39;{}&lt;{}-{}&gt;:{}&#39;.format(node.label, *node.color, node.dist)
-    elif node.color:
-        return &#39;{}&lt;{}&gt;:{}&#39;.format(node.label, node.color, node.dist)
+    if isinstance(node.reconc, (tuple, list)):
+        return &#39;{}&lt;{}-{}&gt;:{}&#39;.format(node.label, *node.reconc, node.dist)
+    elif node.reconc:
+        return &#39;{}&lt;{}&gt;:{}&#39;.format(node.label, node.reconc, node.dist)
     else:
         return &#39;{}:{}&#39;.format(node.label, node.dist)</code></pre>
 </details>
@@ -1379,9 +1365,9 @@ and dist.</dd>
 <h2 id="notes">Notes</h2>
 <p>Do not use this function for serialization and reloading Tree
 objects. Use the <code>serialize()</code> function instead.
-Labels and colors that are integer numbers are converted to int.
-The colors (if present in &lt;&hellip;&gt; in the string) are parsed as strings
-and need to be converted to integers afterwards if necessary.</p></div>
+Labels and reconciliations that are integer numbers are converted to int.
+The reconciliations (if present in &lt;&hellip;&gt; in the string) are parsed as
+strings and need to be converted to integers afterwards if necessary.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1410,14 +1396,14 @@ and need to be converted to integers afterwards if necessary.</p></div>
     -----
     Do not use this function for serialization and reloading Tree
     objects. Use the `serialize()` function instead.
-    Labels and colors that are integer numbers are converted to int.
-    The colors (if present in &lt;...&gt; in the string) are parsed as strings
-    and need to be converted to integers afterwards if necessary.
+    Labels and reconciliations that are integer numbers are converted to int.
+    The reconciliations (if present in &lt;...&gt; in the string) are parsed as
+    strings and need to be converted to integers afterwards if necessary.
     &#34;&#34;&#34;
     
-    # label&lt;color&gt;:distance
+    # label&lt;reconc&gt;:distance
     label_col_dist_regex = re.compile(r&#34;&#39;?([a-zA-Z0-9_]*)&#39;?&lt;(.*)&gt;:(-?[0-9]*\.?[0-9]*[Ee]?-?[0-9]+)&#34;)
-    # label&lt;color&gt;
+    # label&lt;reconc&gt;
     label_col_regex = re.compile(r&#34;&#39;?([a-zA-Z0-9_]*)&#39;?&lt;(.*)&gt;&#34;)
     # label:distance
     label_dist_regex = re.compile(r&#34;&#39;?([a-zA-Z0-9_]*)&#39;?:(-?[0-9]*\.?[0-9]*[Ee]?-?[0-9]+)&#34;)
@@ -1442,30 +1428,30 @@ and need to be converted to integers afterwards if necessary.</p></div>
                 parse_subtree(node, child[1:end])               # recursive call &#39;parse_subtree&#39;
             child = child[end+1:].strip()
             label_col_dist = label_col_dist_regex.match(child)
-            if label_col_dist:                                  # CASE 1: label&lt;color&gt;:distance
+            if label_col_dist:                                  # CASE 1: label&lt;reconc&gt;:distance
                 node.label = to_int(label_col_dist.group(1))
-                node.color = to_int(label_col_dist.group(2))
+                node.reconc = to_int(label_col_dist.group(2))
                 node.dist = float(label_col_dist.group(3))
             else:
                 label_col = label_col_regex.match(child)
                 label_dist = label_dist_regex.match(child)
-                if label_col:                                   # CASE 2: label&lt;color&gt;
+                if label_col:                                   # CASE 2: label&lt;reconc&gt;
                     node.label = to_int(label_col.group(1))
-                    node.color = to_int(label_col.group(2))
+                    node.reconc = to_int(label_col.group(2))
                     node.dist = 1.0
                 elif label_dist:                                # CASE 3: label:distance
                     node.label = to_int(label_dist.group(1))
-                    node.color = None
+                    node.reconc = None
                     node.dist = float(label_dist.group(2))
                 else:                                           # CASE 4: label
                     node.label = to_int(child)
-                    node.color = None
+                    node.reconc = None
                     node.dist = 1.0
-            # color is a tuple
-            if node.color and isinstance(node.color, str) and node.color.find(&#39;-&#39;) != -1:
-                split_color = node.color.split(&#39;-&#39;)
-                node.color = (to_int(split_color[0]),
-                              to_int(split_color[1]))
+            # reconc is a tuple
+            if node.reconc and isinstance(node.reconc, str) and node.reconc.find(&#39;-&#39;) != -1:
+                split_reconc = node.reconc.split(&#39;-&#39;)
+                node.reconc = (to_int(split_reconc[0]),
+                              to_int(split_reconc[1]))
                     
     def split_children(child_string):
         &#34;&#34;&#34;Splits a given string by all &#39;,&#39; that are not enclosed by parentheses.&#34;&#34;&#34;
@@ -1556,88 +1542,90 @@ The default is True.</dd>
 </details>
 </dd>
 <dt id="asymmetree.tools.PhyloTreeTools.random_colored_tree"><code class="name flex">
-<span>def <span class="ident">random_colored_tree</span></span>(<span>N, colors, binary=False, force_all_colors=False)</span>
+<span>def <span class="ident">random_colored_tree</span></span>(<span>n, colors, binary=False, force_all_colors=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a random colored tree.</p>
-<p>The number of leaves and the color labels are specified in the
-parameters <code>N</code> and <code>colors</code>, respectively. Each non-leaf node in the
+<p>The number of leaves and the reconciliation labels are specified in the
+parameters n and colors, respectively. Each non-leaf node in the
 resulting tree will have at least children (property of phylogenetic
 trees).</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>N</code></strong> :&ensp;<code>int</code></dt>
+<dt><strong><code>n</code></strong> :&ensp;<code>int</code></dt>
 <dd>The desired number of leaves.</dd>
 <dt><strong><code>colors</code></strong> :&ensp;<code>int</code> or <code>list</code></dt>
-<dd>The list of colors, or the desired number of colors in which case
-the colors {1, &hellip;, colors} are used.</dd>
+<dd>The list of recociliations, or the desired number in which case the
+reconciliations {1, &hellip;, colors} are used.</dd>
 <dt><strong><code>binary</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>If True, forces the tree to be binary (the default is False).</dd>
 <dt><strong><code>force_all_colors</code></strong> :&ensp;<code>bool</code></dt>
 <dd>If True, the resulting tree is guaranteed to have at least one leaf
-of each color (the default is False).</dd>
+of each reconciliation (the default is False).</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>Tree</code></dt>
-<dd>A random tree with <code>N</code> leaves and random leaf coloring.</dd>
+<dd>A random tree with n leaves to which the <code>reconc</code> attribute is
+assigned at random.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
 <dt><code>TypeError</code></dt>
-<dd>If <code>N</code> is not an integer &gt; 0.</dd>
+<dd>If n is not an integer &gt; 0.</dd>
 <dt><code>ValueError</code></dt>
-<dd>If the number of colors is greater than <code>N</code> and <code>force_all_colors</code>
+<dd>If the number of colors is greater than n and <code>force_all_colors</code>
 is true.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def random_colored_tree(N, colors, binary=False, force_all_colors=False):
+<pre><code class="python">def random_colored_tree(n, colors, binary=False, force_all_colors=False):
      &#34;&#34;&#34;Create a random colored tree.
      
-     The number of leaves and the color labels are specified in the
-     parameters `N` and `colors`, respectively. Each non-leaf node in the 
+     The number of leaves and the reconciliation labels are specified in the
+     parameters n and colors, respectively. Each non-leaf node in the 
      resulting tree will have at least children (property of phylogenetic
      trees).
      
      Parameters
      ----------
-     N : int
+     n : int
          The desired number of leaves.
      colors : int or list
-         The list of colors, or the desired number of colors in which case
-         the colors {1, ..., colors} are used.
+         The list of recociliations, or the desired number in which case the
+         reconciliations {1, ..., colors} are used.
      binary : bool, optional
          If True, forces the tree to be binary (the default is False).
      force_all_colors : bool
          If True, the resulting tree is guaranteed to have at least one leaf
-         of each color (the default is False).
+         of each reconciliation (the default is False).
      
      Returns
      -------
      Tree
-         A random tree with `N` leaves and random leaf coloring.
+         A random tree with n leaves to which the `reconc` attribute is
+         assigned at random.
      
      Raises
      ------
      TypeError
-         If `N` is not an integer &gt; 0.
+         If n is not an integer &gt; 0.
      ValueError
-         If the number of colors is greater than `N` and `force_all_colors`
+         If the number of colors is greater than n and `force_all_colors`
          is true.
      &#34;&#34;&#34;
      
-     tree = Tree.random_tree(N, binary=binary)
+     tree = Tree.random_tree(n, binary=binary)
          
      if isinstance(colors, int):
          colors = [i+1 for i in range(colors)]
      elif not isinstance(colors, collections.abc.Iterable):
          raise TypeError(&#34;&#39;colors&#39; must be of type &#39;int&#39; or iterable&#34;)
          
-     if len(colors) &gt; N and force_all_colors:
-         raise ValueError(&#39;cannot force all colors since #colors &gt; N&#39;)
+     if len(colors) &gt; n and force_all_colors:
+         raise ValueError(&#39;cannot force all colors since #colors &gt; n&#39;)
      
      leaves = [l for l in tree.leaves()]
      
@@ -1646,51 +1634,121 @@ is true.</dd>
          permutation = np.random.permutation(len(leaves))
          for i in range(len(leaves)):
              if i &lt; len(colors):
-                 leaves[permutation[i]].color = colors[i]
+                 leaves[permutation[i]].reconc = colors[i]
              else:
                  # color the remaining leaves randomly
-                 leaves[permutation[i]].color = random.choice(colors)
+                 leaves[permutation[i]].reconc = random.choice(colors)
      else:
          # assign colors completely randomly
          for leaf in leaves:
-             leaf.color = random.choice(colors)
+             leaf.reconc = random.choice(colors)
              
      return tree</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.tools.PhyloTreeTools.reconstruct_color_from_graph"><code class="name flex">
-<span>def <span class="ident">reconstruct_color_from_graph</span></span>(<span>tree, G)</span>
+<dt id="asymmetree.tools.PhyloTreeTools.reconc_sorted_leaves"><code class="name flex">
+<span>def <span class="ident">reconc_sorted_leaves</span></span>(<span>tree, return_list=False)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Reconstruct the colors from a NetworkX Graph.</p>
+<div class="desc"><p>Sort leaves by their reconciliation attribute.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>G</code></strong> :&ensp;<code>networkx.Graph</code></dt>
-<dd>The graph from which labels and colors shall be reconstructed.</dd>
+<dd>A tree with nodes that have a <code>reconc</code> attribute.</dd>
+<dt><strong><code>return_list</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, also return a list of leaves such that leaves of the same
+reconciliation appear as a coherent sequence (the default is False).</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>A dictionary with reconciliations as keys and a list of corresponding
+nodes as values.</dd>
+<dt><code>list</code>, optional</dt>
+<dd>List of leaves such that leaves of the same reconciliation appear as a
+coherent sequence.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def reconstruct_color_from_graph(tree, G):
-    &#34;&#34;&#34;Reconstruct the colors from a NetworkX Graph.
+<pre><code class="python">def reconc_sorted_leaves(tree, return_list=False):
+    &#34;&#34;&#34;Sort leaves by their reconciliation attribute.
+    
+    Parameters
+    ----------
+    tree : Tree
+        A tree with nodes that have a `reconc` attribute.
+    return_list : bool, optional
+        If True, also return a list of leaves such that leaves of the same
+        reconciliation appear as a coherent sequence (the default is False).
+    
+    Returns
+    -------
+    dict
+        A dictionary with reconciliations as keys and a list of corresponding
+        nodes as values.
+    list, optional
+        List of leaves such that leaves of the same reconciliation appear as a
+        coherent sequence.
+    &#34;&#34;&#34;
+    
+    reconc_dict = {}
+    
+    for leaf in tree.leaves():
+        if leaf.reconc not in reconc_dict:
+            reconc_dict[leaf.reconc] = []
+        reconc_dict[leaf.reconc].append(leaf)
+    
+    if not return_list:
+        return reconc_dict
+    else:
+        leaves = []
+        for reconc, leaf_list in reconc_dict.items():
+            for leaf in leaf_list:
+                leaves.append(leaf)
+        
+        return reconc_dict, leaves</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.tools.PhyloTreeTools.reconstruct_reconc_from_graph"><code class="name flex">
+<span>def <span class="ident">reconstruct_reconc_from_graph</span></span>(<span>tree, G)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Reconstruct the reconciliations from a NetworkX Graph.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>G</code></strong> :&ensp;<code>networkx.Graph</code></dt>
+<dd>The graph from which labels and reconciliations shall be reconstructed.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def reconstruct_reconc_from_graph(tree, G):
+    &#34;&#34;&#34;Reconstruct the reconciliations from a NetworkX Graph.
     
     Parameters
     ----------
     tree : Tree
     G : networkx.Graph
-        The graph from which labels and colors shall be reconstructed.
+        The graph from which labels and reconciliations shall be reconstructed.
     &#34;&#34;&#34;
     
     for v in tree.preorder():
         if hasattr(v, &#39;label&#39;) and v.label in G:
-            if &#39;color&#39; in G.nodes[v.label]:
-                if isinstance(G.nodes[v.label][&#39;color&#39;], list):
-                    v.color = tuple(G.nodes[v.label][&#39;color&#39;])
+            if &#39;reconc&#39; in G.nodes[v.label]:
+                if isinstance(G.nodes[v.label][&#39;reconc&#39;], list):
+                    v.reconc = tuple(G.nodes[v.label][&#39;reconc&#39;])
                 else:
-                    v.color = G.nodes[v.label][&#39;color&#39;]</code></pre>
+                    v.reconc = G.nodes[v.label][&#39;reconc&#39;]
+            elif &#39;color&#39; in G.nodes[v.label]:
+                if isinstance(G.nodes[v.label][&#39;color&#39;], list):
+                    v.reconc = tuple(G.nodes[v.label][&#39;color&#39;])
+                else:
+                    v.reconc = G.nodes[v.label][&#39;color&#39;]</code></pre>
 </details>
 </dd>
 <dt id="asymmetree.tools.PhyloTreeTools.reconstruct_timestamps"><code class="name flex">
@@ -1882,7 +1940,7 @@ from youngest to oldest (the default is True).</dd>
 </details>
 </dd>
 <dt id="asymmetree.tools.PhyloTreeTools.to_newick"><code class="name flex">
-<span>def <span class="ident">to_newick</span></span>(<span>tree, label=True, color=True, distance=True, label_inner=True, color_inner=False)</span>
+<span>def <span class="ident">to_newick</span></span>(<span>tree, label=True, reconc=True, distance=True, label_inner=True, reconc_inner=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return a Newick representation of the tree.</p>
@@ -1892,8 +1950,8 @@ from youngest to oldest (the default is True).</dd>
 <dt><strong><code>label</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>If True, the Newick str contains the labels of the nodes (the
 default is True).</dd>
-<dt><strong><code>color</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>If True, the Newick str contains the colors of the nodes in
+<dt><strong><code>reconc</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, the Newick str contains the reconciliations of the nodes in
 &lt;[&hellip;]&gt; brackets (the default is True).</dd>
 <dt><strong><code>distance</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>If True, the Newick str contains the distances of the nodes in
@@ -1901,9 +1959,9 @@ standard :[&hellip;] notation (the default is True).</dd>
 <dt><strong><code>label_inner</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>If True, the Newick str also contains the labels of the inner
 nodes (the default is True).</dd>
-<dt><strong><code>color_inner</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>If True, the Newick str contains the colors of the inner nodes (the
-default is False).</dd>
+<dt><strong><code>reconc_inner</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, the Newick str contains the reconciliations of the inner nodes
+(the default is False).</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -1914,8 +1972,8 @@ default is False).</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_newick(tree, label=True, color=True, distance=True,
-                    label_inner=True, color_inner=False):
+<pre><code class="python">def to_newick(tree, label=True, reconc=True, distance=True,
+                    label_inner=True, reconc_inner=False):
     &#34;&#34;&#34;Return a Newick representation of the tree.
     
     This function overrides the function of the parent class.
@@ -1925,8 +1983,8 @@ default is False).</dd>
     label : bool, optional
         If True, the Newick str contains the labels of the nodes (the
         default is True).
-    color : bool, optional
-        If True, the Newick str contains the colors of the nodes in
+    reconc : bool, optional
+        If True, the Newick str contains the reconciliations of the nodes in
         &lt;[...]&gt; brackets (the default is True).
     distance : bool, optional
         If True, the Newick str contains the distances of the nodes in
@@ -1934,9 +1992,9 @@ default is False).</dd>
     label_inner : bool, optional
         If True, the Newick str also contains the labels of the inner 
         nodes (the default is True).
-    color_inner : bool, optional
-        If True, the Newick str contains the colors of the inner nodes (the
-        default is False).
+    reconc_inner : bool, optional
+        If True, the Newick str contains the reconciliations of the inner nodes
+        (the default is False).
     
     Returns
     -------
@@ -1950,10 +2008,10 @@ default is False).</dd>
             token = &#39;&#39;
             if label and hasattr(node, &#39;label&#39;):
                 token += str(node.label)
-            if color and hasattr(node, &#39;color&#39;) and node.color:
-                token += &#39;&lt;{}-{}&gt;&#39;.format(*node.color) \
-                    if isinstance(node.color, (tuple, list)) \
-                    else &#39;&lt;{}&gt;&#39;.format(node.color)
+            if reconc and hasattr(node, &#39;reconc&#39;) and node.reconc:
+                token += &#39;&lt;{}-{}&gt;&#39;.format(*node.reconc) \
+                    if isinstance(node.reconc, (tuple, list)) \
+                    else &#39;&lt;{}&gt;&#39;.format(node.reconc)
             if distance and hasattr(node, &#39;dist&#39;):
                 token += &#34;:{}&#34;.format(node.dist)
             return token
@@ -1964,10 +2022,10 @@ default is False).</dd>
             token = &#39;&#39;
             if label and hasattr(node, &#39;label&#39;) and label_inner:
                 token += str(node.label)
-            if color_inner and hasattr(node, &#39;color&#39;) and node.color:
-                token += &#39;&lt;{}-{}&gt;&#39;.format(*node.color) \
-                    if isinstance(node.color, (tuple, list)) \
-                    else &#39;&lt;{}&gt;&#39;.format(node.color)
+            if reconc_inner and hasattr(node, &#39;reconc&#39;) and node.reconc:
+                token += &#39;&lt;{}-{}&gt;&#39;.format(*node.reconc) \
+                    if isinstance(node.reconc, (tuple, list)) \
+                    else &#39;&lt;{}&gt;&#39;.format(node.reconc)
             if distance and hasattr(node, &#39;dist&#39;):
                 token += &#39;:{}&#39;.format(node.dist)
             return &#39;({}){}&#39;.format(s[:-1], token)
@@ -1983,8 +2041,8 @@ default is False).</dd>
 <span>def <span class="ident">topology_only</span></span>(<span>tree, inplace=True)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Reset colors, distances, time stamps, transfer status and inner
-labels.</p>
+<div class="desc"><p>Reset reconciliations, distances, time stamps, transfer status, and
+inner labels.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
@@ -2003,8 +2061,8 @@ make a copy first and modify the copy.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def topology_only(tree, inplace=True):
-    &#34;&#34;&#34;Reset colors, distances, time stamps, transfer status and inner
-    labels.
+    &#34;&#34;&#34;Reset reconciliations, distances, time stamps, transfer status, and
+    inner labels.
     
     Parameters
     ----------
@@ -2028,7 +2086,7 @@ make a copy first and modify the copy.</dd>
     for v in T.preorder():
         if v.children:
             v.label = &#39;&#39;
-            v.color = None
+            v.reconc = None
         v.dist = 1.0
         v.tstamp = None
         v.transferred = 0
@@ -2056,17 +2114,18 @@ make a copy first and modify the copy.</dd>
 <ul class="">
 <li><code><a title="asymmetree.tools.PhyloTreeTools.add_planted_root" href="#asymmetree.tools.PhyloTreeTools.add_planted_root">add_planted_root</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.assign_missing_labels" href="#asymmetree.tools.PhyloTreeTools.assign_missing_labels">assign_missing_labels</a></code></li>
-<li><code><a title="asymmetree.tools.PhyloTreeTools.color_sorted_leaves" href="#asymmetree.tools.PhyloTreeTools.color_sorted_leaves">color_sorted_leaves</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.count_node_types" href="#asymmetree.tools.PhyloTreeTools.count_node_types">count_node_types</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.delete_and_reconnect" href="#asymmetree.tools.PhyloTreeTools.delete_and_reconnect">delete_and_reconnect</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.delete_losses_and_contract" href="#asymmetree.tools.PhyloTreeTools.delete_losses_and_contract">delete_losses_and_contract</a></code></li>
+<li><code><a title="asymmetree.tools.PhyloTreeTools.distance_from_timing" href="#asymmetree.tools.PhyloTreeTools.distance_from_timing">distance_from_timing</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.distance_matrix" href="#asymmetree.tools.PhyloTreeTools.distance_matrix">distance_matrix</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.distances_from_root" href="#asymmetree.tools.PhyloTreeTools.distances_from_root">distances_from_root</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.node_to_str" href="#asymmetree.tools.PhyloTreeTools.node_to_str">node_to_str</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.parse_newick" href="#asymmetree.tools.PhyloTreeTools.parse_newick">parse_newick</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.phylo_tree_attributes" href="#asymmetree.tools.PhyloTreeTools.phylo_tree_attributes">phylo_tree_attributes</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.random_colored_tree" href="#asymmetree.tools.PhyloTreeTools.random_colored_tree">random_colored_tree</a></code></li>
-<li><code><a title="asymmetree.tools.PhyloTreeTools.reconstruct_color_from_graph" href="#asymmetree.tools.PhyloTreeTools.reconstruct_color_from_graph">reconstruct_color_from_graph</a></code></li>
+<li><code><a title="asymmetree.tools.PhyloTreeTools.reconc_sorted_leaves" href="#asymmetree.tools.PhyloTreeTools.reconc_sorted_leaves">reconc_sorted_leaves</a></code></li>
+<li><code><a title="asymmetree.tools.PhyloTreeTools.reconstruct_reconc_from_graph" href="#asymmetree.tools.PhyloTreeTools.reconstruct_reconc_from_graph">reconstruct_reconc_from_graph</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.reconstruct_timestamps" href="#asymmetree.tools.PhyloTreeTools.reconstruct_timestamps">reconstruct_timestamps</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.remove_planted_root" href="#asymmetree.tools.PhyloTreeTools.remove_planted_root">remove_planted_root</a></code></li>
 <li><code><a title="asymmetree.tools.PhyloTreeTools.sorted_edges" href="#asymmetree.tools.PhyloTreeTools.sorted_edges">sorted_edges</a></code></li>

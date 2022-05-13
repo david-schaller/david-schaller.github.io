@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>asymmetree.treeevolve.EvolutionRates API documentation</title>
+<title>asymmetree.treeevolve.RateHeterogeneity API documentation</title>
 <meta name="description" content="Evolution rate heterogeneity …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>asymmetree.treeevolve.EvolutionRates</code></h1>
+<h1 class="title">Module <code>asymmetree.treeevolve.RateHeterogeneity</code></h1>
 </header>
 <section id="section-intro">
 <p>Evolution rate heterogeneity.</p>
@@ -36,6 +36,8 @@ Evolution rate heterogeneity.
 Introduce evolution rate asymmetries and autocorrelation.
 &#34;&#34;&#34;
 
+from warnings import warn
+
 import numpy as np
 
 from asymmetree.treeevolve.GeneTree import GeneTreeSimulator
@@ -50,12 +52,13 @@ __author__ = &#39;David Schaller&#39;
 #                         USER INTERFACE FUNCTION
 # --------------------------------------------------------------------------
 
-def simulate_gene_trees(S, N=1,
-                        dupl_rate=0.0,
-                        loss_rate=0.0,
-                        hgt_rate=0.0,
-                        base_rate=1.0,
-                        **kwargs):
+def gene_trees(S,
+               n=1,
+               dupl_rate=0.0,
+               loss_rate=0.0,
+               hgt_rate=0.0,
+               base_rate=1.0,
+               **kwargs):
     &#34;&#34;&#34;Simulates dated gene trees with non-ultrametric edge lengths along a
     species tree.
     
@@ -63,7 +66,7 @@ def simulate_gene_trees(S, N=1,
     ----------
     S : Tree
         The species tree along which the gene trees are simulated.
-    N : int, optional
+    n : int, optional
         Number of gene trees to be simulated, default is 1, in which case a
         tree is returned, otherwise a list is returned.
     dupl_rate : float or tuple
@@ -80,13 +83,13 @@ def simulate_gene_trees(S, N=1,
         trees, see documentation for available options. The default is
         constant 1.0.
     kwargs : optional
-        See documentation or parameters of GeneTreeSimulator.simulate and
-        assign_rates for additional parameters.
+        See documentation or parameters of GeneTreeSimulator.simulate() and
+        rate_heterogeneity() for additional parameters.
     
     Returns
     -------
-    Tree or list
-        Return a single gene tree if N = 1 and a list of gene tree if N &gt; 1.
+    list
+        A list of simulated gene tree.
     &#34;&#34;&#34;
     
     gene_trees = []
@@ -102,34 +105,41 @@ def simulate_gene_trees(S, N=1,
     _, autocorr_factors = autocorrelation_factors(S, autocorr_variance)
     
     # main simulation and imbalancing
-    for i in range(N):
-        TGT = simulator.simulate(dupl_rate=dupl_rate_sampler.draw(),
-                                 loss_rate=loss_rate_sampler.draw(),
-                                 hgt_rate=hgt_rate_sampler.draw(),
+    for i in range(n):
+        TGT = simulator.simulate(dupl_rate=dupl_rate_sampler(),
+                                 loss_rate=loss_rate_sampler(),
+                                 hgt_rate=hgt_rate_sampler(),
                                  **kwargs)
-        assign_rates(TGT, S,
-                     base_rate=base_rate_sampler.draw(),
-                     autocorr_factors=autocorr_factors,
-                     **kwargs)
+        rate_heterogeneity(TGT, S,
+                           base_rate=base_rate_sampler(),
+                           autocorr_factors=autocorr_factors,
+                           **kwargs)
         gene_trees.append(TGT)
     
-    return gene_trees[0] if N == 1 else gene_trees
+    return gene_trees
     
 
 # --------------------------------------------------------------------------
-#                      IMBALANCING OF THE GENE TREE
+#                      evolution rate heterogeneity
 # --------------------------------------------------------------------------
 
-
-def assign_rates(T, S, base_rate=1.0,
-                 autocorr_factors=None,
-                 autocorr_variance=0.0,
-                 rate_increase=(&#39;gamma&#39;, 0.5, 2.2),
-                 CSN_weights=(1, 1, 1),
-                 inplace=True,
-                 **kwargs):
-    &#34;&#34;&#34;Assigns realistic evolution rates to a TRUE gene tree.
+def rate_heterogeneity(T, S,
+                       base_rate=1.0,
+                       autocorr_factors=None,
+                       autocorr_variance=0.0,
+                       rate_increase=(&#39;gamma&#39;, 0.5, 2.2),
+                       CSN_weights=(1, 1, 1),
+                       inplace=True,
+                       **kwargs):
+    &#34;&#34;&#34;Introduces evolution rate heterogeneity into a gene tree.
     
+    The function applies rate multiplier for three sources of evolution rate
+    heterogeneity: (i) gene-family-specific heterogeneity is modeled through
+    the &#39;base_rate&#39; parameter; (ii) for species-specific heterogeneity an
+    autocorrelated relaxed molecular clock model as in [1] is used; and (iii)
+    for paralog-secific heterogeneity it is chosen between the three modes
+    conservation, subfunctionalization, and neofunctionalization for the rates
+    of the descendant lineages of a duplication event.
     The assigned rates are used to modify the length (&#39;dist&#39;) of the edges of
     the (originally ultrametric) dated gene tree.
     
@@ -187,57 +197,49 @@ def assign_rates(T, S, base_rate=1.0,
     if not inplace:
         T = T.copy()
      
-    # factors for subfunctionalization/neofunctionalization
-    CSN_weights = np.asarray(CSN_weights) / sum(CSN_weights)
-    sampler = Sampler(rate_increase, shift=1.0)
-    _divergent_rates(T, S, sampler, CSN_weights)
+    # paralog-specific rate heterogeneity (neo- and subfunctionalization)
+    _divergent_rates(T, S, 
+                     Sampler(rate_increase, shift=1.0), 
+                     np.asarray(CSN_weights) / sum(CSN_weights))
     
-    # autocorrelation
+    # species-specific rate heterogeneity (autocorrelation)
+    if not autocorr_factors and autocorr_variance &gt; 0.0:
+        _, autocorr_factors = autocorrelation_factors(S, autocorr_variance)
     if autocorr_factors:
-        _apply_autocorrelation(T, autocorr_factors, inplace=True)
-    elif autocorr_variance &gt; 0.0:
-        _, edge_rates = autocorrelation_factors(S, autocorr_variance)
-        _apply_autocorrelation(T, edge_rates, inplace=True)
+        for v in T.preorder():
+            if v.parent:
+                edge_ID = v.reconc[1] if isinstance(v.reconc, (tuple, list)) \
+                                     else v.reconc
+                v.dist *= autocorr_factors[edge_ID]
     
-    # finally apply base rate
+    # gene-family-specific rate heterogeneity (base rate)
     for v in T.preorder():
         v.dist *= base_rate
     
     return T
 
+def assign_rates(T, S, **kwargs):
+    
+    warn(&#39;This method is deprecated. Use rate_heterogeneity() instead.&#39;,
+         DeprecationWarning, stacklevel=2)
+    return rate_heterogeneity(T, S, **kwargs)
+
 
 # --------------------------------------------------------------------------
-#                       EVOLUTION RATE ASYMMETRY
+#     paralog-specific rate heterogeneity (neo- and subfunctionalization)
 # --------------------------------------------------------------------------
 
 def _adjust_distances(T, rates):
     
     for edge, rate_list in rates.items():
-        time_points = np.asarray([tstamp for tstamp, _ in rate_list] + [edge[1].tstamp])
+        time_points = np.asarray([tstamp for tstamp, _ in rate_list] +
+                                 [edge[1].tstamp])
         rate_values = np.asarray([rate for _, rate in rate_list])
         edge[1].dist = np.dot(-np.diff(time_points), rate_values)
-        
-
-def _duplication_type(marked_as, CSN_weights):
-    
-    if marked_as == &#39;divergent&#39;:
-        return &#39;divergent&#39;, &#39;divergent&#39;
-    else:
-        r = np.random.choice(3, p=CSN_weights)
-        if r == 0:                                  # conservation
-            return &#39;conserved&#39;, &#39;conserved&#39;
-        elif r == 1:                                # subfunctionalization
-            return &#39;divergent&#39;, &#39;divergent&#39;
-        else:                                       # neofunctionalization
-            if np.random.uniform() &lt; 0.5:
-                return &#39;divergent&#39;, &#39;conserved&#39;
-            else:
-                return &#39;conserved&#39;, &#39;divergent&#39;
 
 
 def _divergent_rates(T, S, sampler, CSN_weights):
-    &#34;&#34;&#34;
-    Assign divergent genes and manipulate the distances in the gene tree.
+    &#34;&#34;&#34;Assign divergent genes and manipulate the distances in the gene tree.
     
     Parameters
     ----------
@@ -259,11 +261,15 @@ def _divergent_rates(T, S, sampler, CSN_weights):
     &#34;&#34;&#34;
     
     T_nodes = sorted_nodes(T)
-    rates = {edge: [] for edge in T.edges()}        # edge --&gt; list of (tstamp, rate) tuples
+    
+    # edge --&gt; list of (tstamp, rate) tuples
+    rates = {edge: [] for edge in T.edges()}
     
     S_parents = {v.label: v.parent.label for v in S.preorder() if v.parent}
-    gene_counter = {(e[0].label, e[1].label): [] for e in S.edges()}
-    marked = {v: &#39;conserved&#39; for v in T_nodes}      # marked as conserved or divergent
+    gene_counter = {(u.label, v.label): [] for u, v in S.edges()}
+    
+    # nodes willl be marked as conserved or divergent
+    marked = {v: &#39;conserved&#39; for v in T_nodes}
     
     for u in T_nodes:
         
@@ -271,27 +277,53 @@ def _divergent_rates(T, S, sampler, CSN_weights):
         if u.event in (&#39;S&#39;, &#39;&#39;, None):
             for v in u.children:
                 marked[v] = marked[u]
-                S_u = u.color
-                S_v = v.color if not isinstance(v.color, (tuple, list)) else v.color[1]
+                S_u = u.reconc
+                S_v = v.reconc if not isinstance(v.reconc, (tuple, list)) \
+                      else v.reconc[1]
                 gene_counter[(S_u, S_v)].append(v)
-                new_rate = sampler.draw() if marked[v] == &#39;divergent&#39; else 1.0
+                new_rate = sampler() if marked[v] == &#39;divergent&#39; else 1.0
                 rates[(u,v)].append((u.tstamp, new_rate))
             
         # ---------------- DUPLICATION -----------------
-        elif u.event == &#39;D&#39;:
-            marked[u.children[0]], marked[u.children[1]] = _duplication_type(marked[u],
-                                                                             CSN_weights)
-            gene_counter[u.color].remove(u)
-            for v in u.children:
-                gene_counter[u.color].append(v)
-                new_rate = sampler.draw() if marked[v] == &#39;divergent&#39; else 1.0
+        elif u.event == &#39;D&#39; or u.event == &#39;GC&#39;:
+            
+            gene_counter[u.reconc].remove(u)
+            
+            # will contain the indices of the conserved descendants
+            conserved = set()
+            
+            if marked[u] != &#39;divergent&#39;:
+                # if parental lineage was divergent or subfunctionalization
+                # is drawn below, all descendant lineages are divergent
+                
+                r = np.random.choice(3, p=CSN_weights)
+                if r == 0:
+                    # conservation: all descendants conserved
+                    conserved.update(range(len(u.children)))
+                elif r == 2:
+                    # neofunctionalization: exactly 1 descendant conserved
+                    conserved.add(np.random.randint(len(u.children)))
+                    
+            for i, v in enumerate(u.children):
+                
+                if i in conserved:
+                    marked[v] = &#39;conserved&#39;
+                    new_rate = 1.0
+                else:
+                    marked[v] = &#39;divergent&#39;
+                    new_rate = sampler()
+                    
+                gene_counter[u.reconc].append(v)
                 rates[(u,v)].append((u.tstamp, new_rate))
         
         # ------------------- LOSS ---------------------
         elif u.event == &#39;L&#39;:
-            gene_counter[u.color].remove(u)
-            if len(gene_counter[u.color]) == 1:
-                v = gene_counter[u.color][0]
+            gene_counter[u.reconc].remove(u)
+            
+            if len(gene_counter[u.reconc]) == 1:
+                # if only one lineage remains in the species, set its status
+                # to conserved
+                v = gene_counter[u.reconc][0]
                 if marked[v] == &#39;divergent&#39;:
                     marked[v] = &#39;conserved&#39;
                     rates[(v.parent,v)].append((u.tstamp, 1.0))
@@ -304,32 +336,36 @@ def _divergent_rates(T, S, sampler, CSN_weights):
                 
             # untransferred copy
             marked[v1] = marked[u]
-            gene_counter[u.color].remove(u)
-            gene_counter[u.color].append(v1)
+            gene_counter[u.reconc].remove(u)
+            gene_counter[u.reconc].append(v1)
             if u.parent:
                 rates[(u,v1)].append((u.tstamp, rates[(u.parent,u)][-1][1]))
             else:
-                new_rate = sampler.draw() if marked[v1] == &#39;divergent&#39; else 1.0
+                new_rate = sampler() if marked[v1] == &#39;divergent&#39; else 1.0
                 rates[(u,v1)].append((u.tstamp, new_rate))
             
             # transferred copy
-            marked[v2] = &#39;divergent&#39;
-            if isinstance(v2.color, (tuple, list)):
-                gene_counter[v2.color].append(v2)
+            S_edge = v2.reconc if isinstance(v2.reconc, (tuple, list)) \
+                     else (S_parents[v2.reconc], v2.reconc)
+            gene_counter[S_edge].append(v2)
+            if len(gene_counter[S_edge]) == 1:
+                marked[v2] = &#39;conserved&#39;
+                new_rate = 1.0
             else:
-                gene_counter[(S_parents[v2.color], v2.color)].append(v2)
-            new_rate = sampler.draw() if marked[v2] == &#39;divergent&#39; else 1.0
+                marked[v2] = &#39;divergent&#39;
+                new_rate = sampler()
             rates[(u,v2)].append((u.tstamp, new_rate))
             
     _adjust_distances(T, rates)
+    
     return T
 
 # --------------------------------------------------------------------------
-#                         AUTOCORRELATION
+#           species-specific rate heterogeneity (autocorrelation)
 # --------------------------------------------------------------------------
     
 def autocorrelation_factors(tree, variance):
-    &#34;&#34;&#34;Geometric Brownian motion process to assign rate factors to species tree.
+    &#34;&#34;&#34;Lognormal model to assign rate factors to a species tree.
     
     The parameter &#39;variance&#39; is a hyperparameter for a log-normal distribution
     from which offspring rates are drawn. The overall variance of this
@@ -379,22 +415,10 @@ def autocorrelation_factors(tree, variance):
             node_rates[v.label] = np.exp(np.random.normal(mu, np.sqrt(var)))
             
             # edge rate as arithmetic mean of u and v
-            edge_rates[v.label] = (node_rates[v.parent.label] + node_rates[v.label]) / 2
+            edge_rates[v.label] = (node_rates[v.parent.label] + 
+                                   node_rates[v.label]) / 2
             
-    return node_rates, edge_rates
-
-
-def _apply_autocorrelation(T, edge_rates, inplace=True):
-    
-    if not inplace:
-        T = T.copy()
-    
-    for v in T.preorder():
-        if v.parent:
-            edge_ID = v.color[1] if isinstance(v.color, (tuple, list)) else v.color
-            v.dist *= edge_rates[edge_ID]
-    
-    return T</code></pre>
+    return node_rates, edge_rates</code></pre>
 </details>
 </section>
 <section>
@@ -404,12 +428,234 @@ def _apply_autocorrelation(T, edge_rates, inplace=True):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="asymmetree.treeevolve.EvolutionRates.assign_rates"><code class="name flex">
-<span>def <span class="ident">assign_rates</span></span>(<span>T, S, base_rate=1.0, autocorr_factors=None, autocorr_variance=0.0, rate_increase=('gamma', 0.5, 2.2), CSN_weights=(1, 1, 1), inplace=True, **kwargs)</span>
+<dt id="asymmetree.treeevolve.RateHeterogeneity.assign_rates"><code class="name flex">
+<span>def <span class="ident">assign_rates</span></span>(<span>T, S, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Assigns realistic evolution rates to a TRUE gene tree.</p>
-<p>The assigned rates are used to modify the length ('dist') of the edges of
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assign_rates(T, S, **kwargs):
+    
+    warn(&#39;This method is deprecated. Use rate_heterogeneity() instead.&#39;,
+         DeprecationWarning, stacklevel=2)
+    return rate_heterogeneity(T, S, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.treeevolve.RateHeterogeneity.autocorrelation_factors"><code class="name flex">
+<span>def <span class="ident">autocorrelation_factors</span></span>(<span>tree, variance)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Lognormal model to assign rate factors to a species tree.</p>
+<p>The parameter 'variance' is a hyperparameter for a log-normal distribution
+from which offspring rates are drawn. The overall variance of this
+distribution is 'variance' * divergence time.
+The rates are first computed for the nodes, the rates of the edges are
+assigned afterwards as the arithmetic mean of the rates of the two incident
+nodes.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>The species tree.</dd>
+<dt><strong><code>variance</code></strong> :&ensp;<code>float</code></dt>
+<dd>The hyperparameter for a log-normal distribution from which offspring
+rates are drawn at each node.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple</code> of <code>two dicts</code></dt>
+<dd>A dict mapping the labels of the nodel to their assigned rated, and a
+second dict mapping the labels of v of edges (v.parent, v) to the
+assigned rates of the edges.</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] H. Kishino, J. L. Thorne, and W. J. Bruno.
+Performance of a Divergence Time Estimation Method under a Probabilistic
+Model of Rate Evolution.
+In: Molecular Biology and Evolution, 18(3):352-361, March 2001.
+doi: 10.1093/oxfordjournals.molbev.a003811.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def autocorrelation_factors(tree, variance):
+    &#34;&#34;&#34;Lognormal model to assign rate factors to a species tree.
+    
+    The parameter &#39;variance&#39; is a hyperparameter for a log-normal distribution
+    from which offspring rates are drawn. The overall variance of this
+    distribution is &#39;variance&#39; * divergence time.
+    The rates are first computed for the nodes, the rates of the edges are
+    assigned afterwards as the arithmetic mean of the rates of the two incident
+    nodes.
+    
+    Parameters
+    ----------
+    tree : Tree
+        The species tree.
+    variance : float
+        The hyperparameter for a log-normal distribution from which offspring
+        rates are drawn at each node.
+    
+    Returns
+    -------
+    tuple of two dicts
+        A dict mapping the labels of the nodel to their assigned rated, and a
+        second dict mapping the labels of v of edges (v.parent, v) to the
+        assigned rates of the edges.
+    
+    References
+    ----------
+    .. [1] H. Kishino, J. L. Thorne, and W. J. Bruno.
+       Performance of a Divergence Time Estimation Method under a Probabilistic
+       Model of Rate Evolution. 
+       In: Molecular Biology and Evolution, 18(3):352-361, March 2001.
+       doi: 10.1093/oxfordjournals.molbev.a003811.
+    &#34;&#34;&#34;
+    
+    node_rates = {}                 # maps node v --&gt; rate of v
+    edge_rates = {}                 # maps v of edge (u,v) --&gt; rate of (u,v)
+    
+    for v in tree.preorder():
+        if not v.parent:
+            # assign factor 1.0 to root (= expected value for all other nodes
+            # and edges)
+            node_rates[v.label] = 1.0
+            edge_rates[v.label] = 1.0
+        else:
+            var = variance * v.dist
+            # ensure that exp. value is equal to parent&#39;s rate
+            mu = np.log(node_rates[v.parent.label]) - var/2
+            
+            node_rates[v.label] = np.exp(np.random.normal(mu, np.sqrt(var)))
+            
+            # edge rate as arithmetic mean of u and v
+            edge_rates[v.label] = (node_rates[v.parent.label] + 
+                                   node_rates[v.label]) / 2
+            
+    return node_rates, edge_rates</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.treeevolve.RateHeterogeneity.gene_trees"><code class="name flex">
+<span>def <span class="ident">gene_trees</span></span>(<span>S, n=1, dupl_rate=0.0, loss_rate=0.0, hgt_rate=0.0, base_rate=1.0, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Simulates dated gene trees with non-ultrametric edge lengths along a
+species tree.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>S</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>The species tree along which the gene trees are simulated.</dd>
+<dt><strong><code>n</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of gene trees to be simulated, default is 1, in which case a
+tree is returned, otherwise a list is returned.</dd>
+<dt><strong><code>dupl_rate</code></strong> :&ensp;<code>float</code> or <code>tuple</code></dt>
+<dd>The (distribution for the) duplication rate, see documentation for
+available option. The default is constant 0.0.</dd>
+<dt><strong><code>loss_rate</code></strong> :&ensp;<code>float</code> or <code>tuple</code></dt>
+<dd>The (distribution for the) loss rate, see documentation for
+available option. The default is constant 0.0.</dd>
+<dt><strong><code>hgt_rate</code></strong> :&ensp;<code>float</code> or <code>tuple</code></dt>
+<dd>The (distribution for the) HGT rate, see documentation for
+available option. The default is constant 0.0.</dd>
+<dt><strong><code>base_rate</code></strong> :&ensp;<code>float</code> or <code>tuple</code></dt>
+<dd>The (distribution for the) evolution rate at the roots of the gene
+trees, see documentation for available options. The default is
+constant 1.0.</dd>
+<dt><strong><code>kwargs</code></strong> :&ensp;<code>optional</code></dt>
+<dd>See documentation or parameters of GeneTreeSimulator.simulate() and
+rate_heterogeneity() for additional parameters.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>A list of simulated gene tree.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def gene_trees(S,
+               n=1,
+               dupl_rate=0.0,
+               loss_rate=0.0,
+               hgt_rate=0.0,
+               base_rate=1.0,
+               **kwargs):
+    &#34;&#34;&#34;Simulates dated gene trees with non-ultrametric edge lengths along a
+    species tree.
+    
+    Parameters
+    ----------
+    S : Tree
+        The species tree along which the gene trees are simulated.
+    n : int, optional
+        Number of gene trees to be simulated, default is 1, in which case a
+        tree is returned, otherwise a list is returned.
+    dupl_rate : float or tuple
+        The (distribution for the) duplication rate, see documentation for
+        available option. The default is constant 0.0.
+    loss_rate : float or tuple
+        The (distribution for the) loss rate, see documentation for
+        available option. The default is constant 0.0.
+    hgt_rate : float or tuple
+        The (distribution for the) HGT rate, see documentation for
+        available option. The default is constant 0.0.
+    base_rate : float or tuple
+        The (distribution for the) evolution rate at the roots of the gene
+        trees, see documentation for available options. The default is
+        constant 1.0.
+    kwargs : optional
+        See documentation or parameters of GeneTreeSimulator.simulate() and
+        rate_heterogeneity() for additional parameters.
+    
+    Returns
+    -------
+    list
+        A list of simulated gene tree.
+    &#34;&#34;&#34;
+    
+    gene_trees = []
+    simulator = GeneTreeSimulator(S)
+    
+    dupl_rate_sampler = Sampler(dupl_rate)
+    loss_rate_sampler = Sampler(loss_rate)
+    hgt_rate_sampler = Sampler(hgt_rate)
+    base_rate_sampler = Sampler(dupl_rate)
+    
+    # autocorrelation between genes of the same or related species
+    autocorr_variance = kwargs.pop(&#39;autocorr_variance&#39;, 0.0)
+    _, autocorr_factors = autocorrelation_factors(S, autocorr_variance)
+    
+    # main simulation and imbalancing
+    for i in range(n):
+        TGT = simulator.simulate(dupl_rate=dupl_rate_sampler(),
+                                 loss_rate=loss_rate_sampler(),
+                                 hgt_rate=hgt_rate_sampler(),
+                                 **kwargs)
+        rate_heterogeneity(TGT, S,
+                           base_rate=base_rate_sampler(),
+                           autocorr_factors=autocorr_factors,
+                           **kwargs)
+        gene_trees.append(TGT)
+    
+    return gene_trees</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.treeevolve.RateHeterogeneity.rate_heterogeneity"><code class="name flex">
+<span>def <span class="ident">rate_heterogeneity</span></span>(<span>T, S, base_rate=1.0, autocorr_factors=None, autocorr_variance=0.0, rate_increase=('gamma', 0.5, 2.2), CSN_weights=(1, 1, 1), inplace=True, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Introduces evolution rate heterogeneity into a gene tree.</p>
+<p>The function applies rate multiplier for three sources of evolution rate
+heterogeneity: (i) gene-family-specific heterogeneity is modeled through
+the 'base_rate' parameter; (ii) for species-specific heterogeneity an
+autocorrelated relaxed molecular clock model as in [1] is used; and (iii)
+for paralog-secific heterogeneity it is chosen between the three modes
+conservation, subfunctionalization, and neofunctionalization for the rates
+of the descendant lineages of a duplication event.
+The assigned rates are used to modify the length ('dist') of the edges of
 the (originally ultrametric) dated gene tree.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -463,15 +709,23 @@ doi: 10.1534/genetics.106.066951.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_rates(T, S, base_rate=1.0,
-                 autocorr_factors=None,
-                 autocorr_variance=0.0,
-                 rate_increase=(&#39;gamma&#39;, 0.5, 2.2),
-                 CSN_weights=(1, 1, 1),
-                 inplace=True,
-                 **kwargs):
-    &#34;&#34;&#34;Assigns realistic evolution rates to a TRUE gene tree.
+<pre><code class="python">def rate_heterogeneity(T, S,
+                       base_rate=1.0,
+                       autocorr_factors=None,
+                       autocorr_variance=0.0,
+                       rate_increase=(&#39;gamma&#39;, 0.5, 2.2),
+                       CSN_weights=(1, 1, 1),
+                       inplace=True,
+                       **kwargs):
+    &#34;&#34;&#34;Introduces evolution rate heterogeneity into a gene tree.
     
+    The function applies rate multiplier for three sources of evolution rate
+    heterogeneity: (i) gene-family-specific heterogeneity is modeled through
+    the &#39;base_rate&#39; parameter; (ii) for species-specific heterogeneity an
+    autocorrelated relaxed molecular clock model as in [1] is used; and (iii)
+    for paralog-secific heterogeneity it is chosen between the three modes
+    conservation, subfunctionalization, and neofunctionalization for the rates
+    of the descendant lineages of a duplication event.
     The assigned rates are used to modify the length (&#39;dist&#39;) of the edges of
     the (originally ultrametric) dated gene tree.
     
@@ -529,220 +783,26 @@ doi: 10.1534/genetics.106.066951.</p></div>
     if not inplace:
         T = T.copy()
      
-    # factors for subfunctionalization/neofunctionalization
-    CSN_weights = np.asarray(CSN_weights) / sum(CSN_weights)
-    sampler = Sampler(rate_increase, shift=1.0)
-    _divergent_rates(T, S, sampler, CSN_weights)
+    # paralog-specific rate heterogeneity (neo- and subfunctionalization)
+    _divergent_rates(T, S, 
+                     Sampler(rate_increase, shift=1.0), 
+                     np.asarray(CSN_weights) / sum(CSN_weights))
     
-    # autocorrelation
+    # species-specific rate heterogeneity (autocorrelation)
+    if not autocorr_factors and autocorr_variance &gt; 0.0:
+        _, autocorr_factors = autocorrelation_factors(S, autocorr_variance)
     if autocorr_factors:
-        _apply_autocorrelation(T, autocorr_factors, inplace=True)
-    elif autocorr_variance &gt; 0.0:
-        _, edge_rates = autocorrelation_factors(S, autocorr_variance)
-        _apply_autocorrelation(T, edge_rates, inplace=True)
+        for v in T.preorder():
+            if v.parent:
+                edge_ID = v.reconc[1] if isinstance(v.reconc, (tuple, list)) \
+                                     else v.reconc
+                v.dist *= autocorr_factors[edge_ID]
     
-    # finally apply base rate
+    # gene-family-specific rate heterogeneity (base rate)
     for v in T.preorder():
         v.dist *= base_rate
     
     return T</code></pre>
-</details>
-</dd>
-<dt id="asymmetree.treeevolve.EvolutionRates.autocorrelation_factors"><code class="name flex">
-<span>def <span class="ident">autocorrelation_factors</span></span>(<span>tree, variance)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Geometric Brownian motion process to assign rate factors to species tree.</p>
-<p>The parameter 'variance' is a hyperparameter for a log-normal distribution
-from which offspring rates are drawn. The overall variance of this
-distribution is 'variance' * divergence time.
-The rates are first computed for the nodes, the rates of the edges are
-assigned afterwards as the arithmetic mean of the rates of the two incident
-nodes.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
-<dd>The species tree.</dd>
-<dt><strong><code>variance</code></strong> :&ensp;<code>float</code></dt>
-<dd>The hyperparameter for a log-normal distribution from which offspring
-rates are drawn at each node.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>tuple</code> of <code>two dicts</code></dt>
-<dd>A dict mapping the labels of the nodel to their assigned rated, and a
-second dict mapping the labels of v of edges (v.parent, v) to the
-assigned rates of the edges.</dd>
-</dl>
-<h2 id="references">References</h2>
-<p>.. [1] H. Kishino, J. L. Thorne, and W. J. Bruno.
-Performance of a Divergence Time Estimation Method under a Probabilistic
-Model of Rate Evolution.
-In: Molecular Biology and Evolution, 18(3):352-361, March 2001.
-doi: 10.1093/oxfordjournals.molbev.a003811.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def autocorrelation_factors(tree, variance):
-    &#34;&#34;&#34;Geometric Brownian motion process to assign rate factors to species tree.
-    
-    The parameter &#39;variance&#39; is a hyperparameter for a log-normal distribution
-    from which offspring rates are drawn. The overall variance of this
-    distribution is &#39;variance&#39; * divergence time.
-    The rates are first computed for the nodes, the rates of the edges are
-    assigned afterwards as the arithmetic mean of the rates of the two incident
-    nodes.
-    
-    Parameters
-    ----------
-    tree : Tree
-        The species tree.
-    variance : float
-        The hyperparameter for a log-normal distribution from which offspring
-        rates are drawn at each node.
-    
-    Returns
-    -------
-    tuple of two dicts
-        A dict mapping the labels of the nodel to their assigned rated, and a
-        second dict mapping the labels of v of edges (v.parent, v) to the
-        assigned rates of the edges.
-    
-    References
-    ----------
-    .. [1] H. Kishino, J. L. Thorne, and W. J. Bruno.
-       Performance of a Divergence Time Estimation Method under a Probabilistic
-       Model of Rate Evolution. 
-       In: Molecular Biology and Evolution, 18(3):352-361, March 2001.
-       doi: 10.1093/oxfordjournals.molbev.a003811.
-    &#34;&#34;&#34;
-    
-    node_rates = {}                 # maps node v --&gt; rate of v
-    edge_rates = {}                 # maps v of edge (u,v) --&gt; rate of (u,v)
-    
-    for v in tree.preorder():
-        if not v.parent:
-            # assign factor 1.0 to root (= expected value for all other nodes
-            # and edges)
-            node_rates[v.label] = 1.0
-            edge_rates[v.label] = 1.0
-        else:
-            var = variance * v.dist
-            # ensure that exp. value is equal to parent&#39;s rate
-            mu = np.log(node_rates[v.parent.label]) - var/2
-            
-            node_rates[v.label] = np.exp(np.random.normal(mu, np.sqrt(var)))
-            
-            # edge rate as arithmetic mean of u and v
-            edge_rates[v.label] = (node_rates[v.parent.label] + node_rates[v.label]) / 2
-            
-    return node_rates, edge_rates</code></pre>
-</details>
-</dd>
-<dt id="asymmetree.treeevolve.EvolutionRates.simulate_gene_trees"><code class="name flex">
-<span>def <span class="ident">simulate_gene_trees</span></span>(<span>S, N=1, dupl_rate=0.0, loss_rate=0.0, hgt_rate=0.0, base_rate=1.0, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Simulates dated gene trees with non-ultrametric edge lengths along a
-species tree.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>S</code></strong> :&ensp;<code>Tree</code></dt>
-<dd>The species tree along which the gene trees are simulated.</dd>
-<dt><strong><code>N</code></strong> :&ensp;<code>int</code>, optional</dt>
-<dd>Number of gene trees to be simulated, default is 1, in which case a
-tree is returned, otherwise a list is returned.</dd>
-<dt><strong><code>dupl_rate</code></strong> :&ensp;<code>float</code> or <code>tuple</code></dt>
-<dd>The (distribution for the) duplication rate, see documentation for
-available option. The default is constant 0.0.</dd>
-<dt><strong><code>loss_rate</code></strong> :&ensp;<code>float</code> or <code>tuple</code></dt>
-<dd>The (distribution for the) loss rate, see documentation for
-available option. The default is constant 0.0.</dd>
-<dt><strong><code>hgt_rate</code></strong> :&ensp;<code>float</code> or <code>tuple</code></dt>
-<dd>The (distribution for the) HGT rate, see documentation for
-available option. The default is constant 0.0.</dd>
-<dt><strong><code>base_rate</code></strong> :&ensp;<code>float</code> or <code>tuple</code></dt>
-<dd>The (distribution for the) evolution rate at the roots of the gene
-trees, see documentation for available options. The default is
-constant 1.0.</dd>
-<dt><strong><code>kwargs</code></strong> :&ensp;<code>optional</code></dt>
-<dd>See documentation or parameters of GeneTreeSimulator.simulate and
-assign_rates for additional parameters.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Tree</code> or <code>list</code></dt>
-<dd>Return a single gene tree if N = 1 and a list of gene tree if N &gt; 1.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def simulate_gene_trees(S, N=1,
-                        dupl_rate=0.0,
-                        loss_rate=0.0,
-                        hgt_rate=0.0,
-                        base_rate=1.0,
-                        **kwargs):
-    &#34;&#34;&#34;Simulates dated gene trees with non-ultrametric edge lengths along a
-    species tree.
-    
-    Parameters
-    ----------
-    S : Tree
-        The species tree along which the gene trees are simulated.
-    N : int, optional
-        Number of gene trees to be simulated, default is 1, in which case a
-        tree is returned, otherwise a list is returned.
-    dupl_rate : float or tuple
-        The (distribution for the) duplication rate, see documentation for
-        available option. The default is constant 0.0.
-    loss_rate : float or tuple
-        The (distribution for the) loss rate, see documentation for
-        available option. The default is constant 0.0.
-    hgt_rate : float or tuple
-        The (distribution for the) HGT rate, see documentation for
-        available option. The default is constant 0.0.
-    base_rate : float or tuple
-        The (distribution for the) evolution rate at the roots of the gene
-        trees, see documentation for available options. The default is
-        constant 1.0.
-    kwargs : optional
-        See documentation or parameters of GeneTreeSimulator.simulate and
-        assign_rates for additional parameters.
-    
-    Returns
-    -------
-    Tree or list
-        Return a single gene tree if N = 1 and a list of gene tree if N &gt; 1.
-    &#34;&#34;&#34;
-    
-    gene_trees = []
-    simulator = GeneTreeSimulator(S)
-    
-    dupl_rate_sampler = Sampler(dupl_rate)
-    loss_rate_sampler = Sampler(loss_rate)
-    hgt_rate_sampler = Sampler(hgt_rate)
-    base_rate_sampler = Sampler(dupl_rate)
-    
-    # autocorrelation between genes of the same or related species
-    autocorr_variance = kwargs.pop(&#39;autocorr_variance&#39;, 0.0)
-    _, autocorr_factors = autocorrelation_factors(S, autocorr_variance)
-    
-    # main simulation and imbalancing
-    for i in range(N):
-        TGT = simulator.simulate(dupl_rate=dupl_rate_sampler.draw(),
-                                 loss_rate=loss_rate_sampler.draw(),
-                                 hgt_rate=hgt_rate_sampler.draw(),
-                                 **kwargs)
-        assign_rates(TGT, S,
-                     base_rate=base_rate_sampler.draw(),
-                     autocorr_factors=autocorr_factors,
-                     **kwargs)
-        gene_trees.append(TGT)
-    
-    return gene_trees[0] if N == 1 else gene_trees</code></pre>
 </details>
 </dd>
 </dl>
@@ -763,9 +823,10 @@ assign_rates for additional parameters.</dd>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="asymmetree.treeevolve.EvolutionRates.assign_rates" href="#asymmetree.treeevolve.EvolutionRates.assign_rates">assign_rates</a></code></li>
-<li><code><a title="asymmetree.treeevolve.EvolutionRates.autocorrelation_factors" href="#asymmetree.treeevolve.EvolutionRates.autocorrelation_factors">autocorrelation_factors</a></code></li>
-<li><code><a title="asymmetree.treeevolve.EvolutionRates.simulate_gene_trees" href="#asymmetree.treeevolve.EvolutionRates.simulate_gene_trees">simulate_gene_trees</a></code></li>
+<li><code><a title="asymmetree.treeevolve.RateHeterogeneity.assign_rates" href="#asymmetree.treeevolve.RateHeterogeneity.assign_rates">assign_rates</a></code></li>
+<li><code><a title="asymmetree.treeevolve.RateHeterogeneity.autocorrelation_factors" href="#asymmetree.treeevolve.RateHeterogeneity.autocorrelation_factors">autocorrelation_factors</a></code></li>
+<li><code><a title="asymmetree.treeevolve.RateHeterogeneity.gene_trees" href="#asymmetree.treeevolve.RateHeterogeneity.gene_trees">gene_trees</a></code></li>
+<li><code><a title="asymmetree.treeevolve.RateHeterogeneity.rate_heterogeneity" href="#asymmetree.treeevolve.RateHeterogeneity.rate_heterogeneity">rate_heterogeneity</a></code></li>
 </ul>
 </li>
 </ul>

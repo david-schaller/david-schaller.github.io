@@ -53,7 +53,7 @@ def labeled_sequences(sequences):
     for key, sequence in sequences:
         
         if isinstance(key, TreeNode):
-            result.append( (key.label, sequence) )
+            result.append( (str(key.label), sequence) )
         else:
             result.append( (str(key),  sequence) )
             
@@ -129,7 +129,7 @@ def _write_phylip(f, alignment):
     
     f.write(&#39;  {} {} i&#39;.format(len(alignment), seq_length))
     
-    format_str = &#39;\n{:&#39; + str(max_length+1) + &#39;}&#39;
+    format_str = &#39;\n{:&lt;&#39; + str(max_length+1) + &#39;}&#39;
     current = 0
     
     while current &lt; seq_length:
@@ -157,7 +157,7 @@ def _write_clustal(f, alignment):
     
     f.write(&#39;CLUSTAL W (1.8) multiple sequence alignment\n\n&#39;)
     
-    format_str = &#39;\n{:&#39; + str(max_length+4) + &#39;}{}&#39;
+    format_str = &#39;\n{:&lt;&#39; + str(max_length+4) + &#39;}{}&#39;
     current = 0
     
     while current &lt; seq_length:
@@ -231,7 +231,7 @@ if 'sequences' already is a list (of tuples).</p></div>
     for key, sequence in sequences:
         
         if isinstance(key, TreeNode):
-            result.append( (key.label, sequence) )
+            result.append( (str(key.label), sequence) )
         else:
             result.append( (str(key),  sequence) )
             

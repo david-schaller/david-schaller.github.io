@@ -45,7 +45,8 @@ from tralda.datastructures.Tree import Tree, TreeNode, LCA
 from asymmetree.tools.PhyloTreeTools import (sorted_nodes,
                                              sorted_edges,
                                              delete_losses_and_contract,
-                                             remove_planted_root)
+                                             remove_planted_root,
+                                             distance_from_timing)
 
 
 __author__ = &#39;David Schaller&#39;
@@ -56,7 +57,7 @@ __author__ = &#39;David Schaller&#39;
 # --------------------------------------------------------------------------
     
 
-def simulate_dated_gene_tree(S, **kwargs):
+def dated_gene_tree(S, **kwargs):
     &#34;&#34;&#34;Simulate a gene tree along the specified species tree.
     
     Parameters
@@ -67,6 +68,8 @@ def simulate_dated_gene_tree(S, **kwargs):
         Loss rate, default is 0.0.
     hgt_rate : float, optional
         Horizontal gene transfer rate, default is 0.0.
+    gc_rate : float, optional
+        Gene conversion rate, default is 0.0.
     dupl_polytomy : float, optional
         Allows non-binary duplication events by specifying the lambda
         parameter for a poisson distribution (copy number =
@@ -84,24 +87,39 @@ def simulate_dated_gene_tree(S, **kwargs):
         to be the recipient species in an additive HGT event. The default
         is False, in which case the recipient species is chosen at random
         among the co-existing species. The options &#39;inverse&#39; and
-        &#39;exponential&#39; mean that a species branch is sampled weighted by 1/t 
-        or e^(-t), resp., where t is the elapsed time between the last
-        common ancestor of the two species branches and the time of the
-        event, see [1].
+        &#39;exponential&#39; mean that a species branch is sampled weighted by
+        1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time between
+        the last common ancestor of the two species branches and the time of
+        the event, see [1], and a is a user-defined factor.
     replacing_transfer_distance_bias : str or bool, optional
         Specifies whether closer related gene branches have a higher
         probability to be replaced in a replacing HGT event. The default
         is False, in which case the replaced gene is chosen at random
         among the co-existing gene branches. The options &#39;inverse&#39; and
-        &#39;exponential&#39; mean that a species branch is sampled weighted by 1/t 
-        or e^(-t), resp., where t is the elapsed time between the last
-        common ancestor of the two gene branches and the time of the
-        event, see [1].
+        &#39;exponential&#39; mean that a gene branch is sampled weighted by
+        1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time between
+        the last common ancestor of the two gene branches and the time of the
+        event, see [1], and a is a user-defined factor.
     transfer_distance_bias : str or bool, optional
         Set a common bias mode for additive and replacing HGT, see
         description of parameters &#39;additive_transfer_distance_bias&#39; and
         &#39;replacing_transfer_distance_bias&#39;. If the latter are no set to
         the default (False), then these optioned are prioritized.
+    transfer_distance_bias_strength : float, optional
+        Intensity of the transfer distance bias (factor a) for additive and
+        replacing HGT. The default is 1.0.
+    gc_distance_bias : str or bool, optional
+        Specifies whether closer related gene branches have a higher
+        probability to be replaced in a gene conversion event. The default
+        is False, in which case the replaced gene is chosen at random
+        among the paralogs in the respective species lineage. The options
+        &#39;inverse&#39; and &#39;exponential&#39; mean that a paralog is sampled weighted
+        by 1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+        between the last common ancestor of the two gene branches and the
+        time of the event, see [1], and a is a user-defined factor.
+    gc_distance_bias_strength : float, optional
+        Intensity of the distance bias (factor a) for gene conversion.
+        The default is 1.0.
     
     Returns
     -------
@@ -125,8 +143,7 @@ def simulate_dated_gene_tree(S, **kwargs):
 class _Branch:
     
     label:          int         # unique branch label
-    array_id:       int         # index in rate array
-    rate:           float       # total event rate
+    list_id:        int         # index in list of branches
     parent:         TreeNode    # parent node
     S_edge:         TreeNode    # v of species tree edge (u, v) into which
                                 # the branch is embedded
@@ -177,12 +194,16 @@ class GeneTreeSimulator:
                  dupl_rate=0.0,
                  loss_rate=0.0,
                  hgt_rate=0.0,
+                 gc_rate=0.0,
                  dupl_polytomy=0.0,
                  prohibit_extinction=&#39;per_species&#39;,
                  replace_prob=0.0,
                  additive_transfer_distance_bias=False,
                  replacing_transfer_distance_bias=False,
                  transfer_distance_bias=False,
+                 transfer_distance_bias_strength=1.0,
+                 gc_distance_bias=False,
+                 gc_distance_bias_strength=1.0,
                  **kwargs):
         &#34;&#34;&#34;Simulate a gene tree along the specified species tree.
         
@@ -194,6 +215,8 @@ class GeneTreeSimulator:
             Loss rate, default is 0.0.
         hgt_rate : float, optional
             Horizontal gene transfer rate, default is 0.0.
+        gc_rate : float, optional
+            Gene conversion rate, default is 0.0.
         dupl_polytomy : float, optional
             Allows non-binary duplication events by specifying the lambda
             parameter for a poisson distribution (copy number =
@@ -211,24 +234,39 @@ class GeneTreeSimulator:
             to be the recipient species in an additive HGT event. The default
             is False, in which case the recipient species is chosen at random
             among the co-existing species. The options &#39;inverse&#39; and
-            &#39;exponential&#39; mean that a species branch is sampled weighted by 1/t 
-            or e^(-t), resp., where t is the elapsed time between the last
-            common ancestor of the two species branches and the time of the
-            event, see [1].
+            &#39;exponential&#39; mean that a species branch is sampled weighted by
+            1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+            between the last common ancestor of the two species branches and
+            the time of the event, see [1], and a is a user-defined factor.
         replacing_transfer_distance_bias : str or bool, optional
             Specifies whether closer related gene branches have a higher
             probability to be replaced in a replacing HGT event. The default
             is False, in which case the replaced gene is chosen at random
             among the co-existing gene branches. The options &#39;inverse&#39; and
-            &#39;exponential&#39; mean that a species branch is sampled weighted by 1/t 
-            or e^(-t), resp., where t is the elapsed time between the last
-            common ancestor of the two gene branches and the time of the
-            event, see [1].
+            &#39;exponential&#39; mean that a gene branch is sampled weighted by
+            1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+            between the last common ancestor of the two gene branches and the
+            time of the event, see [1], and a is a user-defined factor.
         transfer_distance_bias : str or bool, optional
             Set a common bias mode for additive and replacing HGT, see
             description of parameters &#39;additive_transfer_distance_bias&#39; and
             &#39;replacing_transfer_distance_bias&#39;. If the latter are no set to
             the default (False), then these optioned are prioritized.
+        transfer_distance_bias_strength : float, optional
+            Intensity of the transfer distance bias (factor a) for additive and
+            replacing HGT. The default is 1.0.
+        gc_distance_bias : str or bool, optional
+            Specifies whether closer related gene branches have a higher
+            probability to be replaced in a gene conversion event. The default
+            is False, in which case the replaced gene is chosen at random
+            among the paralogs in the respective species lineage. The options
+            &#39;inverse&#39; and &#39;exponential&#39; mean that a paralog is sampled weighted
+            by 1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+            between the last common ancestor of the two gene branches and the
+            time of the event, see [1], and a is a user-defined factor.
+        gc_distance_bias_strength : float, optional
+            Intensity of the distance bias (factor a) for gene conversion.
+            The default is 1.0.
         
         Returns
         -------
@@ -244,10 +282,16 @@ class GeneTreeSimulator:
            doi:10.1093/bioinformatics/btz081.
         &#34;&#34;&#34;
         
-        self.rate_sum = dupl_rate + loss_rate + hgt_rate
+        self.rate_sum = 0.0
+        for rate in (dupl_rate, loss_rate, hgt_rate, gc_rate):
+            self.rate_sum += rate
+            if rate &lt; 0.0:
+                raise ValueError(f&#39;negative rate {rate}&#39;)
+        
         self.d = dupl_rate
         self.l = loss_rate
         self.h = hgt_rate
+        self.gc = gc_rate
         
         if prohibit_extinction not in (False, &#39;per_family&#39;, &#39;per_species&#39;):
             raise ValueError(f&#34;unknown mode prohibit_extinction attribute: &#34;\
@@ -260,11 +304,13 @@ class GeneTreeSimulator:
         
         for m in (additive_transfer_distance_bias,
                   replacing_transfer_distance_bias,
-                  transfer_distance_bias):
+                  transfer_distance_bias,
+                  gc_distance_bias):
             if m not in (False, &#39;inverse&#39;, &#39;exponential&#39;):
                 raise ValueError(f&#34;unknown mode for transfer distance bias: &#34;\
                                  f&#34;{m}&#34;)
         
+        # mode for transfer distance bias for additive and replacing HGT
         self._additive_transfer_distance_bias = additive_transfer_distance_bias
         self._replacing_transfer_distance_bias = replacing_transfer_distance_bias
         if transfer_distance_bias:
@@ -273,22 +319,90 @@ class GeneTreeSimulator:
             if not replacing_transfer_distance_bias:
                 self._replacing_transfer_distance_bias = transfer_distance_bias
         
-        self._reset()
+        # intensity factor for transfer distance bias
+        if not isinstance(transfer_distance_bias_strength, (int, float)) or \
+            transfer_distance_bias_strength &lt;= 0.0:
+            raise ValueError(&#39;factor for transfer distance bias must be &gt; 0&#39;)
+        self._transfer_distance_bias_strength = transfer_distance_bias_strength
+        
+        self._gc_distance_bias = gc_distance_bias
+        if not isinstance(gc_distance_bias_strength, (int, float)) or \
+            gc_distance_bias_strength &lt;= 0.0:
+            raise ValueError(&#39;factor for g.c. distance bias must be &gt; 0&#39;)
+        self._gc_distance_bias_strength = gc_distance_bias_strength
         
         return self._run()
     
     
-    def _reset(self):
+    def _new_branch(self, parent, S_edge, transferred):
+        
+        new_branch = _Branch(self.id_counter, len(self.branches),
+                             parent, S_edge, transferred)
+        self.branches.append(new_branch)
+        
+        self.ES_to_b[S_edge].append(new_branch)
+        self.id_counter += 1
+        
+        if self.S_subtree_survivors[S_edge]:
+            self.surv_non_loss_lineages.add(new_branch)
+        
+        return new_branch
+    
+    
+    def _remove_branch(self, branch):
+        
+        # efficient removal from list
+        if branch.list_id != len(self.branches) - 1:
+            branch2 = self.branches[-1]
+            self.branches[branch.list_id] = branch2
+            branch2.list_id = branch.list_id
+        self.branches.pop()
+        
+        self.ES_to_b[branch.S_edge].remove(branch)
+        self.surv_non_loss_lineages.discard(branch)
+    
+    
+    def _initiatialize_tree(self):
+        
+        root = TreeNode(label=0, 
+                        event=&#39;S&#39; if len(self.S.root.children) &gt; 1 else None,
+                        reconc=self.S.root.label, 
+                        tstamp=self.S.root.tstamp)
+            
+        T = Tree(root)
+        self.id_counter += 1
+        self.spec_queue.popleft()
+                
+        for S_edge in self.S.root.children:
+            self._new_branch(T.root, S_edge, 0)
+            
+        return T
+    
+    
+    def _get_branch_and_type(self):
+        
+        total_rate = len(self.branches) * self.rate_sum
+        r = np.random.uniform(high=total_rate)
+        i = int(len(self.branches) * r / total_rate)
+        r2 = r - i * self.rate_sum
+        
+        if r2 &lt;= self.d:
+            event_type = &#39;D&#39;
+        elif r2 &lt;= self.d + self.l:
+            event_type = &#39;L&#39;
+        elif r2 &lt;= self.d + self.l + self.h:
+            event_type = &#39;H&#39;
+        else:
+            event_type = &#39;GC&#39;
+        
+        return self.branches[i], event_type
+
+
+    def _run(self):
         
         # queue for speciation events
         self.spec_queue = deque(self.sorted_speciations)
         self.id_counter = 0
-        
-        # counter for surviving genes
-        self.total_surviving = 0
-        
-        # total event rate (all branches)
-        self.total_rate = 0.0
         
         # keep track of surving branches that are in species branches with
         # at least 1 surviving species leaf
@@ -298,89 +412,15 @@ class GeneTreeSimulator:
         
         # maps species tree branches to existing gene branches
         self.ES_to_b = {S_edge: [] for _, S_edge in self.sorted_edges}
-
-    
-    def _get_tstamp(self, t):
-        
-        rate = self.total_rate
-        if (self._prohibit_extinction == &#39;per_family&#39; and
-            len(self.surv_non_loss_lineages) == 1):
-            rate -= self.l
-        
-        if rate &lt;= 0.0:
-            return -1
-        else:
-            return t - np.random.exponential(1/rate)
-    
-    
-    def _get_branch_and_type(self):
-        
-        if (self._prohibit_extinction == &#39;per_family&#39; and
-            len(self.surv_non_loss_lineages) == 1):
-            
-            # get the single branch that is in a non-loss species branch
-            special_branch = next(iter(self.surv_non_loss_lineages))
-            temp_rate = special_branch.rate
-            
-            r = np.random.uniform(high=self.total_rate-self.l)
-            current_sum = 0.0
-            
-            for i in range(len(self.branches)):
-                if r &lt;= current_sum + self.branches[i].rate:
-                    break
-                current_sum += self.branches[i].rate
-            
-            branch = self.branches[i]
-            
-            loss_factor = 0 if branch is special_branch else 1
-            
-            if r &lt;= current_sum + self.d:
-                event_type = &#39;D&#39;
-            elif r &lt;= current_sum + self.d + loss_factor * self.l:
-                event_type = &#39;L&#39;
-            else:
-                event_type = &#39;H&#39;
-            
-            # finally reset branch rate
-            special_branch.rate = temp_rate
-        
-        else:
-            r = np.random.uniform(high=self.total_rate)
-            current_sum = 0.0
-            
-            for i in range(len(self.branches)):
-                if r &lt;= current_sum + self.branches[i].rate:
-                    break
-                current_sum += self.branches[i].rate
-            
-            branch = self.branches[i]
-            
-            loss_factor = 1
-            if (self._prohibit_extinction == &#39;per_species&#39; and
-                len(self.ES_to_b[branch.S_edge]) &lt;= 1):
-                loss_factor = 0
-            
-            if r &lt;= current_sum + self.d:
-                event_type = &#39;D&#39;
-            elif r &lt;= current_sum + self.d + loss_factor * self.l:
-                event_type = &#39;L&#39;
-            else:
-                event_type = &#39;H&#39;
-        
-        # assert np.isclose(self.total_rate, sum([b.rate for b in self.branches])), \
-        #        &#34;Sum of rates and total rate are not equal.&#34;
-        
-        return branch, event_type
-
-
-    def _run(self):
         
         self.T = self._initiatialize_tree()
         t = self.T.root.tstamp
         
         while self.spec_queue:
             
-            event_tstamp = self._get_tstamp(t)
+            total_rate = len(self.branches) * self.rate_sum
+            event_tstamp = t - np.random.exponential(1/total_rate) \
+                           if total_rate &gt; 0.0 else -1
             next_spec_tstamp = self.spec_queue[0].tstamp
             
             # speciation
@@ -403,60 +443,16 @@ class GeneTreeSimulator:
                 elif event_type == &#39;H&#39;:
                     self._hgt(event_tstamp, branch)
                 
+                # gene conversion
+                elif event_type == &#39;GC&#39;:
+                    self._gene_conversion(event_tstamp, branch)
+                
                 t = event_tstamp
+        
+        # add the &#39;dist&#39; attribute to the nodes
+        distance_from_timing(self.T)
 
         return self.T
-    
-    
-    def _new_branch(self, rate, parent, S_edge, transferred, array_id=None):
-        
-        if array_id is None:
-            new_branch = _Branch(self.id_counter, len(self.branches), rate,
-                                 parent, S_edge, transferred)
-            self.branches.append(new_branch)
-        else:
-            new_branch = _Branch(self.id_counter, array_id, rate,
-                                 parent, S_edge, transferred)
-            self.branches[array_id] = new_branch
-        
-        self.ES_to_b[S_edge].append(new_branch)
-        self.id_counter += 1
-        
-        if self.S_subtree_survivors[S_edge]:
-            self.surv_non_loss_lineages.add(new_branch)
-        
-        return new_branch
-    
-    
-    def _initiatialize_tree(self):
-        
-        if len(self.S.root.children) &gt; 1:
-            # root is a speciation event
-            root = TreeNode(label=0, event=&#39;S&#39;,
-                            color=self.S.root.label, 
-                            dist=0.0, tstamp=self.S.root.tstamp)
-        else:                    
-            # planted species tree
-            root = TreeNode(label=0, event=None,
-                            color=self.S.root.label,
-                            dist=0.0, tstamp=self.S.root.tstamp)
-            
-        T = Tree(root)
-        self.id_counter += 1
-        self.spec_queue.popleft()
-        
-        if self._prohibit_extinction == &#39;per_species&#39;:
-            rate = self.d + self.h
-        else:
-            rate = self.rate_sum
-                
-        for S_edge in self.S.root.children:
-            
-            self._new_branch(rate, T.root, S_edge, 0)
-            self.total_rate += rate   
-            self.total_surviving = 1
-            
-        return T
             
     
     def _speciation(self):
@@ -470,35 +466,17 @@ class GeneTreeSimulator:
             
             spec_node = TreeNode(label=branch.label,
                                  event=&#39;S&#39;,
-                                 color=S_edge.label, tstamp=S_edge.tstamp,
-                                 dist=abs(S_edge.tstamp-branch.parent.tstamp),
+                                 reconc=S_edge.label, tstamp=S_edge.tstamp,
                                  transferred=branch.transferred)
             branch.parent.add_child(spec_node)
+            self._remove_branch(branch)
             
             for S_w in S_edge.children:
-                
-                if S_w is S_edge.children[0]:
-                    self._new_branch(branch.rate, spec_node, S_w, 0,
-                                     array_id=branch.array_id)
-                else:
-                    self._new_branch(branch.rate, spec_node, S_w, 0)
+                self._new_branch(spec_node, S_w, 0)
             
-            # losses and (extant) leaves
-            if not S_edge.children:
-                
-                self.ES_to_b[S_edge].remove(branch)
-                self.total_rate -= branch.rate
-                branch.rate = 0.0
-                
-                if S_edge.label == &#39;L&#39;:
-                    spec_node.event = &#39;L&#39;
-                    self.total_surviving -= 1
-                    self.surv_non_loss_lineages.discard(branch)
-            
-            else:
-                self.total_surviving += len(S_edge.children) - 1
-                self.total_rate += (len(S_edge.children) - 1) * branch.rate
-                self.surv_non_loss_lineages.discard(branch)
+            # loss leaves if it was a species extinction event
+            if (not S_edge.children) and S_edge.label == &#39;L&#39;:
+                spec_node.event = &#39;L&#39;
             
     
     def _duplication(self, event_tstamp, branch):
@@ -507,51 +485,42 @@ class GeneTreeSimulator:
         
         dupl_node = TreeNode(label=branch.label,
                              event=&#39;D&#39;,
-                             color=(S_edge.parent.label, S_edge.label),
+                             reconc=(S_edge.parent.label, S_edge.label),
                              tstamp=event_tstamp,
-                             dist=abs(event_tstamp-branch.parent.tstamp),
                              transferred=branch.transferred)
         branch.parent.add_child(dupl_node)
-        self.ES_to_b[S_edge].remove(branch)
-        self.surv_non_loss_lineages.discard(branch)
+        self._remove_branch(branch)
         
         copy_number = 2 if self._dupl_polytomy &lt;= 0.0 else \
                       2 + np.random.poisson(lam=self._dupl_polytomy)
         
         for i in range(copy_number):
-            self._new_branch(self.rate_sum, dupl_node, S_edge, 0,
-                             array_id=(branch.array_id if i == 0 else None))
-        
-        self.total_surviving += (copy_number - 1)
-        self.total_rate += (copy_number - 1) * (self.rate_sum)
-        
-        if (self._prohibit_extinction == &#39;per_species&#39; and
-            len(self.ES_to_b[S_edge]) == copy_number):
-            self.total_rate += self.l
+            self._new_branch(dupl_node, S_edge, 0)
             
             
     def _loss(self, event_tstamp, branch):
+        
+        # not executing the loss event if extinction is prohibited is
+        # equivalent to temporarily setting the loss rate to zero in the
+        # respective branches
+        if (self._prohibit_extinction == &#39;per_family&#39; and
+            len(self.surv_non_loss_lineages) == 1 and
+            next(iter(self.surv_non_loss_lineages)) is branch):
+            return
+        
+        if (self._prohibit_extinction == &#39;per_species&#39; and
+            len(self.ES_to_b[branch.S_edge]) &lt;= 1):
+            return
         
         S_edge = branch.S_edge
         
         loss_node = TreeNode(label=branch.label,
                              event=&#39;L&#39;,
-                             color=(S_edge.parent.label, S_edge.label),
+                             reconc=(S_edge.parent.label, S_edge.label),
                              tstamp=event_tstamp,
-                             dist=abs(event_tstamp-branch.parent.tstamp),
                              transferred=branch.transferred)
         branch.parent.add_child(loss_node)
-        self.ES_to_b[S_edge].remove(branch)
-        self.surv_non_loss_lineages.discard(branch)
-        branch.rate = 0.0
-        
-        self.total_surviving -= 1
-        self.total_rate -= self.rate_sum
-        
-        if (self._prohibit_extinction == &#39;per_species&#39; and
-            len(self.ES_to_b[S_edge]) == 1):
-            self.total_rate -= self.l
-            self.ES_to_b[S_edge][0].rate -= self.l
+        self._remove_branch(branch)
             
     
     def _coexisting_species_edges(self, tstamp, exclude_edge=None):
@@ -590,10 +559,11 @@ class GeneTreeSimulator:
             else:
                 distances = [(self.lca_S(S_edge, e).tstamp-event_tstamp)
                              for e in valid_species]
+                a = self._transfer_distance_bias_strength
                 if self._additive_transfer_distance_bias == &#39;inverse&#39;:
-                    weights = 1 / np.asarray(distances)
+                    weights = 1 / (a * np.asarray(distances))
                 elif self._additive_transfer_distance_bias == &#39;exponential&#39;:
-                    weights = np.exp(-np.asarray(distances))
+                    weights = np.exp(-a * np.asarray(distances))
                 
                 trans_edge = random.choices(valid_species, weights=weights)[0]
             
@@ -612,10 +582,11 @@ class GeneTreeSimulator:
                 lca_T = LCA(self.T)
                 distances = [(lca_T(branch.parent, b.parent).tstamp-event_tstamp)
                              for b in valid_genes]
+                a = self._transfer_distance_bias_strength
                 if self._replacing_transfer_distance_bias == &#39;inverse&#39;:
-                    weights = 1 / np.asarray(distances)
+                    weights = 1 / (a * np.asarray(distances))
                 elif self._replacing_transfer_distance_bias == &#39;exponential&#39;:
-                    weights = np.exp(-np.asarray(distances))
+                    weights = np.exp(-a * np.asarray(distances))
                 
                 replaced_gene_branch = random.choices(valid_genes,
                                                       weights=weights)[0]
@@ -635,51 +606,72 @@ class GeneTreeSimulator:
         if trans_edge:
             hgt_node = TreeNode(label=branch.label,
                                 event=&#39;H&#39;,
-                                color=(S_edge.parent.label, S_edge.label),
+                                reconc=(S_edge.parent.label, S_edge.label),
                                 tstamp=event_tstamp,
-                                dist=abs(event_tstamp-branch.parent.tstamp),
                                 transferred=branch.transferred)
             branch.parent.add_child(hgt_node)
-            self.ES_to_b[S_edge].remove(branch)
-            self.surv_non_loss_lineages.discard(branch)
+            self._remove_branch(branch)
             
             # original branch
-            self._new_branch(branch.rate, hgt_node, S_edge, 0, 
-                             array_id=branch.array_id)
+            self._new_branch(hgt_node, S_edge, 0)
             
             # receiving branch
-            self._new_branch(self.rate_sum, hgt_node, trans_edge, 1)
-            
-            self.total_surviving += 1
-            self.total_rate += self.rate_sum
-            
-            if (self._prohibit_extinction == &#39;per_species&#39; and
-                len(self.ES_to_b[trans_edge]) == 2):
-                self.total_rate += self.l
-                self.ES_to_b[trans_edge][0].rate += self.l
+            self._new_branch(hgt_node, trans_edge, 1)
         
         # replacing HGT leads to loss in the recipient species
         if replaced_gene_branch:
             self._loss(event_tstamp, replaced_gene_branch)
             # save replaced gene information in HGT node
             hgt_node.replaced_gene = replaced_gene_branch.label
-                
     
-    def _assert_no_extinction(self, T):
-        &#34;&#34;&#34;Returns False if gene family is extinct in some species.&#34;&#34;&#34;
+    
+    def _sample_replaced_gene_gc(self, event_tstamp, branch):
         
-        VS_to_VT = {l.label: [] for l in self.S.preorder() if not l.children and
-                                                                  l.event != &#39;L&#39;}
+        candidates = [b for b in self.ES_to_b[branch.S_edge] if b is not branch]
         
-        for v in T.preorder():
-            if not v.children and v.event != &#39;L&#39;:
-                VS_to_VT[v.color].append(v.label)
-                
-        for leaf_list in VS_to_VT.values():
-            if not leaf_list:
-                return False
+        # no gene conversion possible if there is currently no other branch in
+        # the species lineage
+        if not candidates:
+            return
         
-        return True
+        if not self._gc_distance_bias:
+            return random.choice(candidates)
+        else:
+            lca_T = LCA(self.T)
+            distances = [(lca_T(branch.parent, b.parent).tstamp-event_tstamp)
+                         for b in candidates]
+            a = self._gc_distance_bias_strength
+            if self._gc_distance_bias == &#39;inverse&#39;:
+                weights = 1 / (a * np.asarray(distances))
+            elif self._gc_distance_bias == &#39;exponential&#39;:
+                weights = np.exp(-a * np.asarray(distances))
+            
+            return random.choices(candidates, weights=weights)[0]
+    
+    
+    def _gene_conversion(self, event_tstamp, branch):
+        
+        S_edge = branch.S_edge
+        
+        replaced_gene_branch = self._sample_replaced_gene_gc(event_tstamp,
+                                                             branch)
+        
+        if replaced_gene_branch:
+            gc_node = TreeNode(label=branch.label,
+                               event=&#39;GC&#39;,
+                               reconc=(S_edge.parent.label, S_edge.label),
+                               tstamp=event_tstamp,
+                               transferred=branch.transferred)
+            branch.parent.add_child(gc_node)
+            self._remove_branch(branch)
+            
+            self._new_branch(gc_node, S_edge, 0)
+            self._new_branch(gc_node, S_edge, 0)
+        
+            # gene conversion leads to loss of a homologous gene
+            self._loss(event_tstamp, replaced_gene_branch)
+            # save replaced gene information in GC node
+            gc_node.replaced_gene = replaced_gene_branch.label
         
 
 # --------------------------------------------------------------------------
@@ -725,6 +717,169 @@ def observable_tree(tree):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="asymmetree.treeevolve.GeneTree.dated_gene_tree"><code class="name flex">
+<span>def <span class="ident">dated_gene_tree</span></span>(<span>S, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Simulate a gene tree along the specified species tree.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>dupl_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Duplication rate, default is 0.0.</dd>
+<dt><strong><code>loss_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Loss rate, default is 0.0.</dd>
+<dt><strong><code>hgt_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Horizontal gene transfer rate, default is 0.0.</dd>
+<dt><strong><code>gc_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Gene conversion rate, default is 0.0.</dd>
+<dt><strong><code>dupl_polytomy</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Allows non-binary duplication events by specifying the lambda
+parameter for a poisson distribution (copy number =
+drawn number + 2); default is 0.0.</dd>
+<dt><strong><code>prohibit_extinction</code></strong> :&ensp;<code>str</code> or <code>bool</code>, optional</dt>
+<dd>Avoid the extinction of all members in any species ('per_species'),
+of the complete gene family ('per_family'), or no constraints
+(False); default is 'per_species'.</dd>
+<dt><strong><code>replace_prob</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Enables replacing HGT events, probability by which one random
+homolog in the receiving branch of the receiving branch gets lost
+immediately after the transfer.</dd>
+<dt><strong><code>additive_transfer_distance_bias</code></strong> :&ensp;<code>str</code> or <code>bool</code>, optional</dt>
+<dd>Specifies whether closer related species have a higher probability
+to be the recipient species in an additive HGT event. The default
+is False, in which case the recipient species is chosen at random
+among the co-existing species. The options 'inverse' and
+'exponential' mean that a species branch is sampled weighted by
+1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time between
+the last common ancestor of the two species branches and the time of
+the event, see [1], and a is a user-defined factor.</dd>
+<dt><strong><code>replacing_transfer_distance_bias</code></strong> :&ensp;<code>str</code> or <code>bool</code>, optional</dt>
+<dd>Specifies whether closer related gene branches have a higher
+probability to be replaced in a replacing HGT event. The default
+is False, in which case the replaced gene is chosen at random
+among the co-existing gene branches. The options 'inverse' and
+'exponential' mean that a gene branch is sampled weighted by
+1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time between
+the last common ancestor of the two gene branches and the time of the
+event, see [1], and a is a user-defined factor.</dd>
+<dt><strong><code>transfer_distance_bias</code></strong> :&ensp;<code>str</code> or <code>bool</code>, optional</dt>
+<dd>Set a common bias mode for additive and replacing HGT, see
+description of parameters 'additive_transfer_distance_bias' and
+'replacing_transfer_distance_bias'. If the latter are no set to
+the default (False), then these optioned are prioritized.</dd>
+<dt><strong><code>transfer_distance_bias_strength</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Intensity of the transfer distance bias (factor a) for additive and
+replacing HGT. The default is 1.0.</dd>
+<dt><strong><code>gc_distance_bias</code></strong> :&ensp;<code>str</code> or <code>bool</code>, optional</dt>
+<dd>Specifies whether closer related gene branches have a higher
+probability to be replaced in a gene conversion event. The default
+is False, in which case the replaced gene is chosen at random
+among the paralogs in the respective species lineage. The options
+'inverse' and 'exponential' mean that a paralog is sampled weighted
+by 1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+between the last common ancestor of the two gene branches and the
+time of the event, see [1], and a is a user-defined factor.</dd>
+<dt><strong><code>gc_distance_bias_strength</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Intensity of the distance bias (factor a) for gene conversion.
+The default is 1.0.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tree</code></dt>
+<dd>The simulated gene tree.</dd>
+</dl>
+<h2 id="references">References</h2>
+<p>.. [1] S. Kundu, M. S. Bansal.
+SaGePhy: an improved phylogenetic simulation framework for gene and
+subgene evolution.
+In: Bioinformatics, 35(18), 2019, 3496–3498.
+doi:10.1093/bioinformatics/btz081.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dated_gene_tree(S, **kwargs):
+    &#34;&#34;&#34;Simulate a gene tree along the specified species tree.
+    
+    Parameters
+    ----------
+    dupl_rate : float, optional
+        Duplication rate, default is 0.0.
+    loss_rate : float, optional
+        Loss rate, default is 0.0.
+    hgt_rate : float, optional
+        Horizontal gene transfer rate, default is 0.0.
+    gc_rate : float, optional
+        Gene conversion rate, default is 0.0.
+    dupl_polytomy : float, optional
+        Allows non-binary duplication events by specifying the lambda
+        parameter for a poisson distribution (copy number =
+        drawn number + 2); default is 0.0.
+    prohibit_extinction : str or bool, optional 
+        Avoid the extinction of all members in any species (&#39;per_species&#39;),
+        of the complete gene family (&#39;per_family&#39;), or no constraints
+        (False); default is &#39;per_species&#39;.
+    replace_prob : float, optional
+        Enables replacing HGT events, probability by which one random
+        homolog in the receiving branch of the receiving branch gets lost
+        immediately after the transfer.
+    additive_transfer_distance_bias : str or bool, optional
+        Specifies whether closer related species have a higher probability
+        to be the recipient species in an additive HGT event. The default
+        is False, in which case the recipient species is chosen at random
+        among the co-existing species. The options &#39;inverse&#39; and
+        &#39;exponential&#39; mean that a species branch is sampled weighted by
+        1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time between
+        the last common ancestor of the two species branches and the time of
+        the event, see [1], and a is a user-defined factor.
+    replacing_transfer_distance_bias : str or bool, optional
+        Specifies whether closer related gene branches have a higher
+        probability to be replaced in a replacing HGT event. The default
+        is False, in which case the replaced gene is chosen at random
+        among the co-existing gene branches. The options &#39;inverse&#39; and
+        &#39;exponential&#39; mean that a gene branch is sampled weighted by
+        1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time between
+        the last common ancestor of the two gene branches and the time of the
+        event, see [1], and a is a user-defined factor.
+    transfer_distance_bias : str or bool, optional
+        Set a common bias mode for additive and replacing HGT, see
+        description of parameters &#39;additive_transfer_distance_bias&#39; and
+        &#39;replacing_transfer_distance_bias&#39;. If the latter are no set to
+        the default (False), then these optioned are prioritized.
+    transfer_distance_bias_strength : float, optional
+        Intensity of the transfer distance bias (factor a) for additive and
+        replacing HGT. The default is 1.0.
+    gc_distance_bias : str or bool, optional
+        Specifies whether closer related gene branches have a higher
+        probability to be replaced in a gene conversion event. The default
+        is False, in which case the replaced gene is chosen at random
+        among the paralogs in the respective species lineage. The options
+        &#39;inverse&#39; and &#39;exponential&#39; mean that a paralog is sampled weighted
+        by 1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+        between the last common ancestor of the two gene branches and the
+        time of the event, see [1], and a is a user-defined factor.
+    gc_distance_bias_strength : float, optional
+        Intensity of the distance bias (factor a) for gene conversion.
+        The default is 1.0.
+    
+    Returns
+    -------
+    Tree
+        The simulated gene tree.
+    
+    References
+    ----------
+    .. [1] S. Kundu, M. S. Bansal.
+       SaGePhy: an improved phylogenetic simulation framework for gene and 
+       subgene evolution.
+       In: Bioinformatics, 35(18), 2019, 3496–3498.
+       doi:10.1093/bioinformatics/btz081.
+    &#34;&#34;&#34;
+    
+    gene_tree_simulator = GeneTreeSimulator(S)
+    return gene_tree_simulator.simulate(**kwargs)</code></pre>
+</details>
+</dd>
 <dt id="asymmetree.treeevolve.GeneTree.observable_tree"><code class="name flex">
 <span>def <span class="ident">observable_tree</span></span>(<span>tree)</span>
 </code></dt>
@@ -789,135 +944,6 @@ the tree has only a single child, then this 'planted edge' is also removed.
     return pruned_tree</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.treeevolve.GeneTree.simulate_dated_gene_tree"><code class="name flex">
-<span>def <span class="ident">simulate_dated_gene_tree</span></span>(<span>S, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Simulate a gene tree along the specified species tree.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>dupl_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
-<dd>Duplication rate, default is 0.0.</dd>
-<dt><strong><code>loss_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
-<dd>Loss rate, default is 0.0.</dd>
-<dt><strong><code>hgt_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
-<dd>Horizontal gene transfer rate, default is 0.0.</dd>
-<dt><strong><code>dupl_polytomy</code></strong> :&ensp;<code>float</code>, optional</dt>
-<dd>Allows non-binary duplication events by specifying the lambda
-parameter for a poisson distribution (copy number =
-drawn number + 2); default is 0.0.</dd>
-<dt><strong><code>prohibit_extinction</code></strong> :&ensp;<code>str</code> or <code>bool</code>, optional</dt>
-<dd>Avoid the extinction of all members in any species ('per_species'),
-of the complete gene family ('per_family'), or no constraints
-(False); default is 'per_species'.</dd>
-<dt><strong><code>replace_prob</code></strong> :&ensp;<code>float</code>, optional</dt>
-<dd>Enables replacing HGT events, probability by which one random
-homolog in the receiving branch of the receiving branch gets lost
-immediately after the transfer.</dd>
-<dt><strong><code>additive_transfer_distance_bias</code></strong> :&ensp;<code>str</code> or <code>bool</code>, optional</dt>
-<dd>Specifies whether closer related species have a higher probability
-to be the recipient species in an additive HGT event. The default
-is False, in which case the recipient species is chosen at random
-among the co-existing species. The options 'inverse' and
-'exponential' mean that a species branch is sampled weighted by 1/t
-or e^(-t), resp., where t is the elapsed time between the last
-common ancestor of the two species branches and the time of the
-event, see [1].</dd>
-<dt><strong><code>replacing_transfer_distance_bias</code></strong> :&ensp;<code>str</code> or <code>bool</code>, optional</dt>
-<dd>Specifies whether closer related gene branches have a higher
-probability to be replaced in a replacing HGT event. The default
-is False, in which case the replaced gene is chosen at random
-among the co-existing gene branches. The options 'inverse' and
-'exponential' mean that a species branch is sampled weighted by 1/t
-or e^(-t), resp., where t is the elapsed time between the last
-common ancestor of the two gene branches and the time of the
-event, see [1].</dd>
-<dt><strong><code>transfer_distance_bias</code></strong> :&ensp;<code>str</code> or <code>bool</code>, optional</dt>
-<dd>Set a common bias mode for additive and replacing HGT, see
-description of parameters 'additive_transfer_distance_bias' and
-'replacing_transfer_distance_bias'. If the latter are no set to
-the default (False), then these optioned are prioritized.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Tree</code></dt>
-<dd>The simulated gene tree.</dd>
-</dl>
-<h2 id="references">References</h2>
-<p>.. [1] S. Kundu, M. S. Bansal.
-SaGePhy: an improved phylogenetic simulation framework for gene and
-subgene evolution.
-In: Bioinformatics, 35(18), 2019, 3496–3498.
-doi:10.1093/bioinformatics/btz081.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def simulate_dated_gene_tree(S, **kwargs):
-    &#34;&#34;&#34;Simulate a gene tree along the specified species tree.
-    
-    Parameters
-    ----------
-    dupl_rate : float, optional
-        Duplication rate, default is 0.0.
-    loss_rate : float, optional
-        Loss rate, default is 0.0.
-    hgt_rate : float, optional
-        Horizontal gene transfer rate, default is 0.0.
-    dupl_polytomy : float, optional
-        Allows non-binary duplication events by specifying the lambda
-        parameter for a poisson distribution (copy number =
-        drawn number + 2); default is 0.0.
-    prohibit_extinction : str or bool, optional 
-        Avoid the extinction of all members in any species (&#39;per_species&#39;),
-        of the complete gene family (&#39;per_family&#39;), or no constraints
-        (False); default is &#39;per_species&#39;.
-    replace_prob : float, optional
-        Enables replacing HGT events, probability by which one random
-        homolog in the receiving branch of the receiving branch gets lost
-        immediately after the transfer.
-    additive_transfer_distance_bias : str or bool, optional
-        Specifies whether closer related species have a higher probability
-        to be the recipient species in an additive HGT event. The default
-        is False, in which case the recipient species is chosen at random
-        among the co-existing species. The options &#39;inverse&#39; and
-        &#39;exponential&#39; mean that a species branch is sampled weighted by 1/t 
-        or e^(-t), resp., where t is the elapsed time between the last
-        common ancestor of the two species branches and the time of the
-        event, see [1].
-    replacing_transfer_distance_bias : str or bool, optional
-        Specifies whether closer related gene branches have a higher
-        probability to be replaced in a replacing HGT event. The default
-        is False, in which case the replaced gene is chosen at random
-        among the co-existing gene branches. The options &#39;inverse&#39; and
-        &#39;exponential&#39; mean that a species branch is sampled weighted by 1/t 
-        or e^(-t), resp., where t is the elapsed time between the last
-        common ancestor of the two gene branches and the time of the
-        event, see [1].
-    transfer_distance_bias : str or bool, optional
-        Set a common bias mode for additive and replacing HGT, see
-        description of parameters &#39;additive_transfer_distance_bias&#39; and
-        &#39;replacing_transfer_distance_bias&#39;. If the latter are no set to
-        the default (False), then these optioned are prioritized.
-    
-    Returns
-    -------
-    Tree
-        The simulated gene tree.
-    
-    References
-    ----------
-    .. [1] S. Kundu, M. S. Bansal.
-       SaGePhy: an improved phylogenetic simulation framework for gene and 
-       subgene evolution.
-       In: Bioinformatics, 35(18), 2019, 3496–3498.
-       doi:10.1093/bioinformatics/btz081.
-    &#34;&#34;&#34;
-    
-    gene_tree_simulator = GeneTreeSimulator(S)
-    return gene_tree_simulator.simulate(**kwargs)</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
@@ -973,12 +999,16 @@ doi:10.1093/bioinformatics/btz081.</p></div>
                  dupl_rate=0.0,
                  loss_rate=0.0,
                  hgt_rate=0.0,
+                 gc_rate=0.0,
                  dupl_polytomy=0.0,
                  prohibit_extinction=&#39;per_species&#39;,
                  replace_prob=0.0,
                  additive_transfer_distance_bias=False,
                  replacing_transfer_distance_bias=False,
                  transfer_distance_bias=False,
+                 transfer_distance_bias_strength=1.0,
+                 gc_distance_bias=False,
+                 gc_distance_bias_strength=1.0,
                  **kwargs):
         &#34;&#34;&#34;Simulate a gene tree along the specified species tree.
         
@@ -990,6 +1020,8 @@ doi:10.1093/bioinformatics/btz081.</p></div>
             Loss rate, default is 0.0.
         hgt_rate : float, optional
             Horizontal gene transfer rate, default is 0.0.
+        gc_rate : float, optional
+            Gene conversion rate, default is 0.0.
         dupl_polytomy : float, optional
             Allows non-binary duplication events by specifying the lambda
             parameter for a poisson distribution (copy number =
@@ -1007,24 +1039,39 @@ doi:10.1093/bioinformatics/btz081.</p></div>
             to be the recipient species in an additive HGT event. The default
             is False, in which case the recipient species is chosen at random
             among the co-existing species. The options &#39;inverse&#39; and
-            &#39;exponential&#39; mean that a species branch is sampled weighted by 1/t 
-            or e^(-t), resp., where t is the elapsed time between the last
-            common ancestor of the two species branches and the time of the
-            event, see [1].
+            &#39;exponential&#39; mean that a species branch is sampled weighted by
+            1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+            between the last common ancestor of the two species branches and
+            the time of the event, see [1], and a is a user-defined factor.
         replacing_transfer_distance_bias : str or bool, optional
             Specifies whether closer related gene branches have a higher
             probability to be replaced in a replacing HGT event. The default
             is False, in which case the replaced gene is chosen at random
             among the co-existing gene branches. The options &#39;inverse&#39; and
-            &#39;exponential&#39; mean that a species branch is sampled weighted by 1/t 
-            or e^(-t), resp., where t is the elapsed time between the last
-            common ancestor of the two gene branches and the time of the
-            event, see [1].
+            &#39;exponential&#39; mean that a gene branch is sampled weighted by
+            1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+            between the last common ancestor of the two gene branches and the
+            time of the event, see [1], and a is a user-defined factor.
         transfer_distance_bias : str or bool, optional
             Set a common bias mode for additive and replacing HGT, see
             description of parameters &#39;additive_transfer_distance_bias&#39; and
             &#39;replacing_transfer_distance_bias&#39;. If the latter are no set to
             the default (False), then these optioned are prioritized.
+        transfer_distance_bias_strength : float, optional
+            Intensity of the transfer distance bias (factor a) for additive and
+            replacing HGT. The default is 1.0.
+        gc_distance_bias : str or bool, optional
+            Specifies whether closer related gene branches have a higher
+            probability to be replaced in a gene conversion event. The default
+            is False, in which case the replaced gene is chosen at random
+            among the paralogs in the respective species lineage. The options
+            &#39;inverse&#39; and &#39;exponential&#39; mean that a paralog is sampled weighted
+            by 1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+            between the last common ancestor of the two gene branches and the
+            time of the event, see [1], and a is a user-defined factor.
+        gc_distance_bias_strength : float, optional
+            Intensity of the distance bias (factor a) for gene conversion.
+            The default is 1.0.
         
         Returns
         -------
@@ -1040,10 +1087,16 @@ doi:10.1093/bioinformatics/btz081.</p></div>
            doi:10.1093/bioinformatics/btz081.
         &#34;&#34;&#34;
         
-        self.rate_sum = dupl_rate + loss_rate + hgt_rate
+        self.rate_sum = 0.0
+        for rate in (dupl_rate, loss_rate, hgt_rate, gc_rate):
+            self.rate_sum += rate
+            if rate &lt; 0.0:
+                raise ValueError(f&#39;negative rate {rate}&#39;)
+        
         self.d = dupl_rate
         self.l = loss_rate
         self.h = hgt_rate
+        self.gc = gc_rate
         
         if prohibit_extinction not in (False, &#39;per_family&#39;, &#39;per_species&#39;):
             raise ValueError(f&#34;unknown mode prohibit_extinction attribute: &#34;\
@@ -1056,11 +1109,13 @@ doi:10.1093/bioinformatics/btz081.</p></div>
         
         for m in (additive_transfer_distance_bias,
                   replacing_transfer_distance_bias,
-                  transfer_distance_bias):
+                  transfer_distance_bias,
+                  gc_distance_bias):
             if m not in (False, &#39;inverse&#39;, &#39;exponential&#39;):
                 raise ValueError(f&#34;unknown mode for transfer distance bias: &#34;\
                                  f&#34;{m}&#34;)
         
+        # mode for transfer distance bias for additive and replacing HGT
         self._additive_transfer_distance_bias = additive_transfer_distance_bias
         self._replacing_transfer_distance_bias = replacing_transfer_distance_bias
         if transfer_distance_bias:
@@ -1069,22 +1124,90 @@ doi:10.1093/bioinformatics/btz081.</p></div>
             if not replacing_transfer_distance_bias:
                 self._replacing_transfer_distance_bias = transfer_distance_bias
         
-        self._reset()
+        # intensity factor for transfer distance bias
+        if not isinstance(transfer_distance_bias_strength, (int, float)) or \
+            transfer_distance_bias_strength &lt;= 0.0:
+            raise ValueError(&#39;factor for transfer distance bias must be &gt; 0&#39;)
+        self._transfer_distance_bias_strength = transfer_distance_bias_strength
+        
+        self._gc_distance_bias = gc_distance_bias
+        if not isinstance(gc_distance_bias_strength, (int, float)) or \
+            gc_distance_bias_strength &lt;= 0.0:
+            raise ValueError(&#39;factor for g.c. distance bias must be &gt; 0&#39;)
+        self._gc_distance_bias_strength = gc_distance_bias_strength
         
         return self._run()
     
     
-    def _reset(self):
+    def _new_branch(self, parent, S_edge, transferred):
+        
+        new_branch = _Branch(self.id_counter, len(self.branches),
+                             parent, S_edge, transferred)
+        self.branches.append(new_branch)
+        
+        self.ES_to_b[S_edge].append(new_branch)
+        self.id_counter += 1
+        
+        if self.S_subtree_survivors[S_edge]:
+            self.surv_non_loss_lineages.add(new_branch)
+        
+        return new_branch
+    
+    
+    def _remove_branch(self, branch):
+        
+        # efficient removal from list
+        if branch.list_id != len(self.branches) - 1:
+            branch2 = self.branches[-1]
+            self.branches[branch.list_id] = branch2
+            branch2.list_id = branch.list_id
+        self.branches.pop()
+        
+        self.ES_to_b[branch.S_edge].remove(branch)
+        self.surv_non_loss_lineages.discard(branch)
+    
+    
+    def _initiatialize_tree(self):
+        
+        root = TreeNode(label=0, 
+                        event=&#39;S&#39; if len(self.S.root.children) &gt; 1 else None,
+                        reconc=self.S.root.label, 
+                        tstamp=self.S.root.tstamp)
+            
+        T = Tree(root)
+        self.id_counter += 1
+        self.spec_queue.popleft()
+                
+        for S_edge in self.S.root.children:
+            self._new_branch(T.root, S_edge, 0)
+            
+        return T
+    
+    
+    def _get_branch_and_type(self):
+        
+        total_rate = len(self.branches) * self.rate_sum
+        r = np.random.uniform(high=total_rate)
+        i = int(len(self.branches) * r / total_rate)
+        r2 = r - i * self.rate_sum
+        
+        if r2 &lt;= self.d:
+            event_type = &#39;D&#39;
+        elif r2 &lt;= self.d + self.l:
+            event_type = &#39;L&#39;
+        elif r2 &lt;= self.d + self.l + self.h:
+            event_type = &#39;H&#39;
+        else:
+            event_type = &#39;GC&#39;
+        
+        return self.branches[i], event_type
+
+
+    def _run(self):
         
         # queue for speciation events
         self.spec_queue = deque(self.sorted_speciations)
         self.id_counter = 0
-        
-        # counter for surviving genes
-        self.total_surviving = 0
-        
-        # total event rate (all branches)
-        self.total_rate = 0.0
         
         # keep track of surving branches that are in species branches with
         # at least 1 surviving species leaf
@@ -1094,89 +1217,15 @@ doi:10.1093/bioinformatics/btz081.</p></div>
         
         # maps species tree branches to existing gene branches
         self.ES_to_b = {S_edge: [] for _, S_edge in self.sorted_edges}
-
-    
-    def _get_tstamp(self, t):
-        
-        rate = self.total_rate
-        if (self._prohibit_extinction == &#39;per_family&#39; and
-            len(self.surv_non_loss_lineages) == 1):
-            rate -= self.l
-        
-        if rate &lt;= 0.0:
-            return -1
-        else:
-            return t - np.random.exponential(1/rate)
-    
-    
-    def _get_branch_and_type(self):
-        
-        if (self._prohibit_extinction == &#39;per_family&#39; and
-            len(self.surv_non_loss_lineages) == 1):
-            
-            # get the single branch that is in a non-loss species branch
-            special_branch = next(iter(self.surv_non_loss_lineages))
-            temp_rate = special_branch.rate
-            
-            r = np.random.uniform(high=self.total_rate-self.l)
-            current_sum = 0.0
-            
-            for i in range(len(self.branches)):
-                if r &lt;= current_sum + self.branches[i].rate:
-                    break
-                current_sum += self.branches[i].rate
-            
-            branch = self.branches[i]
-            
-            loss_factor = 0 if branch is special_branch else 1
-            
-            if r &lt;= current_sum + self.d:
-                event_type = &#39;D&#39;
-            elif r &lt;= current_sum + self.d + loss_factor * self.l:
-                event_type = &#39;L&#39;
-            else:
-                event_type = &#39;H&#39;
-            
-            # finally reset branch rate
-            special_branch.rate = temp_rate
-        
-        else:
-            r = np.random.uniform(high=self.total_rate)
-            current_sum = 0.0
-            
-            for i in range(len(self.branches)):
-                if r &lt;= current_sum + self.branches[i].rate:
-                    break
-                current_sum += self.branches[i].rate
-            
-            branch = self.branches[i]
-            
-            loss_factor = 1
-            if (self._prohibit_extinction == &#39;per_species&#39; and
-                len(self.ES_to_b[branch.S_edge]) &lt;= 1):
-                loss_factor = 0
-            
-            if r &lt;= current_sum + self.d:
-                event_type = &#39;D&#39;
-            elif r &lt;= current_sum + self.d + loss_factor * self.l:
-                event_type = &#39;L&#39;
-            else:
-                event_type = &#39;H&#39;
-        
-        # assert np.isclose(self.total_rate, sum([b.rate for b in self.branches])), \
-        #        &#34;Sum of rates and total rate are not equal.&#34;
-        
-        return branch, event_type
-
-
-    def _run(self):
         
         self.T = self._initiatialize_tree()
         t = self.T.root.tstamp
         
         while self.spec_queue:
             
-            event_tstamp = self._get_tstamp(t)
+            total_rate = len(self.branches) * self.rate_sum
+            event_tstamp = t - np.random.exponential(1/total_rate) \
+                           if total_rate &gt; 0.0 else -1
             next_spec_tstamp = self.spec_queue[0].tstamp
             
             # speciation
@@ -1199,60 +1248,16 @@ doi:10.1093/bioinformatics/btz081.</p></div>
                 elif event_type == &#39;H&#39;:
                     self._hgt(event_tstamp, branch)
                 
+                # gene conversion
+                elif event_type == &#39;GC&#39;:
+                    self._gene_conversion(event_tstamp, branch)
+                
                 t = event_tstamp
+        
+        # add the &#39;dist&#39; attribute to the nodes
+        distance_from_timing(self.T)
 
         return self.T
-    
-    
-    def _new_branch(self, rate, parent, S_edge, transferred, array_id=None):
-        
-        if array_id is None:
-            new_branch = _Branch(self.id_counter, len(self.branches), rate,
-                                 parent, S_edge, transferred)
-            self.branches.append(new_branch)
-        else:
-            new_branch = _Branch(self.id_counter, array_id, rate,
-                                 parent, S_edge, transferred)
-            self.branches[array_id] = new_branch
-        
-        self.ES_to_b[S_edge].append(new_branch)
-        self.id_counter += 1
-        
-        if self.S_subtree_survivors[S_edge]:
-            self.surv_non_loss_lineages.add(new_branch)
-        
-        return new_branch
-    
-    
-    def _initiatialize_tree(self):
-        
-        if len(self.S.root.children) &gt; 1:
-            # root is a speciation event
-            root = TreeNode(label=0, event=&#39;S&#39;,
-                            color=self.S.root.label, 
-                            dist=0.0, tstamp=self.S.root.tstamp)
-        else:                    
-            # planted species tree
-            root = TreeNode(label=0, event=None,
-                            color=self.S.root.label,
-                            dist=0.0, tstamp=self.S.root.tstamp)
-            
-        T = Tree(root)
-        self.id_counter += 1
-        self.spec_queue.popleft()
-        
-        if self._prohibit_extinction == &#39;per_species&#39;:
-            rate = self.d + self.h
-        else:
-            rate = self.rate_sum
-                
-        for S_edge in self.S.root.children:
-            
-            self._new_branch(rate, T.root, S_edge, 0)
-            self.total_rate += rate   
-            self.total_surviving = 1
-            
-        return T
             
     
     def _speciation(self):
@@ -1266,35 +1271,17 @@ doi:10.1093/bioinformatics/btz081.</p></div>
             
             spec_node = TreeNode(label=branch.label,
                                  event=&#39;S&#39;,
-                                 color=S_edge.label, tstamp=S_edge.tstamp,
-                                 dist=abs(S_edge.tstamp-branch.parent.tstamp),
+                                 reconc=S_edge.label, tstamp=S_edge.tstamp,
                                  transferred=branch.transferred)
             branch.parent.add_child(spec_node)
+            self._remove_branch(branch)
             
             for S_w in S_edge.children:
-                
-                if S_w is S_edge.children[0]:
-                    self._new_branch(branch.rate, spec_node, S_w, 0,
-                                     array_id=branch.array_id)
-                else:
-                    self._new_branch(branch.rate, spec_node, S_w, 0)
+                self._new_branch(spec_node, S_w, 0)
             
-            # losses and (extant) leaves
-            if not S_edge.children:
-                
-                self.ES_to_b[S_edge].remove(branch)
-                self.total_rate -= branch.rate
-                branch.rate = 0.0
-                
-                if S_edge.label == &#39;L&#39;:
-                    spec_node.event = &#39;L&#39;
-                    self.total_surviving -= 1
-                    self.surv_non_loss_lineages.discard(branch)
-            
-            else:
-                self.total_surviving += len(S_edge.children) - 1
-                self.total_rate += (len(S_edge.children) - 1) * branch.rate
-                self.surv_non_loss_lineages.discard(branch)
+            # loss leaves if it was a species extinction event
+            if (not S_edge.children) and S_edge.label == &#39;L&#39;:
+                spec_node.event = &#39;L&#39;
             
     
     def _duplication(self, event_tstamp, branch):
@@ -1303,51 +1290,42 @@ doi:10.1093/bioinformatics/btz081.</p></div>
         
         dupl_node = TreeNode(label=branch.label,
                              event=&#39;D&#39;,
-                             color=(S_edge.parent.label, S_edge.label),
+                             reconc=(S_edge.parent.label, S_edge.label),
                              tstamp=event_tstamp,
-                             dist=abs(event_tstamp-branch.parent.tstamp),
                              transferred=branch.transferred)
         branch.parent.add_child(dupl_node)
-        self.ES_to_b[S_edge].remove(branch)
-        self.surv_non_loss_lineages.discard(branch)
+        self._remove_branch(branch)
         
         copy_number = 2 if self._dupl_polytomy &lt;= 0.0 else \
                       2 + np.random.poisson(lam=self._dupl_polytomy)
         
         for i in range(copy_number):
-            self._new_branch(self.rate_sum, dupl_node, S_edge, 0,
-                             array_id=(branch.array_id if i == 0 else None))
-        
-        self.total_surviving += (copy_number - 1)
-        self.total_rate += (copy_number - 1) * (self.rate_sum)
-        
-        if (self._prohibit_extinction == &#39;per_species&#39; and
-            len(self.ES_to_b[S_edge]) == copy_number):
-            self.total_rate += self.l
+            self._new_branch(dupl_node, S_edge, 0)
             
             
     def _loss(self, event_tstamp, branch):
+        
+        # not executing the loss event if extinction is prohibited is
+        # equivalent to temporarily setting the loss rate to zero in the
+        # respective branches
+        if (self._prohibit_extinction == &#39;per_family&#39; and
+            len(self.surv_non_loss_lineages) == 1 and
+            next(iter(self.surv_non_loss_lineages)) is branch):
+            return
+        
+        if (self._prohibit_extinction == &#39;per_species&#39; and
+            len(self.ES_to_b[branch.S_edge]) &lt;= 1):
+            return
         
         S_edge = branch.S_edge
         
         loss_node = TreeNode(label=branch.label,
                              event=&#39;L&#39;,
-                             color=(S_edge.parent.label, S_edge.label),
+                             reconc=(S_edge.parent.label, S_edge.label),
                              tstamp=event_tstamp,
-                             dist=abs(event_tstamp-branch.parent.tstamp),
                              transferred=branch.transferred)
         branch.parent.add_child(loss_node)
-        self.ES_to_b[S_edge].remove(branch)
-        self.surv_non_loss_lineages.discard(branch)
-        branch.rate = 0.0
-        
-        self.total_surviving -= 1
-        self.total_rate -= self.rate_sum
-        
-        if (self._prohibit_extinction == &#39;per_species&#39; and
-            len(self.ES_to_b[S_edge]) == 1):
-            self.total_rate -= self.l
-            self.ES_to_b[S_edge][0].rate -= self.l
+        self._remove_branch(branch)
             
     
     def _coexisting_species_edges(self, tstamp, exclude_edge=None):
@@ -1386,10 +1364,11 @@ doi:10.1093/bioinformatics/btz081.</p></div>
             else:
                 distances = [(self.lca_S(S_edge, e).tstamp-event_tstamp)
                              for e in valid_species]
+                a = self._transfer_distance_bias_strength
                 if self._additive_transfer_distance_bias == &#39;inverse&#39;:
-                    weights = 1 / np.asarray(distances)
+                    weights = 1 / (a * np.asarray(distances))
                 elif self._additive_transfer_distance_bias == &#39;exponential&#39;:
-                    weights = np.exp(-np.asarray(distances))
+                    weights = np.exp(-a * np.asarray(distances))
                 
                 trans_edge = random.choices(valid_species, weights=weights)[0]
             
@@ -1408,10 +1387,11 @@ doi:10.1093/bioinformatics/btz081.</p></div>
                 lca_T = LCA(self.T)
                 distances = [(lca_T(branch.parent, b.parent).tstamp-event_tstamp)
                              for b in valid_genes]
+                a = self._transfer_distance_bias_strength
                 if self._replacing_transfer_distance_bias == &#39;inverse&#39;:
-                    weights = 1 / np.asarray(distances)
+                    weights = 1 / (a * np.asarray(distances))
                 elif self._replacing_transfer_distance_bias == &#39;exponential&#39;:
-                    weights = np.exp(-np.asarray(distances))
+                    weights = np.exp(-a * np.asarray(distances))
                 
                 replaced_gene_branch = random.choices(valid_genes,
                                                       weights=weights)[0]
@@ -1431,56 +1411,77 @@ doi:10.1093/bioinformatics/btz081.</p></div>
         if trans_edge:
             hgt_node = TreeNode(label=branch.label,
                                 event=&#39;H&#39;,
-                                color=(S_edge.parent.label, S_edge.label),
+                                reconc=(S_edge.parent.label, S_edge.label),
                                 tstamp=event_tstamp,
-                                dist=abs(event_tstamp-branch.parent.tstamp),
                                 transferred=branch.transferred)
             branch.parent.add_child(hgt_node)
-            self.ES_to_b[S_edge].remove(branch)
-            self.surv_non_loss_lineages.discard(branch)
+            self._remove_branch(branch)
             
             # original branch
-            self._new_branch(branch.rate, hgt_node, S_edge, 0, 
-                             array_id=branch.array_id)
+            self._new_branch(hgt_node, S_edge, 0)
             
             # receiving branch
-            self._new_branch(self.rate_sum, hgt_node, trans_edge, 1)
-            
-            self.total_surviving += 1
-            self.total_rate += self.rate_sum
-            
-            if (self._prohibit_extinction == &#39;per_species&#39; and
-                len(self.ES_to_b[trans_edge]) == 2):
-                self.total_rate += self.l
-                self.ES_to_b[trans_edge][0].rate += self.l
+            self._new_branch(hgt_node, trans_edge, 1)
         
         # replacing HGT leads to loss in the recipient species
         if replaced_gene_branch:
             self._loss(event_tstamp, replaced_gene_branch)
             # save replaced gene information in HGT node
             hgt_node.replaced_gene = replaced_gene_branch.label
-                
     
-    def _assert_no_extinction(self, T):
-        &#34;&#34;&#34;Returns False if gene family is extinct in some species.&#34;&#34;&#34;
+    
+    def _sample_replaced_gene_gc(self, event_tstamp, branch):
         
-        VS_to_VT = {l.label: [] for l in self.S.preorder() if not l.children and
-                                                                  l.event != &#39;L&#39;}
+        candidates = [b for b in self.ES_to_b[branch.S_edge] if b is not branch]
         
-        for v in T.preorder():
-            if not v.children and v.event != &#39;L&#39;:
-                VS_to_VT[v.color].append(v.label)
-                
-        for leaf_list in VS_to_VT.values():
-            if not leaf_list:
-                return False
+        # no gene conversion possible if there is currently no other branch in
+        # the species lineage
+        if not candidates:
+            return
         
-        return True</code></pre>
+        if not self._gc_distance_bias:
+            return random.choice(candidates)
+        else:
+            lca_T = LCA(self.T)
+            distances = [(lca_T(branch.parent, b.parent).tstamp-event_tstamp)
+                         for b in candidates]
+            a = self._gc_distance_bias_strength
+            if self._gc_distance_bias == &#39;inverse&#39;:
+                weights = 1 / (a * np.asarray(distances))
+            elif self._gc_distance_bias == &#39;exponential&#39;:
+                weights = np.exp(-a * np.asarray(distances))
+            
+            return random.choices(candidates, weights=weights)[0]
+    
+    
+    def _gene_conversion(self, event_tstamp, branch):
+        
+        S_edge = branch.S_edge
+        
+        replaced_gene_branch = self._sample_replaced_gene_gc(event_tstamp,
+                                                             branch)
+        
+        if replaced_gene_branch:
+            gc_node = TreeNode(label=branch.label,
+                               event=&#39;GC&#39;,
+                               reconc=(S_edge.parent.label, S_edge.label),
+                               tstamp=event_tstamp,
+                               transferred=branch.transferred)
+            branch.parent.add_child(gc_node)
+            self._remove_branch(branch)
+            
+            self._new_branch(gc_node, S_edge, 0)
+            self._new_branch(gc_node, S_edge, 0)
+        
+            # gene conversion leads to loss of a homologous gene
+            self._loss(event_tstamp, replaced_gene_branch)
+            # save replaced gene information in GC node
+            gc_node.replaced_gene = replaced_gene_branch.label</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
 <dt id="asymmetree.treeevolve.GeneTree.GeneTreeSimulator.simulate"><code class="name flex">
-<span>def <span class="ident">simulate</span></span>(<span>self, dupl_rate=0.0, loss_rate=0.0, hgt_rate=0.0, dupl_polytomy=0.0, prohibit_extinction='per_species', replace_prob=0.0, additive_transfer_distance_bias=False, replacing_transfer_distance_bias=False, transfer_distance_bias=False, **kwargs)</span>
+<span>def <span class="ident">simulate</span></span>(<span>self, dupl_rate=0.0, loss_rate=0.0, hgt_rate=0.0, gc_rate=0.0, dupl_polytomy=0.0, prohibit_extinction='per_species', replace_prob=0.0, additive_transfer_distance_bias=False, replacing_transfer_distance_bias=False, transfer_distance_bias=False, transfer_distance_bias_strength=1.0, gc_distance_bias=False, gc_distance_bias_strength=1.0, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Simulate a gene tree along the specified species tree.</p>
@@ -1492,6 +1493,8 @@ doi:10.1093/bioinformatics/btz081.</p></div>
 <dd>Loss rate, default is 0.0.</dd>
 <dt><strong><code>hgt_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
 <dd>Horizontal gene transfer rate, default is 0.0.</dd>
+<dt><strong><code>gc_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Gene conversion rate, default is 0.0.</dd>
 <dt><strong><code>dupl_polytomy</code></strong> :&ensp;<code>float</code>, optional</dt>
 <dd>Allows non-binary duplication events by specifying the lambda
 parameter for a poisson distribution (copy number =
@@ -1509,24 +1512,39 @@ immediately after the transfer.</dd>
 to be the recipient species in an additive HGT event. The default
 is False, in which case the recipient species is chosen at random
 among the co-existing species. The options 'inverse' and
-'exponential' mean that a species branch is sampled weighted by 1/t
-or e^(-t), resp., where t is the elapsed time between the last
-common ancestor of the two species branches and the time of the
-event, see [1].</dd>
+'exponential' mean that a species branch is sampled weighted by
+1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+between the last common ancestor of the two species branches and
+the time of the event, see [1], and a is a user-defined factor.</dd>
 <dt><strong><code>replacing_transfer_distance_bias</code></strong> :&ensp;<code>str</code> or <code>bool</code>, optional</dt>
 <dd>Specifies whether closer related gene branches have a higher
 probability to be replaced in a replacing HGT event. The default
 is False, in which case the replaced gene is chosen at random
 among the co-existing gene branches. The options 'inverse' and
-'exponential' mean that a species branch is sampled weighted by 1/t
-or e^(-t), resp., where t is the elapsed time between the last
-common ancestor of the two gene branches and the time of the
-event, see [1].</dd>
+'exponential' mean that a gene branch is sampled weighted by
+1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+between the last common ancestor of the two gene branches and the
+time of the event, see [1], and a is a user-defined factor.</dd>
 <dt><strong><code>transfer_distance_bias</code></strong> :&ensp;<code>str</code> or <code>bool</code>, optional</dt>
 <dd>Set a common bias mode for additive and replacing HGT, see
 description of parameters 'additive_transfer_distance_bias' and
 'replacing_transfer_distance_bias'. If the latter are no set to
 the default (False), then these optioned are prioritized.</dd>
+<dt><strong><code>transfer_distance_bias_strength</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Intensity of the transfer distance bias (factor a) for additive and
+replacing HGT. The default is 1.0.</dd>
+<dt><strong><code>gc_distance_bias</code></strong> :&ensp;<code>str</code> or <code>bool</code>, optional</dt>
+<dd>Specifies whether closer related gene branches have a higher
+probability to be replaced in a gene conversion event. The default
+is False, in which case the replaced gene is chosen at random
+among the paralogs in the respective species lineage. The options
+'inverse' and 'exponential' mean that a paralog is sampled weighted
+by 1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+between the last common ancestor of the two gene branches and the
+time of the event, see [1], and a is a user-defined factor.</dd>
+<dt><strong><code>gc_distance_bias_strength</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Intensity of the distance bias (factor a) for gene conversion.
+The default is 1.0.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -1547,12 +1565,16 @@ doi:10.1093/bioinformatics/btz081.</p></div>
              dupl_rate=0.0,
              loss_rate=0.0,
              hgt_rate=0.0,
+             gc_rate=0.0,
              dupl_polytomy=0.0,
              prohibit_extinction=&#39;per_species&#39;,
              replace_prob=0.0,
              additive_transfer_distance_bias=False,
              replacing_transfer_distance_bias=False,
              transfer_distance_bias=False,
+             transfer_distance_bias_strength=1.0,
+             gc_distance_bias=False,
+             gc_distance_bias_strength=1.0,
              **kwargs):
     &#34;&#34;&#34;Simulate a gene tree along the specified species tree.
     
@@ -1564,6 +1586,8 @@ doi:10.1093/bioinformatics/btz081.</p></div>
         Loss rate, default is 0.0.
     hgt_rate : float, optional
         Horizontal gene transfer rate, default is 0.0.
+    gc_rate : float, optional
+        Gene conversion rate, default is 0.0.
     dupl_polytomy : float, optional
         Allows non-binary duplication events by specifying the lambda
         parameter for a poisson distribution (copy number =
@@ -1581,24 +1605,39 @@ doi:10.1093/bioinformatics/btz081.</p></div>
         to be the recipient species in an additive HGT event. The default
         is False, in which case the recipient species is chosen at random
         among the co-existing species. The options &#39;inverse&#39; and
-        &#39;exponential&#39; mean that a species branch is sampled weighted by 1/t 
-        or e^(-t), resp., where t is the elapsed time between the last
-        common ancestor of the two species branches and the time of the
-        event, see [1].
+        &#39;exponential&#39; mean that a species branch is sampled weighted by
+        1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+        between the last common ancestor of the two species branches and
+        the time of the event, see [1], and a is a user-defined factor.
     replacing_transfer_distance_bias : str or bool, optional
         Specifies whether closer related gene branches have a higher
         probability to be replaced in a replacing HGT event. The default
         is False, in which case the replaced gene is chosen at random
         among the co-existing gene branches. The options &#39;inverse&#39; and
-        &#39;exponential&#39; mean that a species branch is sampled weighted by 1/t 
-        or e^(-t), resp., where t is the elapsed time between the last
-        common ancestor of the two gene branches and the time of the
-        event, see [1].
+        &#39;exponential&#39; mean that a gene branch is sampled weighted by
+        1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+        between the last common ancestor of the two gene branches and the
+        time of the event, see [1], and a is a user-defined factor.
     transfer_distance_bias : str or bool, optional
         Set a common bias mode for additive and replacing HGT, see
         description of parameters &#39;additive_transfer_distance_bias&#39; and
         &#39;replacing_transfer_distance_bias&#39;. If the latter are no set to
         the default (False), then these optioned are prioritized.
+    transfer_distance_bias_strength : float, optional
+        Intensity of the transfer distance bias (factor a) for additive and
+        replacing HGT. The default is 1.0.
+    gc_distance_bias : str or bool, optional
+        Specifies whether closer related gene branches have a higher
+        probability to be replaced in a gene conversion event. The default
+        is False, in which case the replaced gene is chosen at random
+        among the paralogs in the respective species lineage. The options
+        &#39;inverse&#39; and &#39;exponential&#39; mean that a paralog is sampled weighted
+        by 1/(a * t) or e^(-(a * t)), resp., where t is the elapsed time
+        between the last common ancestor of the two gene branches and the
+        time of the event, see [1], and a is a user-defined factor.
+    gc_distance_bias_strength : float, optional
+        Intensity of the distance bias (factor a) for gene conversion.
+        The default is 1.0.
     
     Returns
     -------
@@ -1614,10 +1653,16 @@ doi:10.1093/bioinformatics/btz081.</p></div>
        doi:10.1093/bioinformatics/btz081.
     &#34;&#34;&#34;
     
-    self.rate_sum = dupl_rate + loss_rate + hgt_rate
+    self.rate_sum = 0.0
+    for rate in (dupl_rate, loss_rate, hgt_rate, gc_rate):
+        self.rate_sum += rate
+        if rate &lt; 0.0:
+            raise ValueError(f&#39;negative rate {rate}&#39;)
+    
     self.d = dupl_rate
     self.l = loss_rate
     self.h = hgt_rate
+    self.gc = gc_rate
     
     if prohibit_extinction not in (False, &#39;per_family&#39;, &#39;per_species&#39;):
         raise ValueError(f&#34;unknown mode prohibit_extinction attribute: &#34;\
@@ -1630,11 +1675,13 @@ doi:10.1093/bioinformatics/btz081.</p></div>
     
     for m in (additive_transfer_distance_bias,
               replacing_transfer_distance_bias,
-              transfer_distance_bias):
+              transfer_distance_bias,
+              gc_distance_bias):
         if m not in (False, &#39;inverse&#39;, &#39;exponential&#39;):
             raise ValueError(f&#34;unknown mode for transfer distance bias: &#34;\
                              f&#34;{m}&#34;)
     
+    # mode for transfer distance bias for additive and replacing HGT
     self._additive_transfer_distance_bias = additive_transfer_distance_bias
     self._replacing_transfer_distance_bias = replacing_transfer_distance_bias
     if transfer_distance_bias:
@@ -1643,7 +1690,17 @@ doi:10.1093/bioinformatics/btz081.</p></div>
         if not replacing_transfer_distance_bias:
             self._replacing_transfer_distance_bias = transfer_distance_bias
     
-    self._reset()
+    # intensity factor for transfer distance bias
+    if not isinstance(transfer_distance_bias_strength, (int, float)) or \
+        transfer_distance_bias_strength &lt;= 0.0:
+        raise ValueError(&#39;factor for transfer distance bias must be &gt; 0&#39;)
+    self._transfer_distance_bias_strength = transfer_distance_bias_strength
+    
+    self._gc_distance_bias = gc_distance_bias
+    if not isinstance(gc_distance_bias_strength, (int, float)) or \
+        gc_distance_bias_strength &lt;= 0.0:
+        raise ValueError(&#39;factor for g.c. distance bias must be &gt; 0&#39;)
+    self._gc_distance_bias_strength = gc_distance_bias_strength
     
     return self._run()</code></pre>
 </details>
@@ -1666,9 +1723,9 @@ doi:10.1093/bioinformatics/btz081.</p></div>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="asymmetree.treeevolve.GeneTree.dated_gene_tree" href="#asymmetree.treeevolve.GeneTree.dated_gene_tree">dated_gene_tree</a></code></li>
 <li><code><a title="asymmetree.treeevolve.GeneTree.observable_tree" href="#asymmetree.treeevolve.GeneTree.observable_tree">observable_tree</a></code></li>
 <li><code><a title="asymmetree.treeevolve.GeneTree.prune_losses" href="#asymmetree.treeevolve.GeneTree.prune_losses">prune_losses</a></code></li>
-<li><code><a title="asymmetree.treeevolve.GeneTree.simulate_dated_gene_tree" href="#asymmetree.treeevolve.GeneTree.simulate_dated_gene_tree">simulate_dated_gene_tree</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

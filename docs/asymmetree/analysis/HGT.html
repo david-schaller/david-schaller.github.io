@@ -69,8 +69,7 @@ from tralda.supertree import Build
 from asymmetree.tools.PhyloTreeTools import (add_planted_root,
                                              phylo_tree_attributes,
                                              assign_missing_labels)
-from asymmetree.treeevolve.SpeciesTree import (simulate_timing,
-                                               distance_from_timing)
+from asymmetree.treeevolve.SpeciesTree import distance_from_timing
 
 
 __author__ = &#39;David Schaller&#39;
@@ -116,7 +115,7 @@ def rs_transfer_edges(T, S, lca_S=None):
     Returns
     -------
     set
-        The subset of TreeNode instances in the tree for which the &#39;color&#39;
+        The subset of TreeNode instances in the tree for which the &#39;reconc&#39;
         attributes of its incident edges refer to incomparable branches in the
         species tree.
     &#34;&#34;&#34;
@@ -127,7 +126,7 @@ def rs_transfer_edges(T, S, lca_S=None):
     transfer_edges = set()
     
     for u, v in T.edges():
-        if not lca_S.are_comparable(u.color, v.color):
+        if not lca_S.are_comparable(u.reconc, v.reconc):
             transfer_edges.add(v)
     
     return transfer_edges
@@ -169,7 +168,7 @@ def fitch(tree, transfer_edges, supply_undirected=False, lca_T=None):
     first_transfer = {}
     
     for x in leaves:
-        fitch.add_node(x.label, color=x.color)
+        fitch.add_node(x.label, color=x.reconc)
         
         current = x
         while current:
@@ -326,9 +325,9 @@ def below_equal_above(T, S, lca_T=None, lca_S=None):
     equal = nx.Graph()
     above = nx.Graph()
     for u in L_T:
-        below.add_node(u.label, color=u.color)
-        equal.add_node(u.label, color=u.color)
-        above.add_node(u.label, color=u.color)
+        below.add_node(u.label, color=u.reconc)
+        equal.add_node(u.label, color=u.reconc)
+        above.add_node(u.label, color=u.reconc)
     
     if not isinstance(lca_T, LCA):
         lca_T = LCA(T)
@@ -338,7 +337,7 @@ def below_equal_above(T, S, lca_T=None, lca_S=None):
     for a, b in itertools.combinations(L_T, 2):
         
         t_ab = lca_T.get(a, b).tstamp
-        t_AB = lca_S.get(L_S[a.color], L_S[b.color]).tstamp
+        t_AB = lca_S.get(L_S[a.reconc], L_S[b.reconc]).tstamp
         
         if t_ab &lt; t_AB:
             below.add_edge(a.label, b.label)
@@ -380,6 +379,28 @@ def ldt_graph(T, S, lca_T=None, lca_S=None):
     &#34;&#34;&#34;
     
     return below_equal_above(T, S, lca_T=lca_T, lca_S=lca_S)[0]
+
+
+def _simulate_timing(tree):
+    &#34;&#34;&#34;Simulates a timing for the tree.
+    
+    It is t(root) = 1 and t(x) = 0 for x in L(S).&#34;&#34;&#34;
+    
+    max_depth = {}
+    
+    for v in tree.postorder():
+        if not v.children:
+            max_depth[v] = 0
+        else:
+            max_depth[v] = max(max_depth[c] for c in v.children) + 1
+    
+    for v in tree.preorder():
+        if not v.children:
+            v.tstamp = 0.0
+        elif not v.parent:
+            v.tstamp = 1.0
+        else:
+            v.tstamp = v.parent.tstamp * (1 - 1 / (max_depth[v]+1))
 
 
 class RsScenarioConstructor:
@@ -449,7 +470,7 @@ class RsScenarioConstructor:
         # planted root
         add_planted_root(self.T)
         self.T.root.tstamp = self.S.root.tstamp
-        self.T.root.color = self.S.root.label
+        self.T.root.reconc = self.S.root.label
         
         # suppress all vertices with a single child except the planted root
         to_suppress = []
@@ -495,7 +516,7 @@ class RsScenarioConstructor:
             phylo_tree_attributes(S, inplace=True)
             add_planted_root(S)
             assign_missing_labels(S)
-            simulate_timing(S)
+            _simulate_timing(S)
             distance_from_timing(S)
             return S
     
@@ -503,14 +524,14 @@ class RsScenarioConstructor:
     def _build_gene_tree(self, L, u_S):
         
         u_T = TreeNode(label=&#39;&#39;, event=&#39;D&#39;,
-                       color=(u_S.parent.label, u_S.label),
+                       reconc=(u_S.parent.label, u_S.label),
                        tstamp=u_S.tstamp + self.epsilon)
         
         # u_S is a leaf
         if not u_S.children:
             for x in L:
                 leaf = TreeNode(label=x,
-                                color=self.G.nodes[x][&#39;color&#39;],
+                                reconc=self.G.nodes[x][&#39;color&#39;],
                                 tstamp=0.0)
                 u_T.add_child(leaf)
         
@@ -529,7 +550,7 @@ class RsScenarioConstructor:
                 # choose v_S_star s.t. L(S(v_S_star)) \cap sigma(C) is non-empty
                 v_S_star = color_to_v_S[self.G.nodes[next(iter(C))][&#39;color&#39;]]
                 v_T = TreeNode(label=&#39;&#39;, event=&#39;H&#39;,
-                               color=(u_S.label, v_S_star.label),
+                               reconc=(u_S.label, v_S_star.label),
                                tstamp=u_S.tstamp - self.epsilon)
                 u_T.add_child(v_T)
                 
@@ -1000,9 +1021,9 @@ which case a new instance is created and used.</dd>
     equal = nx.Graph()
     above = nx.Graph()
     for u in L_T:
-        below.add_node(u.label, color=u.color)
-        equal.add_node(u.label, color=u.color)
-        above.add_node(u.label, color=u.color)
+        below.add_node(u.label, color=u.reconc)
+        equal.add_node(u.label, color=u.reconc)
+        above.add_node(u.label, color=u.reconc)
     
     if not isinstance(lca_T, LCA):
         lca_T = LCA(T)
@@ -1012,7 +1033,7 @@ which case a new instance is created and used.</dd>
     for a, b in itertools.combinations(L_T, 2):
         
         t_ab = lca_T.get(a, b).tstamp
-        t_AB = lca_S.get(L_S[a.color], L_S[b.color]).tstamp
+        t_AB = lca_S.get(L_S[a.reconc], L_S[b.reconc]).tstamp
         
         if t_ab &lt; t_AB:
             below.add_edge(a.label, b.label)
@@ -1089,7 +1110,7 @@ case a new instance is created and used.</dd>
     first_transfer = {}
     
     for x in leaves:
-        fitch.add_node(x.label, color=x.color)
+        fitch.add_node(x.label, color=x.reconc)
         
         current = x
         while current:
@@ -1775,7 +1796,7 @@ in which case a new instance is created and used.</dd>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>set</code></dt>
-<dd>The subset of TreeNode instances in the tree for which the 'color'
+<dd>The subset of TreeNode instances in the tree for which the 'reconc'
 attributes of its incident edges refer to incomparable branches in the
 species tree.</dd>
 </dl></div>
@@ -1802,7 +1823,7 @@ species tree.</dd>
     Returns
     -------
     set
-        The subset of TreeNode instances in the tree for which the &#39;color&#39;
+        The subset of TreeNode instances in the tree for which the &#39;reconc&#39;
         attributes of its incident edges refer to incomparable branches in the
         species tree.
     &#34;&#34;&#34;
@@ -1813,7 +1834,7 @@ species tree.</dd>
     transfer_edges = set()
     
     for u, v in T.edges():
-        if not lca_S.are_comparable(u.color, v.color):
+        if not lca_S.are_comparable(u.reconc, v.reconc):
             transfer_edges.add(v)
     
     return transfer_edges</code></pre>
@@ -1997,7 +2018,7 @@ in which case such a set is created internally.</dd>
         # planted root
         add_planted_root(self.T)
         self.T.root.tstamp = self.S.root.tstamp
-        self.T.root.color = self.S.root.label
+        self.T.root.reconc = self.S.root.label
         
         # suppress all vertices with a single child except the planted root
         to_suppress = []
@@ -2043,7 +2064,7 @@ in which case such a set is created internally.</dd>
             phylo_tree_attributes(S, inplace=True)
             add_planted_root(S)
             assign_missing_labels(S)
-            simulate_timing(S)
+            _simulate_timing(S)
             distance_from_timing(S)
             return S
     
@@ -2051,14 +2072,14 @@ in which case such a set is created internally.</dd>
     def _build_gene_tree(self, L, u_S):
         
         u_T = TreeNode(label=&#39;&#39;, event=&#39;D&#39;,
-                       color=(u_S.parent.label, u_S.label),
+                       reconc=(u_S.parent.label, u_S.label),
                        tstamp=u_S.tstamp + self.epsilon)
         
         # u_S is a leaf
         if not u_S.children:
             for x in L:
                 leaf = TreeNode(label=x,
-                                color=self.G.nodes[x][&#39;color&#39;],
+                                reconc=self.G.nodes[x][&#39;color&#39;],
                                 tstamp=0.0)
                 u_T.add_child(leaf)
         
@@ -2077,7 +2098,7 @@ in which case such a set is created internally.</dd>
                 # choose v_S_star s.t. L(S(v_S_star)) \cap sigma(C) is non-empty
                 v_S_star = color_to_v_S[self.G.nodes[next(iter(C))][&#39;color&#39;]]
                 v_T = TreeNode(label=&#39;&#39;, event=&#39;H&#39;,
-                               color=(u_S.label, v_S_star.label),
+                               reconc=(u_S.label, v_S_star.label),
                                tstamp=u_S.tstamp - self.epsilon)
                 u_T.add_child(v_T)
                 
@@ -2151,7 +2172,7 @@ not an LDT graph.</dd>
     # planted root
     add_planted_root(self.T)
     self.T.root.tstamp = self.S.root.tstamp
-    self.T.root.color = self.S.root.label
+    self.T.root.reconc = self.S.root.label
     
     # suppress all vertices with a single child except the planted root
     to_suppress = []

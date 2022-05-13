@@ -51,7 +51,7 @@ import numpy as np
 
 from asymmetree.seqevolve.EvolvingSequence import EvoSeq, State
 from asymmetree.seqevolve.Alignment import AlignmentBuilder
-from asymmetree.file_io.SeqFileIO import write_alignment
+from asymmetree.file_io.SeqFileIO import write_alignment, write_fasta
 
 
 __author__ = &#39;David Schaller&#39;
@@ -61,7 +61,7 @@ class Evolver:
     
     def __init__(self, subst_model,
                  indel_model=None, het_model=None,
-                 jump_chain=False,
+                 gillespie=&#39;auto&#39;,
                  **kwargs):
         &#34;&#34;&#34;
         Parameters
@@ -72,13 +72,13 @@ class Evolver:
             Model for insertions and deletions, default is None.
         het_model : HetModel, optional
             Model for substitution rate heterogeneity, default is None.
-        jump_chain : bool, optional
-            If True, draw substitution in a Gillespie process instead of
-            constructing the exchange probability matrix P via matrix
-            diagonalization. The jump chain mode is expected to be faster if
-            the rate heterogeneity is large, and therefore automatically
-            switched on if the het_model has more than 5 classes or is set to
-            sitewise.
+        gillespie : bool, optional
+            If True, the Gillespie algorithm is used instead of constructing
+            the exchange probability matrix P via matrix diagonalization. The
+            Gillespie algorithm is expected to be faster if the rate
+            heterogeneity is large. The default is &#39;auto&#39;, in which case the 
+            exchange probability matrix is used except if rate heterogeneity
+            is enabled.
         &#34;&#34;&#34;
         
         self.subst_model = subst_model
@@ -86,12 +86,13 @@ class Evolver:
         self.indel_model = indel_model
         self.het_model = het_model
         
-        if (jump_chain or 
-            (het_model and het_model.sitewise) or
-            (het_model and het_model.classes &gt; 5)):     # determine best cutoff
-            self._jump_chain = True
+        if gillespie == &#39;auto&#39;:
+            if het_model and (het_model.classes &gt; 1 or het_model.sitewise):
+                self._gillespie = True
+            else:
+                self._gillespie = False
         else:
-            self._jump_chain = False
+            self._gillespie = bool(gillespie)
         
     
     def evolve_along_tree(self, tree, start_length=200, start_seq=None):
@@ -136,7 +137,8 @@ class Evolver:
             if v.parent is None:
                 self.sequences[v] = root_seq
             else:
-                self.sequences[v] = self._evolve(self.sequences[v.parent], v.dist)
+                self.sequences[v] = self._evolve(self.sequences[v.parent],
+                                                 v.dist)
                 
         return self.sequences
           
@@ -179,12 +181,54 @@ class Evolver:
             if self.het_model:
                 self.het_model.assign(child_seq)
         
-        if not self._jump_chain:
-            self._substitute(child_seq, distance)               # apply transition prob. matrix
+        if not self._gillespie:
+            # use transition prob. matrix
+            self._substitute(child_seq, distance)
         else:
-            self._substitute_jump_chain(child_seq, distance)    # apply jump chain
+            # use Gillespie algorithm
+            self._substitute_gillespie(child_seq, distance)
         
         return child_seq
+    
+    
+    def get_sequences(self, include_inner=True):
+        &#34;&#34;&#34;Return the simulated sequence as strings.
+        
+        Parameters
+        ----------
+        include_inner : bool, optional
+            If True, the sequences of the inner nodes of the tree are also
+            includes. The default is True.
+        
+        Returns
+        -------
+        dict
+            A dictionary with the tree nodes as keys and the str sequence
+            (without gaps) as values.
+        &#34;&#34;&#34;
+        
+        if include_inner:
+            return {v: self.subst_model.to_sequence(seq)
+                    for v, seq in self.sequences.items()}
+        else:
+            return {v: self.subst_model.to_sequence(seq)
+                    for v, seq in self.sequences.items() if v.is_leaf()}
+    
+    
+    def write_sequences(self, filename, include_inner=True):
+        &#34;&#34;&#34;Write the simulated sequences into a file in fasta format.
+        
+        Parameters
+        ----------
+        filename: str
+            The path and filename to the file into which the sequences shall
+            be written.
+        include_inner : bool, optional
+            If True, the sequences of the inner nodes of the tree are also
+            written to the file. The default is True.
+        &#34;&#34;&#34;
+        
+        write_fasta(filename, self.get_sequences(include_inner=include_inner))
     
     
     def true_alignment(self, include_inner=True, write_to=None,
@@ -231,131 +275,75 @@ class Evolver:
     def _substitute(self, sequence, t):
         
         # (cumulative) transition probability matrices
-        P = self._cumulative_P_matrices(sequence, t)
+        P = {}
         
         r = np.random.random(len(sequence))
-        pos = 0
         
-        for site in sequence:
-            
+        for i, site in enumerate(sequence):
+
             if site.status == State.INHERITED:
                 # mutate according to matrix of the corresponding class
-                site._value = np.argmax(P[site.rate_class][site._value, :] &gt; r[pos])
+                
+                d = site.rate_factor * t
+                
+                if d not in P:
+                    if d &gt; 0.0:
+                        P[d] = np.cumsum(
+                            self.subst_model.transition_prob_matrix(d),
+                            axis=1)
+                    else:
+                        continue
+                
+                site._value = np.argmax(P[d][site._value, :] &gt; r[i])
             
             else:
                 # choose random character
-                site._value = np.argmax(self.subst_model.freqs_cumulative &gt; r[pos])
-            
-            pos += 1
-    
-    
-    def _cumulative_P_matrices(self, sequence, t):
-        
-        P = {}
-        
-        if not self.het_model:
-            P[0] = np.cumsum(self.subst_model.transition_prob_matrix(t),
-                             axis=1)
-
-        else:
-            for site in sequence:
-                
-                c = site.rate_class
-                
-                if c not in P:
-                    
-                    r = site.rate_factor
-                    
-                    if r &gt; 0.0:
-                        P[c] = np.cumsum(self.subst_model.transition_prob_matrix(r * t),
-                                         axis=1)
-                    elif r == 0:
-                        P[c] = np.cumsum(np.identity(len(self.subst_model.alphabet)),
-                                         axis=1)
-        
-        return P
+                site._value = np.argmax(self.subst_model.freqs_cumulative &gt; r[i])
         
     
     # --------------------------------------------------------------------------
-    #                        Substitution by Jump chain
+    #                   Substitution by Gillespie algorithm
     # --------------------------------------------------------------------------
     
-    def _substitute_jump_chain(self, sequence, t):
+    def _substitute_gillespie(self, sequence, t):
         
-        total_rate = self._total_subst_rate(sequence, exclude_inserted=True)
-        
-        # jump chain algorithm for inherited positions
-        current_time = 0.0
-        while current_time &lt; t:
-            
-            current_time += np.random.exponential(1/total_rate) if total_rate &gt; 0.0 else float(&#39;inf&#39;)
-            
-            if current_time &lt; t:
-                
-                site, mutation = self._draw_substitution(sequence, total_rate)
-                
-                total_rate += site.rate_factor * self.subst_model.Q[site._value, site._value]
-                total_rate -= site.rate_factor * self.subst_model.Q[mutation, mutation]
-                site._value = mutation
-        
-        # choose random characters for insertions
-        r = np.random.random(sequence.count_status(State.INSERTION))
-        pos = 0
         for site in sequence:
             
+            # choose random characters for insertions
             if site.status == State.INSERTION:
-                site._value = np.argmax(self.subst_model.freqs_cumulative &gt; r[pos])
-                pos += 1
+                site._value = np.argmax(self.subst_model.freqs_cumulative 
+                                        &gt; np.random.random())
                 
-    
-    def _total_subst_rate(self, sequence, exclude_inserted=True):
-        
-        total = 0.0
-        
-        for site in sequence:
-            
-            if exclude_inserted and site.status == State.INSERTION:
-                continue
-            
-            total -= site.rate_factor * self.subst_model.Q[site._value, site._value]
-            
-        return total
-    
-    
-    def _draw_substitution(self, sequence, total_rate):
-        
-        chosen_site, chosen_mutation = None, None
-        r = np.random.uniform(low=0.0, high=total_rate)
-        
-        current_sum = 0.0
-        for site in sequence:
-            
-            if site.status == State.INSERTION:
-                continue
-            
-            # use negative value on the diagonal of the rate matrix Q
-            site_rate = - site.rate_factor * self.subst_model.Q[site._value, site._value]
-            current_sum += site_rate
-            
-            if current_sum &gt; r:
-                chosen_site = site
-                
-                # rescale the &#34;rest&#34; of r for application on the rate matrix Q
-                r = (r - current_sum + site_rate) / site.rate_factor
-                
-                break
-            
-        current_sum = 0.0
-        for i in range(len(self.subst_model.alphabet)):
-            
-            if i != site._value:            # skip the entry on diagonal
-                current_sum += self.subst_model.Q[site._value, i]
-                
-                if current_sum &gt; r:
-                    chosen_mutation = i
-                    break
+            # Gillespie algorithm for inherited positions
+            else:
+                current_time = 0.0
+                while current_time &lt; t:
                     
-        return chosen_site, chosen_mutation
+                    # use negative value on the diagonal of the rate matrix Q
+                    rate = - site.rate_factor * self.subst_model.Q[site._value,
+                                                                   site._value]
+                    
+                    current_time += np.random.exponential(1/rate) \
+                                    if rate &gt; 0.0 else float(&#39;inf&#39;)
+                    
+                    if current_time &gt;= t:
+                        break
+                        
+                    r_mutation = - np.random.random() * self.subst_model.Q[
+                                                            site._value,
+                                                            site._value]
+                    current_sum = 0.0
+                    for i in range(len(self.subst_model.alphabet)):
+                        
+                        # skip the entry on diagonal
+                        if i != site._value:
+                            current_sum += self.subst_model.Q[site._value, i]
+                            
+                            if current_sum &gt; r_mutation:
+                                mutation = i
+                                break
+                    
+                    site._value = mutation
     
     
     # --------------------------------------------------------------------------
@@ -363,7 +351,7 @@ class Evolver:
     # --------------------------------------------------------------------------
         
     def _generate_indels(self, sequence, t):
-        &#34;&#34;&#34;Generates indels by a Gillespie process.&#34;&#34;&#34;
+        &#34;&#34;&#34;Generates indels using the Gillespie algorithm.&#34;&#34;&#34;
         
         current_time = 0.0
         
@@ -372,12 +360,12 @@ class Evolver:
             ins_rate, del_rate = self.indel_model.get_rates(len(sequence))
             total_rate = ins_rate + del_rate
             
-            current_time += np.random.exponential(1/total_rate) if total_rate &gt; 0.0 else float(&#39;inf&#39;)
+            current_time += np.random.exponential(1/total_rate) \
+                            if total_rate &gt; 0.0 else float(&#39;inf&#39;)
             
             if current_time &lt; t:
                 
-                r = np.random.random()
-                if r &lt; ins_rate / total_rate:
+                if np.random.random() &lt; ins_rate / total_rate:
                     self._insertion(sequence)
                 else:
                     self._deletion(sequence)
@@ -437,7 +425,7 @@ class Evolver:
 <dl>
 <dt id="asymmetree.seqevolve.Evolver.Evolver"><code class="flex name class">
 <span>class <span class="ident">Evolver</span></span>
-<span>(</span><span>subst_model, indel_model=None, het_model=None, jump_chain=False, **kwargs)</span>
+<span>(</span><span>subst_model, indel_model=None, het_model=None, gillespie='auto', **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="parameters">Parameters</h2>
@@ -448,13 +436,13 @@ class Evolver:
 <dd>Model for insertions and deletions, default is None.</dd>
 <dt><strong><code>het_model</code></strong> :&ensp;<code>HetModel</code>, optional</dt>
 <dd>Model for substitution rate heterogeneity, default is None.</dd>
-<dt><strong><code>jump_chain</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>If True, draw substitution in a Gillespie process instead of
-constructing the exchange probability matrix P via matrix
-diagonalization. The jump chain mode is expected to be faster if
-the rate heterogeneity is large, and therefore automatically
-switched on if the het_model has more than 5 classes or is set to
-sitewise.</dd>
+<dt><strong><code>gillespie</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, the Gillespie algorithm is used instead of constructing
+the exchange probability matrix P via matrix diagonalization. The
+Gillespie algorithm is expected to be faster if the rate
+heterogeneity is large. The default is 'auto', in which case the
+exchange probability matrix is used except if rate heterogeneity
+is enabled.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -464,7 +452,7 @@ sitewise.</dd>
     
     def __init__(self, subst_model,
                  indel_model=None, het_model=None,
-                 jump_chain=False,
+                 gillespie=&#39;auto&#39;,
                  **kwargs):
         &#34;&#34;&#34;
         Parameters
@@ -475,13 +463,13 @@ sitewise.</dd>
             Model for insertions and deletions, default is None.
         het_model : HetModel, optional
             Model for substitution rate heterogeneity, default is None.
-        jump_chain : bool, optional
-            If True, draw substitution in a Gillespie process instead of
-            constructing the exchange probability matrix P via matrix
-            diagonalization. The jump chain mode is expected to be faster if
-            the rate heterogeneity is large, and therefore automatically
-            switched on if the het_model has more than 5 classes or is set to
-            sitewise.
+        gillespie : bool, optional
+            If True, the Gillespie algorithm is used instead of constructing
+            the exchange probability matrix P via matrix diagonalization. The
+            Gillespie algorithm is expected to be faster if the rate
+            heterogeneity is large. The default is &#39;auto&#39;, in which case the 
+            exchange probability matrix is used except if rate heterogeneity
+            is enabled.
         &#34;&#34;&#34;
         
         self.subst_model = subst_model
@@ -489,12 +477,13 @@ sitewise.</dd>
         self.indel_model = indel_model
         self.het_model = het_model
         
-        if (jump_chain or 
-            (het_model and het_model.sitewise) or
-            (het_model and het_model.classes &gt; 5)):     # determine best cutoff
-            self._jump_chain = True
+        if gillespie == &#39;auto&#39;:
+            if het_model and (het_model.classes &gt; 1 or het_model.sitewise):
+                self._gillespie = True
+            else:
+                self._gillespie = False
         else:
-            self._jump_chain = False
+            self._gillespie = bool(gillespie)
         
     
     def evolve_along_tree(self, tree, start_length=200, start_seq=None):
@@ -539,7 +528,8 @@ sitewise.</dd>
             if v.parent is None:
                 self.sequences[v] = root_seq
             else:
-                self.sequences[v] = self._evolve(self.sequences[v.parent], v.dist)
+                self.sequences[v] = self._evolve(self.sequences[v.parent],
+                                                 v.dist)
                 
         return self.sequences
           
@@ -582,12 +572,54 @@ sitewise.</dd>
             if self.het_model:
                 self.het_model.assign(child_seq)
         
-        if not self._jump_chain:
-            self._substitute(child_seq, distance)               # apply transition prob. matrix
+        if not self._gillespie:
+            # use transition prob. matrix
+            self._substitute(child_seq, distance)
         else:
-            self._substitute_jump_chain(child_seq, distance)    # apply jump chain
+            # use Gillespie algorithm
+            self._substitute_gillespie(child_seq, distance)
         
         return child_seq
+    
+    
+    def get_sequences(self, include_inner=True):
+        &#34;&#34;&#34;Return the simulated sequence as strings.
+        
+        Parameters
+        ----------
+        include_inner : bool, optional
+            If True, the sequences of the inner nodes of the tree are also
+            includes. The default is True.
+        
+        Returns
+        -------
+        dict
+            A dictionary with the tree nodes as keys and the str sequence
+            (without gaps) as values.
+        &#34;&#34;&#34;
+        
+        if include_inner:
+            return {v: self.subst_model.to_sequence(seq)
+                    for v, seq in self.sequences.items()}
+        else:
+            return {v: self.subst_model.to_sequence(seq)
+                    for v, seq in self.sequences.items() if v.is_leaf()}
+    
+    
+    def write_sequences(self, filename, include_inner=True):
+        &#34;&#34;&#34;Write the simulated sequences into a file in fasta format.
+        
+        Parameters
+        ----------
+        filename: str
+            The path and filename to the file into which the sequences shall
+            be written.
+        include_inner : bool, optional
+            If True, the sequences of the inner nodes of the tree are also
+            written to the file. The default is True.
+        &#34;&#34;&#34;
+        
+        write_fasta(filename, self.get_sequences(include_inner=include_inner))
     
     
     def true_alignment(self, include_inner=True, write_to=None,
@@ -634,131 +666,75 @@ sitewise.</dd>
     def _substitute(self, sequence, t):
         
         # (cumulative) transition probability matrices
-        P = self._cumulative_P_matrices(sequence, t)
+        P = {}
         
         r = np.random.random(len(sequence))
-        pos = 0
         
-        for site in sequence:
-            
+        for i, site in enumerate(sequence):
+
             if site.status == State.INHERITED:
                 # mutate according to matrix of the corresponding class
-                site._value = np.argmax(P[site.rate_class][site._value, :] &gt; r[pos])
+                
+                d = site.rate_factor * t
+                
+                if d not in P:
+                    if d &gt; 0.0:
+                        P[d] = np.cumsum(
+                            self.subst_model.transition_prob_matrix(d),
+                            axis=1)
+                    else:
+                        continue
+                
+                site._value = np.argmax(P[d][site._value, :] &gt; r[i])
             
             else:
                 # choose random character
-                site._value = np.argmax(self.subst_model.freqs_cumulative &gt; r[pos])
-            
-            pos += 1
-    
-    
-    def _cumulative_P_matrices(self, sequence, t):
-        
-        P = {}
-        
-        if not self.het_model:
-            P[0] = np.cumsum(self.subst_model.transition_prob_matrix(t),
-                             axis=1)
-
-        else:
-            for site in sequence:
-                
-                c = site.rate_class
-                
-                if c not in P:
-                    
-                    r = site.rate_factor
-                    
-                    if r &gt; 0.0:
-                        P[c] = np.cumsum(self.subst_model.transition_prob_matrix(r * t),
-                                         axis=1)
-                    elif r == 0:
-                        P[c] = np.cumsum(np.identity(len(self.subst_model.alphabet)),
-                                         axis=1)
-        
-        return P
+                site._value = np.argmax(self.subst_model.freqs_cumulative &gt; r[i])
         
     
     # --------------------------------------------------------------------------
-    #                        Substitution by Jump chain
+    #                   Substitution by Gillespie algorithm
     # --------------------------------------------------------------------------
     
-    def _substitute_jump_chain(self, sequence, t):
+    def _substitute_gillespie(self, sequence, t):
         
-        total_rate = self._total_subst_rate(sequence, exclude_inserted=True)
-        
-        # jump chain algorithm for inherited positions
-        current_time = 0.0
-        while current_time &lt; t:
-            
-            current_time += np.random.exponential(1/total_rate) if total_rate &gt; 0.0 else float(&#39;inf&#39;)
-            
-            if current_time &lt; t:
-                
-                site, mutation = self._draw_substitution(sequence, total_rate)
-                
-                total_rate += site.rate_factor * self.subst_model.Q[site._value, site._value]
-                total_rate -= site.rate_factor * self.subst_model.Q[mutation, mutation]
-                site._value = mutation
-        
-        # choose random characters for insertions
-        r = np.random.random(sequence.count_status(State.INSERTION))
-        pos = 0
         for site in sequence:
             
+            # choose random characters for insertions
             if site.status == State.INSERTION:
-                site._value = np.argmax(self.subst_model.freqs_cumulative &gt; r[pos])
-                pos += 1
+                site._value = np.argmax(self.subst_model.freqs_cumulative 
+                                        &gt; np.random.random())
                 
-    
-    def _total_subst_rate(self, sequence, exclude_inserted=True):
-        
-        total = 0.0
-        
-        for site in sequence:
-            
-            if exclude_inserted and site.status == State.INSERTION:
-                continue
-            
-            total -= site.rate_factor * self.subst_model.Q[site._value, site._value]
-            
-        return total
-    
-    
-    def _draw_substitution(self, sequence, total_rate):
-        
-        chosen_site, chosen_mutation = None, None
-        r = np.random.uniform(low=0.0, high=total_rate)
-        
-        current_sum = 0.0
-        for site in sequence:
-            
-            if site.status == State.INSERTION:
-                continue
-            
-            # use negative value on the diagonal of the rate matrix Q
-            site_rate = - site.rate_factor * self.subst_model.Q[site._value, site._value]
-            current_sum += site_rate
-            
-            if current_sum &gt; r:
-                chosen_site = site
-                
-                # rescale the &#34;rest&#34; of r for application on the rate matrix Q
-                r = (r - current_sum + site_rate) / site.rate_factor
-                
-                break
-            
-        current_sum = 0.0
-        for i in range(len(self.subst_model.alphabet)):
-            
-            if i != site._value:            # skip the entry on diagonal
-                current_sum += self.subst_model.Q[site._value, i]
-                
-                if current_sum &gt; r:
-                    chosen_mutation = i
-                    break
+            # Gillespie algorithm for inherited positions
+            else:
+                current_time = 0.0
+                while current_time &lt; t:
                     
-        return chosen_site, chosen_mutation
+                    # use negative value on the diagonal of the rate matrix Q
+                    rate = - site.rate_factor * self.subst_model.Q[site._value,
+                                                                   site._value]
+                    
+                    current_time += np.random.exponential(1/rate) \
+                                    if rate &gt; 0.0 else float(&#39;inf&#39;)
+                    
+                    if current_time &gt;= t:
+                        break
+                        
+                    r_mutation = - np.random.random() * self.subst_model.Q[
+                                                            site._value,
+                                                            site._value]
+                    current_sum = 0.0
+                    for i in range(len(self.subst_model.alphabet)):
+                        
+                        # skip the entry on diagonal
+                        if i != site._value:
+                            current_sum += self.subst_model.Q[site._value, i]
+                            
+                            if current_sum &gt; r_mutation:
+                                mutation = i
+                                break
+                    
+                    site._value = mutation
     
     
     # --------------------------------------------------------------------------
@@ -766,7 +742,7 @@ sitewise.</dd>
     # --------------------------------------------------------------------------
         
     def _generate_indels(self, sequence, t):
-        &#34;&#34;&#34;Generates indels by a Gillespie process.&#34;&#34;&#34;
+        &#34;&#34;&#34;Generates indels using the Gillespie algorithm.&#34;&#34;&#34;
         
         current_time = 0.0
         
@@ -775,12 +751,12 @@ sitewise.</dd>
             ins_rate, del_rate = self.indel_model.get_rates(len(sequence))
             total_rate = ins_rate + del_rate
             
-            current_time += np.random.exponential(1/total_rate) if total_rate &gt; 0.0 else float(&#39;inf&#39;)
+            current_time += np.random.exponential(1/total_rate) \
+                            if total_rate &gt; 0.0 else float(&#39;inf&#39;)
             
             if current_time &lt; t:
                 
-                r = np.random.random()
-                if r &lt; ins_rate / total_rate:
+                if np.random.random() &lt; ins_rate / total_rate:
                     self._insertion(sequence)
                 else:
                     self._deletion(sequence)
@@ -901,9 +877,55 @@ the simulated sequences as values (instances of type EvoSeq).</dd>
         if v.parent is None:
             self.sequences[v] = root_seq
         else:
-            self.sequences[v] = self._evolve(self.sequences[v.parent], v.dist)
+            self.sequences[v] = self._evolve(self.sequences[v.parent],
+                                             v.dist)
             
     return self.sequences</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.seqevolve.Evolver.Evolver.get_sequences"><code class="name flex">
+<span>def <span class="ident">get_sequences</span></span>(<span>self, include_inner=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the simulated sequence as strings.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>include_inner</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, the sequences of the inner nodes of the tree are also
+includes. The default is True.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>A dictionary with the tree nodes as keys and the str sequence
+(without gaps) as values.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_sequences(self, include_inner=True):
+    &#34;&#34;&#34;Return the simulated sequence as strings.
+    
+    Parameters
+    ----------
+    include_inner : bool, optional
+        If True, the sequences of the inner nodes of the tree are also
+        includes. The default is True.
+    
+    Returns
+    -------
+    dict
+        A dictionary with the tree nodes as keys and the str sequence
+        (without gaps) as values.
+    &#34;&#34;&#34;
+    
+    if include_inner:
+        return {v: self.subst_model.to_sequence(seq)
+                for v, seq in self.sequences.items()}
+    else:
+        return {v: self.subst_model.to_sequence(seq)
+                for v, seq in self.sequences.items() if v.is_leaf()}</code></pre>
 </details>
 </dd>
 <dt id="asymmetree.seqevolve.Evolver.Evolver.true_alignment"><code class="name flex">
@@ -971,6 +993,40 @@ the str sequences as values that include the necessary gaps.</dd>
     return alignment</code></pre>
 </details>
 </dd>
+<dt id="asymmetree.seqevolve.Evolver.Evolver.write_sequences"><code class="name flex">
+<span>def <span class="ident">write_sequences</span></span>(<span>self, filename, include_inner=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Write the simulated sequences into a file in fasta format.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>filename</code></strong> :&ensp;<code>str</code></dt>
+<dd>The path and filename to the file into which the sequences shall
+be written.</dd>
+<dt><strong><code>include_inner</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If True, the sequences of the inner nodes of the tree are also
+written to the file. The default is True.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def write_sequences(self, filename, include_inner=True):
+    &#34;&#34;&#34;Write the simulated sequences into a file in fasta format.
+    
+    Parameters
+    ----------
+    filename: str
+        The path and filename to the file into which the sequences shall
+        be written.
+    include_inner : bool, optional
+        If True, the sequences of the inner nodes of the tree are also
+        written to the file. The default is True.
+    &#34;&#34;&#34;
+    
+    write_fasta(filename, self.get_sequences(include_inner=include_inner))</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -995,7 +1051,9 @@ the str sequences as values that include the necessary gaps.</dd>
 <h4><code><a title="asymmetree.seqevolve.Evolver.Evolver" href="#asymmetree.seqevolve.Evolver.Evolver">Evolver</a></code></h4>
 <ul class="">
 <li><code><a title="asymmetree.seqevolve.Evolver.Evolver.evolve_along_tree" href="#asymmetree.seqevolve.Evolver.Evolver.evolve_along_tree">evolve_along_tree</a></code></li>
+<li><code><a title="asymmetree.seqevolve.Evolver.Evolver.get_sequences" href="#asymmetree.seqevolve.Evolver.Evolver.get_sequences">get_sequences</a></code></li>
 <li><code><a title="asymmetree.seqevolve.Evolver.Evolver.true_alignment" href="#asymmetree.seqevolve.Evolver.Evolver.true_alignment">true_alignment</a></code></li>
+<li><code><a title="asymmetree.seqevolve.Evolver.Evolver.write_sequences" href="#asymmetree.seqevolve.Evolver.Evolver.write_sequences">write_sequences</a></code></li>
 </ul>
 </li>
 </ul>

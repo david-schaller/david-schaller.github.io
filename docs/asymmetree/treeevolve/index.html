@@ -30,8 +30,8 @@ trees, furthermore, can be manipulated with a realistic rate heterogeneity
 among their branches resulting in general additive distances (but no longer
 ultrametric).</p>
 <p>A typical simulation consists of the following steps:</p>
-<p>(1) dated species tree (models e.g. 'innovation', 'Yule', and '(episodic)
-birth-death process')</p>
+<p>(1) dated species tree (models e.g. 'Yule', and '(episodic) birth-death
+process')</p>
 <p>(2) dated gene tree(s) (birth-death process with speciations as additional
 branching events)</p>
 <p>(3) assignment of asymmetric evolution rates to paralogous genes</p>
@@ -53,8 +53,8 @@ ultrametric).
 
 A typical simulation consists of the following steps:
     
-(1) dated species tree (models e.g. &#39;innovation&#39;, &#39;Yule&#39;, and &#39;(episodic)
-    birth-death process&#39;)
+(1) dated species tree (models e.g. &#39;Yule&#39;, and &#39;(episodic) birth-death
+    process&#39;)
     
 (2) dated gene tree(s) (birth-death process with speciations as additional
     branching events)
@@ -64,26 +64,35 @@ A typical simulation consists of the following steps:
 (4) pruned gene tree(s) (removal of all branches that lead to losses only)
 &#34;&#34;&#34;
 
-from asymmetree.treeevolve.GeneTree import simulate_dated_gene_tree, GeneTreeSimulator, prune_losses
-from asymmetree.treeevolve.SpeciesTree import simulate_species_tree, simulate_species_tree_age
-from asymmetree.treeevolve.EvolutionRates import assign_rates, autocorrelation_factors, simulate_gene_trees
-from asymmetree.treeevolve.NoisyMatrix import noisy_matrix, convex_linear_comb, wrong_topology_matrix</code></pre>
+from asymmetree.treeevolve.SpeciesTree import (species_tree_n,
+                                               species_tree_age,
+                                               species_tree_n_age,
+                                               nonbinary)
+from asymmetree.treeevolve.GeneTree import (dated_gene_tree,
+                                            GeneTreeSimulator,
+                                            prune_losses)
+from asymmetree.treeevolve.RateHeterogeneity import (rate_heterogeneity,
+                                                     autocorrelation_factors,
+                                                     gene_trees)
+from asymmetree.treeevolve.DistanceNoise import (noisy_matrix,
+                                                 convex_linear_comb,
+                                                 wrong_topology_matrix)</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="asymmetree.treeevolve.EvolutionRates" href="EvolutionRates.html">asymmetree.treeevolve.EvolutionRates</a></code></dt>
+<dt><code class="name"><a title="asymmetree.treeevolve.DistanceNoise" href="DistanceNoise.html">asymmetree.treeevolve.DistanceNoise</a></code></dt>
 <dd>
-<div class="desc"><p>Evolution rate heterogeneity …</p></div>
+<div class="desc"><p>Simulation of noisy distance matrices …</p></div>
 </dd>
 <dt><code class="name"><a title="asymmetree.treeevolve.GeneTree" href="GeneTree.html">asymmetree.treeevolve.GeneTree</a></code></dt>
 <dd>
 <div class="desc"><p>Simulation of dated gene trees.</p></div>
 </dd>
-<dt><code class="name"><a title="asymmetree.treeevolve.NoisyMatrix" href="NoisyMatrix.html">asymmetree.treeevolve.NoisyMatrix</a></code></dt>
+<dt><code class="name"><a title="asymmetree.treeevolve.RateHeterogeneity" href="RateHeterogeneity.html">asymmetree.treeevolve.RateHeterogeneity</a></code></dt>
 <dd>
-<div class="desc"><p>Simulation of noisy distance matrices …</p></div>
+<div class="desc"><p>Evolution rate heterogeneity …</p></div>
 </dd>
 <dt><code class="name"><a title="asymmetree.treeevolve.SpeciesTree" href="SpeciesTree.html">asymmetree.treeevolve.SpeciesTree</a></code></dt>
 <dd>
@@ -111,9 +120,9 @@ from asymmetree.treeevolve.NoisyMatrix import noisy_matrix, convex_linear_comb, 
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="asymmetree.treeevolve.EvolutionRates" href="EvolutionRates.html">asymmetree.treeevolve.EvolutionRates</a></code></li>
+<li><code><a title="asymmetree.treeevolve.DistanceNoise" href="DistanceNoise.html">asymmetree.treeevolve.DistanceNoise</a></code></li>
 <li><code><a title="asymmetree.treeevolve.GeneTree" href="GeneTree.html">asymmetree.treeevolve.GeneTree</a></code></li>
-<li><code><a title="asymmetree.treeevolve.NoisyMatrix" href="NoisyMatrix.html">asymmetree.treeevolve.NoisyMatrix</a></code></li>
+<li><code><a title="asymmetree.treeevolve.RateHeterogeneity" href="RateHeterogeneity.html">asymmetree.treeevolve.RateHeterogeneity</a></code></li>
 <li><code><a title="asymmetree.treeevolve.SpeciesTree" href="SpeciesTree.html">asymmetree.treeevolve.SpeciesTree</a></code></li>
 </ul>
 </li>

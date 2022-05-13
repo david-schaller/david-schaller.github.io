@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>asymmetree.visualize.GeneTreeVis API documentation</title>
-<meta name="description" content="Gene tree visualization." />
+<title>asymmetree.visualize.TreeVis API documentation</title>
+<meta name="description" content="Species and gene tree visualization." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,17 +19,17 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>asymmetree.visualize.GeneTreeVis</code></h1>
+<h1 class="title">Module <code>asymmetree.visualize.TreeVis</code></h1>
 </header>
 <section id="section-intro">
-<p>Gene tree visualization.</p>
+<p>Species and gene tree visualization.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
 
-&#34;&#34;&#34;Gene tree visualization.&#34;&#34;&#34;
+&#34;&#34;&#34;Species and gene tree visualization.&#34;&#34;&#34;
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -39,38 +39,182 @@ import matplotlib.patches as mpatches
 __author__ = &#39;David Schaller&#39;
 
 
-class GeneTreeVis:
+def assign_species_colors(tree):
+    &#34;&#34;&#34;Assign a unique color to each (extant) species in a species tree.
     
-    def __init__(self, tree, scale_symbols=1.0, species_info=False):
+    Parameters
+    ----------
+    tree : Tree
+        The species tree with uniquely labeled (non-loss) leaves.
+    
+    Returns
+    -------
+    dict
+        A dictonary containing the labels of the extant species as keys and
+        the assigned colors as values.
+    &#34;&#34;&#34;
+    
+    return _assign_cmap({v.label for v in tree.leaves() if v.event != &#39;L&#39;})
+
+
+def assign_gene_colors(tree, species_colors=None):
+    &#34;&#34;&#34;Assign a color to each (extant) gene in a gene tree according to its
+    species.
+    
+    Parameters
+    ----------
+    tree : Tree
+        The gene tree whose (non-loss) leaves have the &#39;reconc&#39; attribute, i.e,
+        the information to which species they belong.
+    species_colors : dict, optional
+        A dictonary containing the values of the &#39;color&#39; attribute appearing
+        in the tree as keys and assigned colors as values.
+    
+    Returns
+    -------
+    dict
+        A dictonary containing the labels of the extant genes as keys and
+        the assigned colors as values.
+    &#34;&#34;&#34;
+    
+    if species_colors is None:
+        
+        species_colors = _assign_cmap({v.reconc for v in tree.leaves()
+                                       if v.event != &#39;L&#39;})
+    
+    return {v.label: species_colors[v.reconc] for v in tree.leaves()
+            if v.event != &#39;L&#39;}
+
+
+def assign_colors(species_tree, gene_tree):
+    &#34;&#34;&#34;Assign a color to each (extant) species and gene.
+    
+    Parameters
+    ----------
+    species_tree : Tree
+        The species tree with uniquely labeled (non-loss) leaves.
+    gene_tree : Tree
+        The gene tree whose (non-loss) leaves have the &#39;reconc&#39; attribute, i.e,
+        the information to which species they belong, that furthermore appear
+        as labels of the (non-loss) leaves in the species tree.
+    
+    Returns
+    -------
+    tuple of two dicts
+        Dictonaries containing the labels of the extant species/genes as keys
+        and the assigned colors as values.
+    &#34;&#34;&#34;
+    
+    species_colors = assign_species_colors(species_tree)
+    
+    return species_colors, assign_gene_colors(gene_tree,
+                                              species_colors=species_colors)
+
+
+def _assign_cmap(colors):
+    
+    color_dict = {}
+    
+    if len(colors) &lt;= 10:
+        cmap = plt.get_cmap(&#39;tab10&#39;)(np.arange(len(colors), dtype=int))
+    else:
+        cmap = plt.get_cmap(&#39;jet&#39;)(np.linspace(0, 1.0, len(colors)))
+        
+    for label, color in zip(colors, cmap):
+        color_dict[label] = color
+    
+    return color_dict
+
+
+def visualize(tree, color_dict=None, save_as=False, scale_symbols=1.0,
+              fontsize=&#39;medium&#39;):
+    &#34;&#34;&#34;Visualize a tree.
+    
+    Parameters
+    ----------
+    tree : Tree
+        A tree whose nodes have the &#39;dist&#39; attribute.
+    color_dict : dict, optional
+        A dictonary containing as values the assigned color for each label
+        of the (non-loss) leaves.
+    save_as : str, optional
+        Save the image to a file. The default is False, in which case the
+        image is not saved.
+    scale_symbols : float, optional
+        Adjust the size of the event type symbols. The default is 1.0.
+    fontsize : str or float or int, optional
+        Adjust the size of the text. The default is &#39;medium&#39;.
+    &#34;&#34;&#34;
+    
+    vis = Visualizer(tree, color_dict=color_dict, scale_symbols=scale_symbols,
+                     fontsize=fontsize)
+    vis.draw(save_as=save_as)
+
+
+class Visualizer:
+    &#34;&#34;&#34;Species and gene tree visualization.&#34;&#34;&#34;
+    
+    def __init__(self, tree, color_dict=None,
+                 scale_symbols=1.0, fontsize=&#39;medium&#39;,
+                 species_info=False):
+        &#34;&#34;&#34;
+        Parameters
+        ----------
+        tree : Tree
+            A tree whose nodes have the &#39;dist&#39; attribute.
+        color_dict : dict, optional
+            A dictonary containing as values the assigned color for each label
+            of the (non-loss) leaves.
+        scale_symbols : float, optional
+            Adjust the size of the event type symbols. The default is 1.0.
+        fontsize : str or float or int, optional
+            Adjust the size of the text. The default is &#39;medium&#39;.
+        species_info : bool, False
+            If True, write the reconciliation information behind the leaf
+            label if available. The default is False.
+        &#34;&#34;&#34;
         
         self.tree = tree
+        
+        if color_dict:
+            self.colors = color_dict
+        else:
+            self.colors = {v.label: &#39;white&#39; for v in tree.preorder()}
         
         self.species_info = species_info
         
         self.symbolsize = 0.03 * scale_symbols
+        self.fontsize = fontsize
         self.symbollw = 0.04
         self.leafs_per_vertical_unit = 15
-        self.symbol_zorder = 3      
-        
-        # print(tree.to_newick())
+        self.symbol_zorder = 3
         
         self.distance_dict = {}
-        self.colors = {}
         #self.divtime_dict {}
-        self.leaf_counter = 0
+        self.leaf_counter = sum(1 for _ in tree.leaves())
         self.node_positions = {}
         
-        self.draw()
-        
     
-    def draw(self):
+    def draw(self, distance_mode=&#39;evolutionary&#39;, save_as=False):
+        &#34;&#34;&#34;Draw the tree and optionally save it to file.
+        
+        Parameters
+        ----------
+        distance_mode : str, optional
+            Information that is used for the length of the species edges.
+            Currently only &#39;evolutionary&#39; is supported, in which case the
+            &#39;dist&#39; attribute is used.
+        save_as : str, optional
+            Save the image to a file. The default is False, in which case the
+            image is not saved.
+        &#34;&#34;&#34;
         
         self.fig, self.ax = plt.subplots()
         self.ax.set_aspect(&#39;equal&#39;)
         self.ax.invert_yaxis()
         
-        self.initial_traversal()
-        self.assign_colors()
+        self.initial_traversal(distance_mode)
+        # self.assign_colors()
         self.assign_positions()
         self.draw_edges()
         self.draw_nodes()
@@ -80,47 +224,36 @@ class GeneTreeVis:
         self.ax.spines[&#39;top&#39;].set_visible(False)
         self.ax.spines[&#39;left&#39;].set_visible(False)
         self.ax.spines[&#39;right&#39;].set_visible(False)
+        self.ax.tick_params(axis=&#39;x&#39;, labelsize=self.fontsize)
         
         xmin, xmax = self.ax.get_xlim()
         ymin, ymax = self.ax.get_ylim()
         self.fig.set_size_inches(5*abs(xmax-xmin), 5*abs(ymax-ymin)+0.4)
         plt.tight_layout()
-        plt.show()
+        if save_as:
+            plt.savefig(save_as, dpi=300)
+        else:
+            plt.show()
         
     
-    def initial_traversal(self, distance=&#39;evolutionary&#39;):
+    def initial_traversal(self, distance_mode):
         
         xmax = 0.0
         
         for v in self.tree.preorder():
-            if distance == &#39;evolutionary&#39;:
+            if distance_mode == &#39;evolutionary&#39;:
                 if not v.parent:
                     self.distance_dict[v] = 0.0
                 else:
                     self.distance_dict[v] = self.distance_dict[v.parent] + v.dist
                     if self.distance_dict[v] &gt; xmax:
                         xmax = self.distance_dict[v]
-            elif distance == &#39;divtime&#39;:
+            elif distance_mode == &#39;divergence time&#39;:
                 raise ValueError(&#39;divergence time not yet implemented&#39;)
             else:
-                raise ValueError(&#34;distance mode &#39;{}&#39; not supported&#34;.format(distance))
-            if not v.children:
-                self.leaf_counter += 1
-                if v.event != &#39;L&#39; and v.color not in self.colors:
-                    self.colors[v.color] = len(self.colors)
+                raise ValueError(f&#34;distance mode &#39;{distance_mode}&#39; not supported&#34;)
                 
         self.ax.set_xlim(-0.1,xmax+0.5)
-        
-    
-    def assign_colors(self):
-        
-        if len(self.colors) &lt;= 10:
-            cmap = plt.get_cmap(&#39;tab10&#39;)(np.arange(len(self.colors), dtype=int))
-        else:
-            cmap = plt.get_cmap(&#39;jet&#39;)(np.linspace(0, 1.0, len(self.colors)))
-        for color_label, color in zip(self.colors.keys(), cmap):
-            self.colors[color_label] = color
-        # print(self.colors)
     
     
     def assign_positions(self):
@@ -145,7 +278,10 @@ class GeneTreeVis:
         
         for v in self.tree.preorder():
             if v.parent:
-                color = &#39;red&#39; if v.transferred else &#39;black&#39;
+                if hasattr(v, &#39;transferred&#39;) and v.transferred:
+                    color = &#39;red&#39;
+                else:
+                    color = &#39;black&#39;
                 self.ax.plot([self.node_positions[v.parent][0],
                               self.node_positions[v][0]],
                              [self.node_positions[v][1],
@@ -164,30 +300,31 @@ class GeneTreeVis:
     def draw_nodes(self):
         
         for v in self.tree.preorder():
-            if not v.parent:
+            if not v.parent and not v.event:
                 self.draw_root(*self.node_positions[v])
             elif v.children:
                 if v.event == &#39;D&#39;:
                     self.draw_dupl(*self.node_positions[v])
                 elif v.event == &#39;S&#39;:
                     self.draw_spec(*self.node_positions[v])
-                if v.event == &#39;H&#39;:
+                elif v.event == &#39;H&#39;:
                     self.draw_hgt(*self.node_positions[v])
+                elif v.event == &#39;GC&#39;:
+                    self.draw_gc(*self.node_positions[v])
             else:
                 if v.event == &#39;L&#39;:
                     self.draw_loss(*self.node_positions[v])
                 else:
                     x, y = self.node_positions[v]
-                    self.draw_leaf(x, y,
-                                   color=self.colors[v.color])
+                    self.draw_leaf(x, y, color=self.colors[v.label])
                     if not self.species_info:
                         text = str(v.label)
-                    else:
-                        text = &#39;{} &lt;{}&gt;&#39;.format(v.label, v.color)
+                    elif hasattr(v, &#39;reconc&#39;):
+                        text = &#39;{} &lt;{}&gt;&#39;.format(v.label, v.reconc)
                     self.write_label(x+self.symbolsize+0.02, y, text)
                 
     
-    def draw_leaf(self, x, y, color=&#39;white&#39;, leftalign=True):
+    def draw_leaf(self, x, y, color=&#39;white&#39;, leftalign=False):
         
         if leftalign:
             x += self.symbolsize/2
@@ -214,7 +351,7 @@ class GeneTreeVis:
                      linestyle=&#39;-&#39;, linewidth=1)
     
     
-    def draw_root(self, x, y, rightalign=True):
+    def draw_root(self, x, y, rightalign=False):
         
         if rightalign:
             x -= self.symbolsize/2
@@ -278,29 +415,28 @@ class GeneTreeVis:
         self.ax.add_patch(outer)
     
     
+    def draw_gc(self, x, y):
+        
+        coord = []
+        R = self.symbolsize/2
+        for i in range(5):
+            coord.append([x + 0.5 * R * np.cos(np.radians(54+i*72)),
+                          y - 0.5 * R * np.sin(np.radians(54+i*72))])
+            coord.append([x + R * np.cos(np.radians(90+i*72)),
+                          y - R * np.sin(np.radians(90+i*72))])
+
+        inner = mpatches.Polygon(coord, closed=True,
+                                 color=&#39;black&#39;, fill=True,
+                                 zorder=self.symbol_zorder)
+        self.ax.add_patch(inner)
+    
+    
     def write_label(self, x, y, text):
         
         self.ax.text(x, y, text,
+                     fontsize=self.fontsize,
                      horizontalalignment=&#39;left&#39;,
-                     verticalalignment=&#39;center&#39;)
-
-
-if __name__ == &#39;__main__&#39;:
-    
-    import asymmetree.treeevolve as te
-    
-    S = te.simulate_species_tree(6, planted=True, non_binary_prob=0.2)
-    
-    TGT_simulator = te.GeneTreeSimulator(S)
-    TGT = TGT_simulator.simulate(dupl_rate=1.0,
-                                 loss_rate=1.0,
-                                 hgt_rate=1.0,
-                                 dupl_polytomy=0.5,
-                                 replace_prob=0.5,
-                                 transfer_distance_bias=&#39;inverse&#39;)
-    TGT = te.assign_rates(TGT, S)
-    
-    gtv = GeneTreeVis(TGT)</code></pre>
+                     verticalalignment=&#39;center&#39;)</code></pre>
 </details>
 </section>
 <section>
@@ -308,52 +444,292 @@ if __name__ == &#39;__main__&#39;:
 <section>
 </section>
 <section>
-</section>
-<section>
-<h2 class="section-title" id="header-classes">Classes</h2>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis"><code class="flex name class">
-<span>class <span class="ident">GeneTreeVis</span></span>
-<span>(</span><span>tree, scale_symbols=1.0, species_info=False)</span>
+<dt id="asymmetree.visualize.TreeVis.assign_colors"><code class="name flex">
+<span>def <span class="ident">assign_colors</span></span>(<span>species_tree, gene_tree)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Assign a color to each (extant) species and gene.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>species_tree</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>The species tree with uniquely labeled (non-loss) leaves.</dd>
+<dt><strong><code>gene_tree</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>The gene tree whose (non-loss) leaves have the 'reconc' attribute, i.e,
+the information to which species they belong, that furthermore appear
+as labels of the (non-loss) leaves in the species tree.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple</code> of <code>two dicts</code></dt>
+<dd>Dictonaries containing the labels of the extant species/genes as keys
+and the assigned colors as values.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class GeneTreeVis:
+<pre><code class="python">def assign_colors(species_tree, gene_tree):
+    &#34;&#34;&#34;Assign a color to each (extant) species and gene.
     
-    def __init__(self, tree, scale_symbols=1.0, species_info=False):
+    Parameters
+    ----------
+    species_tree : Tree
+        The species tree with uniquely labeled (non-loss) leaves.
+    gene_tree : Tree
+        The gene tree whose (non-loss) leaves have the &#39;reconc&#39; attribute, i.e,
+        the information to which species they belong, that furthermore appear
+        as labels of the (non-loss) leaves in the species tree.
+    
+    Returns
+    -------
+    tuple of two dicts
+        Dictonaries containing the labels of the extant species/genes as keys
+        and the assigned colors as values.
+    &#34;&#34;&#34;
+    
+    species_colors = assign_species_colors(species_tree)
+    
+    return species_colors, assign_gene_colors(gene_tree,
+                                              species_colors=species_colors)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.visualize.TreeVis.assign_gene_colors"><code class="name flex">
+<span>def <span class="ident">assign_gene_colors</span></span>(<span>tree, species_colors=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Assign a color to each (extant) gene in a gene tree according to its
+species.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>The gene tree whose (non-loss) leaves have the 'reconc' attribute, i.e,
+the information to which species they belong.</dd>
+<dt><strong><code>species_colors</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>A dictonary containing the values of the 'color' attribute appearing
+in the tree as keys and assigned colors as values.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>A dictonary containing the labels of the extant genes as keys and
+the assigned colors as values.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assign_gene_colors(tree, species_colors=None):
+    &#34;&#34;&#34;Assign a color to each (extant) gene in a gene tree according to its
+    species.
+    
+    Parameters
+    ----------
+    tree : Tree
+        The gene tree whose (non-loss) leaves have the &#39;reconc&#39; attribute, i.e,
+        the information to which species they belong.
+    species_colors : dict, optional
+        A dictonary containing the values of the &#39;color&#39; attribute appearing
+        in the tree as keys and assigned colors as values.
+    
+    Returns
+    -------
+    dict
+        A dictonary containing the labels of the extant genes as keys and
+        the assigned colors as values.
+    &#34;&#34;&#34;
+    
+    if species_colors is None:
+        
+        species_colors = _assign_cmap({v.reconc for v in tree.leaves()
+                                       if v.event != &#39;L&#39;})
+    
+    return {v.label: species_colors[v.reconc] for v in tree.leaves()
+            if v.event != &#39;L&#39;}</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.visualize.TreeVis.assign_species_colors"><code class="name flex">
+<span>def <span class="ident">assign_species_colors</span></span>(<span>tree)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Assign a unique color to each (extant) species in a species tree.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>The species tree with uniquely labeled (non-loss) leaves.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>A dictonary containing the labels of the extant species as keys and
+the assigned colors as values.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assign_species_colors(tree):
+    &#34;&#34;&#34;Assign a unique color to each (extant) species in a species tree.
+    
+    Parameters
+    ----------
+    tree : Tree
+        The species tree with uniquely labeled (non-loss) leaves.
+    
+    Returns
+    -------
+    dict
+        A dictonary containing the labels of the extant species as keys and
+        the assigned colors as values.
+    &#34;&#34;&#34;
+    
+    return _assign_cmap({v.label for v in tree.leaves() if v.event != &#39;L&#39;})</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.visualize.TreeVis.visualize"><code class="name flex">
+<span>def <span class="ident">visualize</span></span>(<span>tree, color_dict=None, save_as=False, scale_symbols=1.0, fontsize='medium')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Visualize a tree.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>A tree whose nodes have the 'dist' attribute.</dd>
+<dt><strong><code>color_dict</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>A dictonary containing as values the assigned color for each label
+of the (non-loss) leaves.</dd>
+<dt><strong><code>save_as</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Save the image to a file. The default is False, in which case the
+image is not saved.</dd>
+<dt><strong><code>scale_symbols</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Adjust the size of the event type symbols. The default is 1.0.</dd>
+<dt><strong><code>fontsize</code></strong> :&ensp;<code>str</code> or <code>float</code> or <code>int</code>, optional</dt>
+<dd>Adjust the size of the text. The default is 'medium'.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def visualize(tree, color_dict=None, save_as=False, scale_symbols=1.0,
+              fontsize=&#39;medium&#39;):
+    &#34;&#34;&#34;Visualize a tree.
+    
+    Parameters
+    ----------
+    tree : Tree
+        A tree whose nodes have the &#39;dist&#39; attribute.
+    color_dict : dict, optional
+        A dictonary containing as values the assigned color for each label
+        of the (non-loss) leaves.
+    save_as : str, optional
+        Save the image to a file. The default is False, in which case the
+        image is not saved.
+    scale_symbols : float, optional
+        Adjust the size of the event type symbols. The default is 1.0.
+    fontsize : str or float or int, optional
+        Adjust the size of the text. The default is &#39;medium&#39;.
+    &#34;&#34;&#34;
+    
+    vis = Visualizer(tree, color_dict=color_dict, scale_symbols=scale_symbols,
+                     fontsize=fontsize)
+    vis.draw(save_as=save_as)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="asymmetree.visualize.TreeVis.Visualizer"><code class="flex name class">
+<span>class <span class="ident">Visualizer</span></span>
+<span>(</span><span>tree, color_dict=None, scale_symbols=1.0, fontsize='medium', species_info=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Species and gene tree visualization.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code>Tree</code></dt>
+<dd>A tree whose nodes have the 'dist' attribute.</dd>
+<dt><strong><code>color_dict</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>A dictonary containing as values the assigned color for each label
+of the (non-loss) leaves.</dd>
+<dt><strong><code>scale_symbols</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Adjust the size of the event type symbols. The default is 1.0.</dd>
+<dt><strong><code>fontsize</code></strong> :&ensp;<code>str</code> or <code>float</code> or <code>int</code>, optional</dt>
+<dd>Adjust the size of the text. The default is 'medium'.</dd>
+<dt><strong><code>species_info</code></strong> :&ensp;<code>bool, False</code></dt>
+<dd>If True, write the reconciliation information behind the leaf
+label if available. The default is False.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Visualizer:
+    &#34;&#34;&#34;Species and gene tree visualization.&#34;&#34;&#34;
+    
+    def __init__(self, tree, color_dict=None,
+                 scale_symbols=1.0, fontsize=&#39;medium&#39;,
+                 species_info=False):
+        &#34;&#34;&#34;
+        Parameters
+        ----------
+        tree : Tree
+            A tree whose nodes have the &#39;dist&#39; attribute.
+        color_dict : dict, optional
+            A dictonary containing as values the assigned color for each label
+            of the (non-loss) leaves.
+        scale_symbols : float, optional
+            Adjust the size of the event type symbols. The default is 1.0.
+        fontsize : str or float or int, optional
+            Adjust the size of the text. The default is &#39;medium&#39;.
+        species_info : bool, False
+            If True, write the reconciliation information behind the leaf
+            label if available. The default is False.
+        &#34;&#34;&#34;
         
         self.tree = tree
+        
+        if color_dict:
+            self.colors = color_dict
+        else:
+            self.colors = {v.label: &#39;white&#39; for v in tree.preorder()}
         
         self.species_info = species_info
         
         self.symbolsize = 0.03 * scale_symbols
+        self.fontsize = fontsize
         self.symbollw = 0.04
         self.leafs_per_vertical_unit = 15
-        self.symbol_zorder = 3      
-        
-        # print(tree.to_newick())
+        self.symbol_zorder = 3
         
         self.distance_dict = {}
-        self.colors = {}
         #self.divtime_dict {}
-        self.leaf_counter = 0
+        self.leaf_counter = sum(1 for _ in tree.leaves())
         self.node_positions = {}
         
-        self.draw()
-        
     
-    def draw(self):
+    def draw(self, distance_mode=&#39;evolutionary&#39;, save_as=False):
+        &#34;&#34;&#34;Draw the tree and optionally save it to file.
+        
+        Parameters
+        ----------
+        distance_mode : str, optional
+            Information that is used for the length of the species edges.
+            Currently only &#39;evolutionary&#39; is supported, in which case the
+            &#39;dist&#39; attribute is used.
+        save_as : str, optional
+            Save the image to a file. The default is False, in which case the
+            image is not saved.
+        &#34;&#34;&#34;
         
         self.fig, self.ax = plt.subplots()
         self.ax.set_aspect(&#39;equal&#39;)
         self.ax.invert_yaxis()
         
-        self.initial_traversal()
-        self.assign_colors()
+        self.initial_traversal(distance_mode)
+        # self.assign_colors()
         self.assign_positions()
         self.draw_edges()
         self.draw_nodes()
@@ -363,47 +739,36 @@ if __name__ == &#39;__main__&#39;:
         self.ax.spines[&#39;top&#39;].set_visible(False)
         self.ax.spines[&#39;left&#39;].set_visible(False)
         self.ax.spines[&#39;right&#39;].set_visible(False)
+        self.ax.tick_params(axis=&#39;x&#39;, labelsize=self.fontsize)
         
         xmin, xmax = self.ax.get_xlim()
         ymin, ymax = self.ax.get_ylim()
         self.fig.set_size_inches(5*abs(xmax-xmin), 5*abs(ymax-ymin)+0.4)
         plt.tight_layout()
-        plt.show()
+        if save_as:
+            plt.savefig(save_as, dpi=300)
+        else:
+            plt.show()
         
     
-    def initial_traversal(self, distance=&#39;evolutionary&#39;):
+    def initial_traversal(self, distance_mode):
         
         xmax = 0.0
         
         for v in self.tree.preorder():
-            if distance == &#39;evolutionary&#39;:
+            if distance_mode == &#39;evolutionary&#39;:
                 if not v.parent:
                     self.distance_dict[v] = 0.0
                 else:
                     self.distance_dict[v] = self.distance_dict[v.parent] + v.dist
                     if self.distance_dict[v] &gt; xmax:
                         xmax = self.distance_dict[v]
-            elif distance == &#39;divtime&#39;:
+            elif distance_mode == &#39;divergence time&#39;:
                 raise ValueError(&#39;divergence time not yet implemented&#39;)
             else:
-                raise ValueError(&#34;distance mode &#39;{}&#39; not supported&#34;.format(distance))
-            if not v.children:
-                self.leaf_counter += 1
-                if v.event != &#39;L&#39; and v.color not in self.colors:
-                    self.colors[v.color] = len(self.colors)
+                raise ValueError(f&#34;distance mode &#39;{distance_mode}&#39; not supported&#34;)
                 
         self.ax.set_xlim(-0.1,xmax+0.5)
-        
-    
-    def assign_colors(self):
-        
-        if len(self.colors) &lt;= 10:
-            cmap = plt.get_cmap(&#39;tab10&#39;)(np.arange(len(self.colors), dtype=int))
-        else:
-            cmap = plt.get_cmap(&#39;jet&#39;)(np.linspace(0, 1.0, len(self.colors)))
-        for color_label, color in zip(self.colors.keys(), cmap):
-            self.colors[color_label] = color
-        # print(self.colors)
     
     
     def assign_positions(self):
@@ -428,7 +793,10 @@ if __name__ == &#39;__main__&#39;:
         
         for v in self.tree.preorder():
             if v.parent:
-                color = &#39;red&#39; if v.transferred else &#39;black&#39;
+                if hasattr(v, &#39;transferred&#39;) and v.transferred:
+                    color = &#39;red&#39;
+                else:
+                    color = &#39;black&#39;
                 self.ax.plot([self.node_positions[v.parent][0],
                               self.node_positions[v][0]],
                              [self.node_positions[v][1],
@@ -447,30 +815,31 @@ if __name__ == &#39;__main__&#39;:
     def draw_nodes(self):
         
         for v in self.tree.preorder():
-            if not v.parent:
+            if not v.parent and not v.event:
                 self.draw_root(*self.node_positions[v])
             elif v.children:
                 if v.event == &#39;D&#39;:
                     self.draw_dupl(*self.node_positions[v])
                 elif v.event == &#39;S&#39;:
                     self.draw_spec(*self.node_positions[v])
-                if v.event == &#39;H&#39;:
+                elif v.event == &#39;H&#39;:
                     self.draw_hgt(*self.node_positions[v])
+                elif v.event == &#39;GC&#39;:
+                    self.draw_gc(*self.node_positions[v])
             else:
                 if v.event == &#39;L&#39;:
                     self.draw_loss(*self.node_positions[v])
                 else:
                     x, y = self.node_positions[v]
-                    self.draw_leaf(x, y,
-                                   color=self.colors[v.color])
+                    self.draw_leaf(x, y, color=self.colors[v.label])
                     if not self.species_info:
                         text = str(v.label)
-                    else:
-                        text = &#39;{} &lt;{}&gt;&#39;.format(v.label, v.color)
+                    elif hasattr(v, &#39;reconc&#39;):
+                        text = &#39;{} &lt;{}&gt;&#39;.format(v.label, v.reconc)
                     self.write_label(x+self.symbolsize+0.02, y, text)
                 
     
-    def draw_leaf(self, x, y, color=&#39;white&#39;, leftalign=True):
+    def draw_leaf(self, x, y, color=&#39;white&#39;, leftalign=False):
         
         if leftalign:
             x += self.symbolsize/2
@@ -497,7 +866,7 @@ if __name__ == &#39;__main__&#39;:
                      linestyle=&#39;-&#39;, linewidth=1)
     
     
-    def draw_root(self, x, y, rightalign=True):
+    def draw_root(self, x, y, rightalign=False):
         
         if rightalign:
             x -= self.symbolsize/2
@@ -561,35 +930,32 @@ if __name__ == &#39;__main__&#39;:
         self.ax.add_patch(outer)
     
     
+    def draw_gc(self, x, y):
+        
+        coord = []
+        R = self.symbolsize/2
+        for i in range(5):
+            coord.append([x + 0.5 * R * np.cos(np.radians(54+i*72)),
+                          y - 0.5 * R * np.sin(np.radians(54+i*72))])
+            coord.append([x + R * np.cos(np.radians(90+i*72)),
+                          y - R * np.sin(np.radians(90+i*72))])
+
+        inner = mpatches.Polygon(coord, closed=True,
+                                 color=&#39;black&#39;, fill=True,
+                                 zorder=self.symbol_zorder)
+        self.ax.add_patch(inner)
+    
+    
     def write_label(self, x, y, text):
         
         self.ax.text(x, y, text,
+                     fontsize=self.fontsize,
                      horizontalalignment=&#39;left&#39;,
                      verticalalignment=&#39;center&#39;)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.assign_colors"><code class="name flex">
-<span>def <span class="ident">assign_colors</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def assign_colors(self):
-    
-    if len(self.colors) &lt;= 10:
-        cmap = plt.get_cmap(&#39;tab10&#39;)(np.arange(len(self.colors), dtype=int))
-    else:
-        cmap = plt.get_cmap(&#39;jet&#39;)(np.linspace(0, 1.0, len(self.colors)))
-    for color_label, color in zip(self.colors.keys(), cmap):
-        self.colors[color_label] = color
-    # print(self.colors)</code></pre>
-</details>
-</dd>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.assign_positions"><code class="name flex">
+<dt id="asymmetree.visualize.TreeVis.Visualizer.assign_positions"><code class="name flex">
 <span>def <span class="ident">assign_positions</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -616,23 +982,45 @@ if __name__ == &#39;__main__&#39;:
                                       ymean)</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw"><code class="name flex">
-<span>def <span class="ident">draw</span></span>(<span>self)</span>
+<dt id="asymmetree.visualize.TreeVis.Visualizer.draw"><code class="name flex">
+<span>def <span class="ident">draw</span></span>(<span>self, distance_mode='evolutionary', save_as=False)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Draw the tree and optionally save it to file.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>distance_mode</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Information that is used for the length of the species edges.
+Currently only 'evolutionary' is supported, in which case the
+'dist' attribute is used.</dd>
+<dt><strong><code>save_as</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Save the image to a file. The default is False, in which case the
+image is not saved.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def draw(self):
+<pre><code class="python">def draw(self, distance_mode=&#39;evolutionary&#39;, save_as=False):
+    &#34;&#34;&#34;Draw the tree and optionally save it to file.
+    
+    Parameters
+    ----------
+    distance_mode : str, optional
+        Information that is used for the length of the species edges.
+        Currently only &#39;evolutionary&#39; is supported, in which case the
+        &#39;dist&#39; attribute is used.
+    save_as : str, optional
+        Save the image to a file. The default is False, in which case the
+        image is not saved.
+    &#34;&#34;&#34;
     
     self.fig, self.ax = plt.subplots()
     self.ax.set_aspect(&#39;equal&#39;)
     self.ax.invert_yaxis()
     
-    self.initial_traversal()
-    self.assign_colors()
+    self.initial_traversal(distance_mode)
+    # self.assign_colors()
     self.assign_positions()
     self.draw_edges()
     self.draw_nodes()
@@ -642,15 +1030,19 @@ if __name__ == &#39;__main__&#39;:
     self.ax.spines[&#39;top&#39;].set_visible(False)
     self.ax.spines[&#39;left&#39;].set_visible(False)
     self.ax.spines[&#39;right&#39;].set_visible(False)
+    self.ax.tick_params(axis=&#39;x&#39;, labelsize=self.fontsize)
     
     xmin, xmax = self.ax.get_xlim()
     ymin, ymax = self.ax.get_ylim()
     self.fig.set_size_inches(5*abs(xmax-xmin), 5*abs(ymax-ymin)+0.4)
     plt.tight_layout()
-    plt.show()</code></pre>
+    if save_as:
+        plt.savefig(save_as, dpi=300)
+    else:
+        plt.show()</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_dupl"><code class="name flex">
+<dt id="asymmetree.visualize.TreeVis.Visualizer.draw_dupl"><code class="name flex">
 <span>def <span class="ident">draw_dupl</span></span>(<span>self, x, y)</span>
 </code></dt>
 <dd>
@@ -678,7 +1070,7 @@ if __name__ == &#39;__main__&#39;:
     self.ax.add_patch(border)</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_edges"><code class="name flex">
+<dt id="asymmetree.visualize.TreeVis.Visualizer.draw_edges"><code class="name flex">
 <span>def <span class="ident">draw_edges</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -691,7 +1083,10 @@ if __name__ == &#39;__main__&#39;:
     
     for v in self.tree.preorder():
         if v.parent:
-            color = &#39;red&#39; if v.transferred else &#39;black&#39;
+            if hasattr(v, &#39;transferred&#39;) and v.transferred:
+                color = &#39;red&#39;
+            else:
+                color = &#39;black&#39;
             self.ax.plot([self.node_positions[v.parent][0],
                           self.node_positions[v][0]],
                          [self.node_positions[v][1],
@@ -707,7 +1102,32 @@ if __name__ == &#39;__main__&#39;:
                  linestyle=&#39;-&#39;, linewidth=1)</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_hgt"><code class="name flex">
+<dt id="asymmetree.visualize.TreeVis.Visualizer.draw_gc"><code class="name flex">
+<span>def <span class="ident">draw_gc</span></span>(<span>self, x, y)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def draw_gc(self, x, y):
+    
+    coord = []
+    R = self.symbolsize/2
+    for i in range(5):
+        coord.append([x + 0.5 * R * np.cos(np.radians(54+i*72)),
+                      y - 0.5 * R * np.sin(np.radians(54+i*72))])
+        coord.append([x + R * np.cos(np.radians(90+i*72)),
+                      y - R * np.sin(np.radians(90+i*72))])
+
+    inner = mpatches.Polygon(coord, closed=True,
+                             color=&#39;black&#39;, fill=True,
+                             zorder=self.symbol_zorder)
+    self.ax.add_patch(inner)</code></pre>
+</details>
+</dd>
+<dt id="asymmetree.visualize.TreeVis.Visualizer.draw_hgt"><code class="name flex">
 <span>def <span class="ident">draw_hgt</span></span>(<span>self, x, y)</span>
 </code></dt>
 <dd>
@@ -733,8 +1153,8 @@ if __name__ == &#39;__main__&#39;:
     self.ax.add_patch(outer)</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_leaf"><code class="name flex">
-<span>def <span class="ident">draw_leaf</span></span>(<span>self, x, y, color='white', leftalign=True)</span>
+<dt id="asymmetree.visualize.TreeVis.Visualizer.draw_leaf"><code class="name flex">
+<span>def <span class="ident">draw_leaf</span></span>(<span>self, x, y, color='white', leftalign=False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -742,7 +1162,7 @@ if __name__ == &#39;__main__&#39;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def draw_leaf(self, x, y, color=&#39;white&#39;, leftalign=True):
+<pre><code class="python">def draw_leaf(self, x, y, color=&#39;white&#39;, leftalign=False):
     
     if leftalign:
         x += self.symbolsize/2
@@ -761,7 +1181,7 @@ if __name__ == &#39;__main__&#39;:
     self.ax.add_patch(little)</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_loss"><code class="name flex">
+<dt id="asymmetree.visualize.TreeVis.Visualizer.draw_loss"><code class="name flex">
 <span>def <span class="ident">draw_loss</span></span>(<span>self, x, y)</span>
 </code></dt>
 <dd>
@@ -778,7 +1198,7 @@ if __name__ == &#39;__main__&#39;:
                  linestyle=&#39;-&#39;, linewidth=1)</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_nodes"><code class="name flex">
+<dt id="asymmetree.visualize.TreeVis.Visualizer.draw_nodes"><code class="name flex">
 <span>def <span class="ident">draw_nodes</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -790,31 +1210,32 @@ if __name__ == &#39;__main__&#39;:
 <pre><code class="python">def draw_nodes(self):
     
     for v in self.tree.preorder():
-        if not v.parent:
+        if not v.parent and not v.event:
             self.draw_root(*self.node_positions[v])
         elif v.children:
             if v.event == &#39;D&#39;:
                 self.draw_dupl(*self.node_positions[v])
             elif v.event == &#39;S&#39;:
                 self.draw_spec(*self.node_positions[v])
-            if v.event == &#39;H&#39;:
+            elif v.event == &#39;H&#39;:
                 self.draw_hgt(*self.node_positions[v])
+            elif v.event == &#39;GC&#39;:
+                self.draw_gc(*self.node_positions[v])
         else:
             if v.event == &#39;L&#39;:
                 self.draw_loss(*self.node_positions[v])
             else:
                 x, y = self.node_positions[v]
-                self.draw_leaf(x, y,
-                               color=self.colors[v.color])
+                self.draw_leaf(x, y, color=self.colors[v.label])
                 if not self.species_info:
                     text = str(v.label)
-                else:
-                    text = &#39;{} &lt;{}&gt;&#39;.format(v.label, v.color)
+                elif hasattr(v, &#39;reconc&#39;):
+                    text = &#39;{} &lt;{}&gt;&#39;.format(v.label, v.reconc)
                 self.write_label(x+self.symbolsize+0.02, y, text)</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_root"><code class="name flex">
-<span>def <span class="ident">draw_root</span></span>(<span>self, x, y, rightalign=True)</span>
+<dt id="asymmetree.visualize.TreeVis.Visualizer.draw_root"><code class="name flex">
+<span>def <span class="ident">draw_root</span></span>(<span>self, x, y, rightalign=False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -822,7 +1243,7 @@ if __name__ == &#39;__main__&#39;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def draw_root(self, x, y, rightalign=True):
+<pre><code class="python">def draw_root(self, x, y, rightalign=False):
     
     if rightalign:
         x -= self.symbolsize/2
@@ -842,7 +1263,7 @@ if __name__ == &#39;__main__&#39;:
     self.ax.add_patch(little)</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_spec"><code class="name flex">
+<dt id="asymmetree.visualize.TreeVis.Visualizer.draw_spec"><code class="name flex">
 <span>def <span class="ident">draw_spec</span></span>(<span>self, x, y)</span>
 </code></dt>
 <dd>
@@ -859,8 +1280,8 @@ if __name__ == &#39;__main__&#39;:
     self.ax.add_patch(fill)</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.initial_traversal"><code class="name flex">
-<span>def <span class="ident">initial_traversal</span></span>(<span>self, distance='evolutionary')</span>
+<dt id="asymmetree.visualize.TreeVis.Visualizer.initial_traversal"><code class="name flex">
+<span>def <span class="ident">initial_traversal</span></span>(<span>self, distance_mode)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -868,31 +1289,27 @@ if __name__ == &#39;__main__&#39;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def initial_traversal(self, distance=&#39;evolutionary&#39;):
+<pre><code class="python">def initial_traversal(self, distance_mode):
     
     xmax = 0.0
     
     for v in self.tree.preorder():
-        if distance == &#39;evolutionary&#39;:
+        if distance_mode == &#39;evolutionary&#39;:
             if not v.parent:
                 self.distance_dict[v] = 0.0
             else:
                 self.distance_dict[v] = self.distance_dict[v.parent] + v.dist
                 if self.distance_dict[v] &gt; xmax:
                     xmax = self.distance_dict[v]
-        elif distance == &#39;divtime&#39;:
+        elif distance_mode == &#39;divergence time&#39;:
             raise ValueError(&#39;divergence time not yet implemented&#39;)
         else:
-            raise ValueError(&#34;distance mode &#39;{}&#39; not supported&#34;.format(distance))
-        if not v.children:
-            self.leaf_counter += 1
-            if v.event != &#39;L&#39; and v.color not in self.colors:
-                self.colors[v.color] = len(self.colors)
+            raise ValueError(f&#34;distance mode &#39;{distance_mode}&#39; not supported&#34;)
             
     self.ax.set_xlim(-0.1,xmax+0.5)</code></pre>
 </details>
 </dd>
-<dt id="asymmetree.visualize.GeneTreeVis.GeneTreeVis.write_label"><code class="name flex">
+<dt id="asymmetree.visualize.TreeVis.Visualizer.write_label"><code class="name flex">
 <span>def <span class="ident">write_label</span></span>(<span>self, x, y, text)</span>
 </code></dt>
 <dd>
@@ -904,6 +1321,7 @@ if __name__ == &#39;__main__&#39;:
 <pre><code class="python">def write_label(self, x, y, text):
     
     self.ax.text(x, y, text,
+                 fontsize=self.fontsize,
                  horizontalalignment=&#39;left&#39;,
                  verticalalignment=&#39;center&#39;)</code></pre>
 </details>
@@ -924,24 +1342,32 @@ if __name__ == &#39;__main__&#39;:
 <li><code><a title="asymmetree.visualize" href="index.html">asymmetree.visualize</a></code></li>
 </ul>
 </li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="asymmetree.visualize.TreeVis.assign_colors" href="#asymmetree.visualize.TreeVis.assign_colors">assign_colors</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.assign_gene_colors" href="#asymmetree.visualize.TreeVis.assign_gene_colors">assign_gene_colors</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.assign_species_colors" href="#asymmetree.visualize.TreeVis.assign_species_colors">assign_species_colors</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.visualize" href="#asymmetree.visualize.TreeVis.visualize">visualize</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis">GeneTreeVis</a></code></h4>
+<h4><code><a title="asymmetree.visualize.TreeVis.Visualizer" href="#asymmetree.visualize.TreeVis.Visualizer">Visualizer</a></code></h4>
 <ul class="two-column">
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.assign_colors" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.assign_colors">assign_colors</a></code></li>
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.assign_positions" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.assign_positions">assign_positions</a></code></li>
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw">draw</a></code></li>
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_dupl" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_dupl">draw_dupl</a></code></li>
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_edges" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_edges">draw_edges</a></code></li>
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_hgt" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_hgt">draw_hgt</a></code></li>
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_leaf" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_leaf">draw_leaf</a></code></li>
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_loss" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_loss">draw_loss</a></code></li>
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_nodes" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_nodes">draw_nodes</a></code></li>
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_root" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_root">draw_root</a></code></li>
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_spec" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.draw_spec">draw_spec</a></code></li>
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.initial_traversal" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.initial_traversal">initial_traversal</a></code></li>
-<li><code><a title="asymmetree.visualize.GeneTreeVis.GeneTreeVis.write_label" href="#asymmetree.visualize.GeneTreeVis.GeneTreeVis.write_label">write_label</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.assign_positions" href="#asymmetree.visualize.TreeVis.Visualizer.assign_positions">assign_positions</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.draw" href="#asymmetree.visualize.TreeVis.Visualizer.draw">draw</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.draw_dupl" href="#asymmetree.visualize.TreeVis.Visualizer.draw_dupl">draw_dupl</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.draw_edges" href="#asymmetree.visualize.TreeVis.Visualizer.draw_edges">draw_edges</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.draw_gc" href="#asymmetree.visualize.TreeVis.Visualizer.draw_gc">draw_gc</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.draw_hgt" href="#asymmetree.visualize.TreeVis.Visualizer.draw_hgt">draw_hgt</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.draw_leaf" href="#asymmetree.visualize.TreeVis.Visualizer.draw_leaf">draw_leaf</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.draw_loss" href="#asymmetree.visualize.TreeVis.Visualizer.draw_loss">draw_loss</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.draw_nodes" href="#asymmetree.visualize.TreeVis.Visualizer.draw_nodes">draw_nodes</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.draw_root" href="#asymmetree.visualize.TreeVis.Visualizer.draw_root">draw_root</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.draw_spec" href="#asymmetree.visualize.TreeVis.Visualizer.draw_spec">draw_spec</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.initial_traversal" href="#asymmetree.visualize.TreeVis.Visualizer.initial_traversal">initial_traversal</a></code></li>
+<li><code><a title="asymmetree.visualize.TreeVis.Visualizer.write_label" href="#asymmetree.visualize.TreeVis.Visualizer.write_label">write_label</a></code></li>
 </ul>
 </li>
 </ul>

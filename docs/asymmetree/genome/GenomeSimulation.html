@@ -92,7 +92,7 @@ class GenomeSimulator:
         return os.path.join(self.outdir, *args)
             
     
-    def simulate_gene_trees(self, N,
+    def simulate_gene_trees(self, n,
                             **kwargs):
         &#34;&#34;&#34;Simulate gene trees.
         
@@ -102,28 +102,26 @@ class GenomeSimulator:
         
         Parameters
         ----------
-        N : int
+        n : int
             Number of gene trees to be simulated.
         kwargs : optional
-            See function &#39;simulate_gene_trees&#39; in &#39;treeevolve&#39; subpackage or 
+            See function &#39;gene_trees&#39; in &#39;treeevolve&#39; subpackage or 
             documentation.
         &#34;&#34;&#34;
         
-        self.number_of_families = N
+        self.number_of_families = n
         
-        self.true_gene_trees = te.simulate_gene_trees(self.S, N=N, **kwargs)
-        if N == 1:
-            self.true_gene_trees = [self.true_gene_trees]
+        self.true_gene_trees = te.gene_trees(self.S, n=n, **kwargs)
         
         self.pruned_gene_trees = [te.prune_losses(tree)
-                                      for tree in self.true_gene_trees]
+                                  for tree in self.true_gene_trees]
         
         # sequences should be emptied here if methods were called before
         if hasattr(self, &#39;sequence_dicts&#39;):
             self.sequence_dicts.clear()
         
         if self.outdir:
-            for i in range(N):
+            for i in range(n):
                 filename = self._path(&#39;true_gene_trees&#39;,
                                       &#39;gene_tree{}.json&#39;.format(i))
                 self.true_gene_trees[i].serialize(filename, mode=&#39;json&#39;)
@@ -203,7 +201,7 @@ class GenomeSimulator:
                 evolver.evolve_along_tree(PGT, start_seq=root_genome[i].upper())
                 
             else:
-                evolver.evolve_along_tree(PGT, start_length=self.sampler.draw())
+                evolver.evolve_along_tree(PGT, start_length=self.sampler())
                 
             self.sequence_dicts.append(evolver.sequences)
             
@@ -247,7 +245,7 @@ class GenomeSimulator:
         else:
             species = [v.label for v in self.S.preorder() if not v.children]
         
-        # labeled sequences sorted by color/species
+        # labeled sequences sorted by species
         sorted_seqs = {s: [] for s in species}
         
         for i in range(self.number_of_families):
@@ -259,7 +257,7 @@ class GenomeSimulator:
                 
                 label = self._compose_label(node, i)
                 sequence = self.subst_model.to_sequence(evoseq)
-                sorted_seqs[node.color].append( (label, sequence) )
+                sorted_seqs[node.reconc].append( (label, sequence) )
                 
         for spec, sequences in sorted_seqs.items():
             basename = &#39;{}.f{}a&#39;.format(spec, self.subst_model.model_type)
@@ -269,7 +267,7 @@ class GenomeSimulator:
     
     def _compose_label(self, node, family_id):
         
-        return &#39;fam{}gene{}spec{}&#39;.format(family_id, node.label, node.color)</code></pre>
+        return &#39;fam{}gene{}spec{}&#39;.format(family_id, node.label, node.reconc)</code></pre>
 </details>
 </section>
 <section>
@@ -348,7 +346,7 @@ saved to file.</dd>
         return os.path.join(self.outdir, *args)
             
     
-    def simulate_gene_trees(self, N,
+    def simulate_gene_trees(self, n,
                             **kwargs):
         &#34;&#34;&#34;Simulate gene trees.
         
@@ -358,28 +356,26 @@ saved to file.</dd>
         
         Parameters
         ----------
-        N : int
+        n : int
             Number of gene trees to be simulated.
         kwargs : optional
-            See function &#39;simulate_gene_trees&#39; in &#39;treeevolve&#39; subpackage or 
+            See function &#39;gene_trees&#39; in &#39;treeevolve&#39; subpackage or 
             documentation.
         &#34;&#34;&#34;
         
-        self.number_of_families = N
+        self.number_of_families = n
         
-        self.true_gene_trees = te.simulate_gene_trees(self.S, N=N, **kwargs)
-        if N == 1:
-            self.true_gene_trees = [self.true_gene_trees]
+        self.true_gene_trees = te.gene_trees(self.S, n=n, **kwargs)
         
         self.pruned_gene_trees = [te.prune_losses(tree)
-                                      for tree in self.true_gene_trees]
+                                  for tree in self.true_gene_trees]
         
         # sequences should be emptied here if methods were called before
         if hasattr(self, &#39;sequence_dicts&#39;):
             self.sequence_dicts.clear()
         
         if self.outdir:
-            for i in range(N):
+            for i in range(n):
                 filename = self._path(&#39;true_gene_trees&#39;,
                                       &#39;gene_tree{}.json&#39;.format(i))
                 self.true_gene_trees[i].serialize(filename, mode=&#39;json&#39;)
@@ -459,7 +455,7 @@ saved to file.</dd>
                 evolver.evolve_along_tree(PGT, start_seq=root_genome[i].upper())
                 
             else:
-                evolver.evolve_along_tree(PGT, start_length=self.sampler.draw())
+                evolver.evolve_along_tree(PGT, start_length=self.sampler())
                 
             self.sequence_dicts.append(evolver.sequences)
             
@@ -503,7 +499,7 @@ saved to file.</dd>
         else:
             species = [v.label for v in self.S.preorder() if not v.children]
         
-        # labeled sequences sorted by color/species
+        # labeled sequences sorted by species
         sorted_seqs = {s: [] for s in species}
         
         for i in range(self.number_of_families):
@@ -515,7 +511,7 @@ saved to file.</dd>
                 
                 label = self._compose_label(node, i)
                 sequence = self.subst_model.to_sequence(evoseq)
-                sorted_seqs[node.color].append( (label, sequence) )
+                sorted_seqs[node.reconc].append( (label, sequence) )
                 
         for spec, sequences in sorted_seqs.items():
             basename = &#39;{}.f{}a&#39;.format(spec, self.subst_model.model_type)
@@ -525,12 +521,12 @@ saved to file.</dd>
     
     def _compose_label(self, node, family_id):
         
-        return &#39;fam{}gene{}spec{}&#39;.format(family_id, node.label, node.color)</code></pre>
+        return &#39;fam{}gene{}spec{}&#39;.format(family_id, node.label, node.reconc)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
 <dt id="asymmetree.genome.GenomeSimulation.GenomeSimulator.simulate_gene_trees"><code class="name flex">
-<span>def <span class="ident">simulate_gene_trees</span></span>(<span>self, N, **kwargs)</span>
+<span>def <span class="ident">simulate_gene_trees</span></span>(<span>self, n, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Simulate gene trees.</p>
@@ -539,17 +535,17 @@ well as the 'pruned gene trees' in which the loss branches are
 removed.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>N</code></strong> :&ensp;<code>int</code></dt>
+<dt><strong><code>n</code></strong> :&ensp;<code>int</code></dt>
 <dd>Number of gene trees to be simulated.</dd>
 <dt><strong><code>kwargs</code></strong> :&ensp;<code>optional</code></dt>
-<dd>See function 'simulate_gene_trees' in 'treeevolve' subpackage or
+<dd>See function 'gene_trees' in 'treeevolve' subpackage or
 documentation.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def simulate_gene_trees(self, N,
+<pre><code class="python">def simulate_gene_trees(self, n,
                         **kwargs):
     &#34;&#34;&#34;Simulate gene trees.
     
@@ -559,28 +555,26 @@ documentation.</dd>
     
     Parameters
     ----------
-    N : int
+    n : int
         Number of gene trees to be simulated.
     kwargs : optional
-        See function &#39;simulate_gene_trees&#39; in &#39;treeevolve&#39; subpackage or 
+        See function &#39;gene_trees&#39; in &#39;treeevolve&#39; subpackage or 
         documentation.
     &#34;&#34;&#34;
     
-    self.number_of_families = N
+    self.number_of_families = n
     
-    self.true_gene_trees = te.simulate_gene_trees(self.S, N=N, **kwargs)
-    if N == 1:
-        self.true_gene_trees = [self.true_gene_trees]
+    self.true_gene_trees = te.gene_trees(self.S, n=n, **kwargs)
     
     self.pruned_gene_trees = [te.prune_losses(tree)
-                                  for tree in self.true_gene_trees]
+                              for tree in self.true_gene_trees]
     
     # sequences should be emptied here if methods were called before
     if hasattr(self, &#39;sequence_dicts&#39;):
         self.sequence_dicts.clear()
     
     if self.outdir:
-        for i in range(N):
+        for i in range(n):
             filename = self._path(&#39;true_gene_trees&#39;,
                                   &#39;gene_tree{}.json&#39;.format(i))
             self.true_gene_trees[i].serialize(filename, mode=&#39;json&#39;)
@@ -700,7 +694,7 @@ in the output directory. The default is True.</dd>
             evolver.evolve_along_tree(PGT, start_seq=root_genome[i].upper())
             
         else:
-            evolver.evolve_along_tree(PGT, start_length=self.sampler.draw())
+            evolver.evolve_along_tree(PGT, start_length=self.sampler())
             
         self.sequence_dicts.append(evolver.sequences)
         
